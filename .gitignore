@@ -1,0 +1,32 @@
+# --- Secretos y entorno local ---
+.env
+.env.*
+!.env.example
+*.local
+
+# --- Supabase CLI (local / caché) ---
+supabase/.temp/
+supabase/.branches/
+
+# --- Deno ---
+.deno/
+
+# --- Logs ---
+*.log
+npm-debug.log*
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editores / IDE ---
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Herramientas opcionales (si añades Node u otros) ---
+node_modules/
+dist/
+coverage/

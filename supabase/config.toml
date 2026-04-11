@@ -1,0 +1,6 @@
+# Configuración mínima para Edge Functions y resolución de import map.
+# Ajusta project_id tras `supabase link` si aplica.
+
+[functions.process-candidate]
+verify_jwt = true
+import_map = "../deno.json"

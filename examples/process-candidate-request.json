@@ -1,0 +1,21 @@
+{
+  "datos_personales": {
+    "nombre": "Ana García López",
+    "pais_residencia": "España",
+    "email": "ana.garcia@example.com",
+    "telefono": "+34 600 000 000"
+  },
+  "perfil_tecnico": {
+    "rol_principal": "Backend Developer",
+    "lenguajes": ["TypeScript", "Python", "SQL"],
+    "frameworks_y_herramientas": ["NestJS", "PostgreSQL", "Docker"],
+    "patrones_y_arquitectura": ["Hexagonal", "CQRS", "Event-driven"]
+  },
+  "evaluacion": {
+    "anos_experiencia_total": 7,
+    "sectores": ["Fintech", "SaaS"],
+    "seniority_estimado": "Senior",
+    "resumen_ejecutivo": "Perfil sólido en backend con experiencia en sistemas distribuidos y buenas prácticas de testing.",
+    "red_flags": []
+  }
+}
