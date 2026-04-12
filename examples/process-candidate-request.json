@@ -1,21 +1,52 @@
 {
   "datos_personales": {
-    "nombre": "Ana García López",
-    "pais_residencia": "España",
-    "email": "ana.garcia@example.com",
-    "telefono": "+34 600 000 000"
+    "nombre": "BRAHYAN LEANDRO ARTEAGA ARISTIZABAL",
+    "pais_residencia": "No especificado",
+    "email": "blarteagaa@gmail.com",
+    "telefono": "(57) 312 609 5772"
   },
   "perfil_tecnico": {
     "rol_principal": "Backend Developer",
-    "lenguajes": ["TypeScript", "Python", "SQL"],
-    "frameworks_y_herramientas": ["NestJS", "PostgreSQL", "Docker"],
-    "patrones_y_arquitectura": ["Hexagonal", "CQRS", "Event-driven"]
+    "lenguajes": [
+      "Java",
+      "PHP",
+      "SQL",
+      "PL/SQL",
+      "TypeScript",
+      "JavaScript"
+    ],
+    "frameworks_y_herramientas": [
+      "Spring Boot",
+      "Laravel",
+      "API REST",
+      "JUnit",
+      "Mockito",
+      "PostgreSQL",
+      "Git",
+      "CI/CD",
+      "Angular",
+      "Vue.js"
+    ],
+    "patrones_y_arquitectura": [
+      "API REST",
+      "Programación Orientada a Objetos",
+      "Diseño de Servicios"
+    ]
   },
   "evaluacion": {
-    "anos_experiencia_total": 7,
-    "sectores": ["Fintech", "SaaS"],
+    "anos_experiencia_total": 5,
+    "sectores": [
+      "Seguros",
+      "Desarrollo de Software"
+    ],
     "seniority_estimado": "Senior",
-    "resumen_ejecutivo": "Perfil sólido en backend con experiencia en sistemas distribuidos y buenas prácticas de testing.",
-    "red_flags": []
+    "resumen_ejecutivo": "Brahyan Leandro Arteaga Aristizabal es un Desarrollador Backend con más de 5 años de experiencia, especializado en Java y Spring Boot. Se destaca en el diseño e implementación de APIs REST, lógica de negocio y gestión de bases de datos relacionales, complementando sus habilidades con conocimientos en desarrollo frontend. Su fortaleza principal radica en la entrega de soluciones backend robustas y su integración efectiva en procesos de CI/CD.",
+    "red_flags": "Nada relevante"
+  },
+  "educacion_y_certificaciones": {
+    "educacion_formal": "Ingeniería de Sistemas y Computación, Universidad del Quindío (2016 – 2021)",
+    "certificaciones": [
+      "Técnico en Mantenimiento de Equipos de Cómputo, SENA (2014 – 2015)"
+    ]
   }
 }

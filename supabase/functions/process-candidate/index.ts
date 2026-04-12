@@ -12,7 +12,8 @@ const jsonResponse = (body: Record<string, unknown>, status: number) =>
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
 const mapPayloadToRow = (payload: CandidatePayload) => {
-  const { datos_personales, perfil_tecnico, evaluacion } = payload;
+  const { datos_personales, perfil_tecnico, evaluacion, educacion_y_certificaciones } =
+    payload;
   return {
     nombre: datos_personales.nombre,
     email: normalizeEmail(datos_personales.email),
@@ -22,6 +23,8 @@ const mapPayloadToRow = (payload: CandidatePayload) => {
     lenguajes: perfil_tecnico.lenguajes,
     frameworks: perfil_tecnico.frameworks_y_herramientas,
     patrones: perfil_tecnico.patrones_y_arquitectura,
+    educacion_formal: educacion_y_certificaciones.educacion_formal.trim(),
+    certificaciones: educacion_y_certificaciones.certificaciones,
     anos_experiencia_total: evaluacion.anos_experiencia_total,
     sectores: evaluacion.sectores,
     seniority_estimado: evaluacion.seniority_estimado,

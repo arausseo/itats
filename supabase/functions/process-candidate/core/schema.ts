@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+/** Normaliza a texto para la columna `candidates.red_flags` (string o array legacy). */
+export const redFlagsField = z
+  .union([z.array(z.string()), z.string()])
+  .transform((v) => {
+    if (typeof v === "string") return v.trim();
+    return v.length ? v.join("\n") : "";
+  });
+
 /** Contrato exacto del body POST (validación estricta con Zod). */
 export const candidatePayloadSchema = z.object({
   datos_personales: z.object({
@@ -19,7 +27,11 @@ export const candidatePayloadSchema = z.object({
     sectores: z.array(z.string()),
     seniority_estimado: z.string(),
     resumen_ejecutivo: z.string(),
-    red_flags: z.array(z.string()),
+    red_flags: redFlagsField,
+  }),
+  educacion_y_certificaciones: z.object({
+    educacion_formal: z.string(),
+    certificaciones: z.array(z.string()).default([]),
   }),
 });
 
