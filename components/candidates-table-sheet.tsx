@@ -38,6 +38,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { CandidateStatusSelect } from "@/components/candidate-status-select";
 
 export type CandidatesTableSheetProps = {
   candidates: Candidate[];
@@ -252,6 +253,10 @@ export function CandidatesTableSheet({
                 <SheetDescription>
                   {selected.rol_principal} · {selected.email}
                 </SheetDescription>
+                <CandidateStatusSelect
+                  candidateId={selected.id}
+                  currentStatus={selected.status}
+                />
               </SheetHeader>
 
               <div className="flex flex-col gap-7 px-6 pb-8 pt-5 sm:px-8">

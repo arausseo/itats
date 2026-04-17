@@ -1,3 +1,21 @@
+export const CANDIDATE_STATUSES = [
+  "nuevo",
+  "en_proceso",
+  "en_espera",
+  "rechazado",
+  "contratado",
+] as const;
+
+export type CandidateStatus = (typeof CANDIDATE_STATUSES)[number];
+
+export const CANDIDATE_STATUS_LABELS: Record<CandidateStatus, string> = {
+  nuevo: "Nuevo",
+  en_proceso: "En proceso",
+  en_espera: "En espera",
+  rechazado: "Rechazado",
+  contratado: "Contratado",
+};
+
 /** Valor JSON almacenado en `raw_analysis` (jsonb). */
 export type JsonValue =
   | string
@@ -29,6 +47,7 @@ export interface Candidate {
   created_at: string;
   certificaciones: JsonbStringArray;
   educacion_formal: string;
+  status: CandidateStatus;
 }
 
 export function normalizeStringArray(value: unknown): string[] {
@@ -86,6 +105,9 @@ export function parseCandidateRow(row: unknown): Candidate {
     created_at: String(r.created_at ?? ""),
     certificaciones: normalizeStringArray(r.certificaciones),
     educacion_formal: String(r.educacion_formal ?? ""),
+    status: CANDIDATE_STATUSES.includes(r.status as CandidateStatus)
+      ? (r.status as CandidateStatus)
+      : "nuevo",
   };
 }
 
