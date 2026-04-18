@@ -48,6 +48,8 @@ export interface Candidate {
   certificaciones: JsonbStringArray;
   educacion_formal: string;
   status: CandidateStatus;
+  /** Ruta en el bucket `resumes` de Supabase Storage; null si no hay PDF asociado. */
+  cv_storage_path: string | null;
 }
 
 export function normalizeStringArray(value: unknown): string[] {
@@ -108,6 +110,10 @@ export function parseCandidateRow(row: unknown): Candidate {
     status: CANDIDATE_STATUSES.includes(r.status as CandidateStatus)
       ? (r.status as CandidateStatus)
       : "nuevo",
+    cv_storage_path:
+      typeof r.cv_storage_path === "string" && r.cv_storage_path.trim().length > 0
+        ? r.cv_storage_path.trim()
+        : null,
   };
 }
 

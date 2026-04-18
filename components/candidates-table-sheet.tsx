@@ -40,6 +40,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CandidateStatusSelect } from "@/components/candidate-status-select";
 import { Spinner } from "@/components/ui/spinner";
+import { getCvDownloadSignedUrl } from "@/src/lib/candidate-cv-download";
 
 export type CandidatesTableSheetProps = {
   candidates: Candidate[];
@@ -140,8 +141,11 @@ export function CandidatesTableSheet({
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Candidate | null>(null);
+  const [cvDownloadPending, setCvDownloadPending] = useState(false);
+  const [cvDownloadError, setCvDownloadError] = useState<string | null>(null);
 
   const openRow = useCallback((row: Candidate) => {
+    setCvDownloadError(null);
     setSelected(row);
     setOpen(true);
   }, []);
@@ -149,6 +153,22 @@ export function CandidatesTableSheet({
   const closeSheet = useCallback(() => {
     setOpen(false);
   }, []);
+
+  const handleDownloadCv = useCallback(async () => {
+    if (!selected?.cv_storage_path) return;
+    setCvDownloadError(null);
+    setCvDownloadPending(true);
+    try {
+      const res = await getCvDownloadSignedUrl(selected.id);
+      if (res.ok) {
+        window.open(res.url, "_blank", "noopener,noreferrer");
+      } else {
+        setCvDownloadError(res.error);
+      }
+    } finally {
+      setCvDownloadPending(false);
+    }
+  }, [selected]);
 
   return (
     <>
@@ -274,6 +294,40 @@ export function CandidatesTableSheet({
                   candidateId={selected.id}
                   currentStatus={selected.status}
                 />
+                <div className="mt-4 flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-fit"
+                    disabled={
+                      !selected.cv_storage_path ||
+                      cvDownloadPending
+                    }
+                    onClick={() => {
+                      void handleDownloadCv();
+                    }}
+                  >
+                    {cvDownloadPending ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Spinner className="h-3.5 w-3.5" />
+                        Generando enlace…
+                      </span>
+                    ) : (
+                      "Descargar CV"
+                    )}
+                  </Button>
+                  {!selected.cv_storage_path ? (
+                    <p className="text-xs text-muted-foreground">
+                      CV no disponible para este candidato.
+                    </p>
+                  ) : null}
+                  {cvDownloadError ? (
+                    <p className="text-xs text-destructive" role="alert">
+                      {cvDownloadError}
+                    </p>
+                  ) : null}
+                </div>
               </SheetHeader>
 
               <div className="flex flex-col gap-7 px-6 pb-8 pt-5 sm:px-8">
