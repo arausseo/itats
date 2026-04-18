@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +24,7 @@ import {
 import { MultiSelectFilter } from "@/components/multi-select-filter";
 import type { FacetCountBundle } from "@/src/lib/candidate-facet-counts";
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 
 const ALL_SENIORITY = "__all__";
 const ALL_PAIS = "__all_pais__";
@@ -58,6 +59,7 @@ export function CandidateFilters({
   facetCounts,
   className,
 }: CandidateFiltersProps) {
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -93,9 +95,11 @@ export function CandidateFilters({
         patch,
       );
       const qs = p.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      startTransition(() => {
+        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      });
     },
-    [pathname, router, searchParams],
+    [pathname, router, searchParams, startTransition],
   );
 
   const pushTextFilters = useCallback(
@@ -271,6 +275,11 @@ export function CandidateFilters({
         optionCounts={facetCounts.patrones}
         facetTotal={facetCounts.patronesTotal}
       />
+      {isPending && (
+        <div className="flex items-end pb-2">
+          <Spinner className="h-4 w-4 text-primary" />
+        </div>
+      )}
     </div>
   );
 }

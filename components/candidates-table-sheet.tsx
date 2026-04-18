@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { redFlagsIsClear, type Candidate } from "@/src/types/candidate";
 import {
@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { CandidateStatusSelect } from "@/components/candidate-status-select";
+import { Spinner } from "@/components/ui/spinner";
 
 export type CandidatesTableSheetProps = {
   candidates: Candidate[];
@@ -75,12 +76,14 @@ function SortableColumnHead({
   align = "left",
   sortColumn,
   sortDir,
+  startTransition,
 }: {
   label: string;
   column: SortColumn;
   align?: "left" | "right";
   sortColumn: SortColumn;
   sortDir: SortDir;
+  startTransition: React.TransitionStartFunction;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -110,7 +113,9 @@ function SortableColumnHead({
             { sort: next.sort, dir: next.dir, page: "1" },
           );
           const qs = p.toString();
-          router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+          startTransition(() => {
+            router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+          });
         }}
       >
         <span>{label}</span>
@@ -132,6 +137,7 @@ export function CandidatesTableSheet({
   page,
   pageSize,
 }: CandidatesTableSheetProps) {
+  const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Candidate | null>(null);
 
@@ -146,7 +152,13 @@ export function CandidatesTableSheet({
 
   return (
     <>
-      <div className="overflow-x-auto rounded-md border border-border/60">
+      <div className="relative">
+        {isPending && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/70 backdrop-blur-[1px]">
+            <Spinner className="h-9 w-9 text-primary" />
+          </div>
+        )}
+        <div className="overflow-x-auto rounded-md border border-border/60">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -155,18 +167,21 @@ export function CandidatesTableSheet({
                 column="nombre"
                 sortColumn={sortColumn}
                 sortDir={sortDir}
+                startTransition={startTransition}
               />
               <SortableColumnHead
                 label="Rol principal"
                 column="rol_principal"
                 sortColumn={sortColumn}
                 sortDir={sortDir}
+                startTransition={startTransition}
               />
               <SortableColumnHead
                 label="Seniority"
                 column="seniority_estimado"
                 sortColumn={sortColumn}
                 sortDir={sortDir}
+                startTransition={startTransition}
               />
               <SortableColumnHead
                 label="Años de experiencia"
@@ -174,6 +189,7 @@ export function CandidatesTableSheet({
                 align="right"
                 sortColumn={sortColumn}
                 sortDir={sortDir}
+                startTransition={startTransition}
               />
               <TableHead>Sectores</TableHead>
             </TableRow>
@@ -230,6 +246,7 @@ export function CandidatesTableSheet({
             )}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       <CandidatesTablePagination

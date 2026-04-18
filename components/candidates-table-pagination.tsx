@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { PAGE_SIZE_OPTIONS } from "@/src/lib/candidate-list-params";
 import { mergeCandidateListUrl } from "@/src/lib/candidate-list-url-client";
+import { Spinner } from "@/components/ui/spinner";
 
 export type CandidatesTablePaginationProps = {
   page: number;
@@ -23,6 +25,7 @@ export function CandidatesTablePagination({
   pageSize,
   totalCount,
 }: CandidatesTablePaginationProps) {
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -37,7 +40,9 @@ export function CandidatesTablePagination({
       { page: String(nextPage) },
     );
     const qs = p.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    startTransition(() => {
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    });
   };
 
   const setPageSize = (nextSize: string) => {
@@ -46,7 +51,9 @@ export function CandidatesTablePagination({
       { pageSize: nextSize, page: "1" },
     );
     const qs = p.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    startTransition(() => {
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    });
   };
 
   return (
@@ -82,19 +89,20 @@ export function CandidatesTablePagination({
           type="button"
           variant="outline"
           size="sm"
-          disabled={page <= 1}
+          disabled={page <= 1 || isPending}
           onClick={() => goToPage(page - 1)}
         >
           Anterior
         </Button>
-        <span className="text-xs tabular-nums text-muted-foreground">
+        <span className="flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
+          {isPending && <Spinner className="h-3.5 w-3.5 text-primary" />}
           Página {page} / {totalPages}
         </span>
         <Button
           type="button"
           variant="outline"
           size="sm"
-          disabled={page >= totalPages || totalCount === 0}
+          disabled={page >= totalPages || totalCount === 0 || isPending}
           onClick={() => goToPage(page + 1)}
         >
           Siguiente
