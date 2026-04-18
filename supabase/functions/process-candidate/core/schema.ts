@@ -33,6 +33,8 @@ export const candidatePayloadSchema = z.object({
     educacion_formal: z.string(),
     certificaciones: z.array(z.string()).default([]),
   }),
+  cv_storage_path: z.string().optional(),
+  embedding: z.array(z.number()).length(1536).optional(),
 });
 
 export type CandidatePayload = z.infer<typeof candidatePayloadSchema>;

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/src/utils/supabase/server";
 import { signOut } from "@/src/lib/auth-actions";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,11 @@ export async function AppHeader() {
           <span className="hidden text-xs text-muted-foreground sm:block">
             {user.email}
           </span>
+          <Link href="/upload">
+            <Button variant="ghost" size="sm" className="h-7 text-xs">
+              Subir CVs
+            </Button>
+          </Link>
           <form action={signOut}>
             <Button type="submit" variant="ghost" size="sm" className="h-7 text-xs">
               Cerrar sesión
