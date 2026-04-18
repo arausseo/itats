@@ -11,8 +11,23 @@ const jsonResponse = (body: Record<string, unknown>, status: number) =>
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
+/** Cabecera enviada por el pipeline Next; prevalece sobre el body (evita despliegues viejos o JSON sin org). */
+function mergeOrganizationIdFromHeader(req: Request, raw: unknown): unknown {
+  const headerOrg = req.headers.get("x-organization-id")?.trim();
+  if (
+    !headerOrg ||
+    typeof raw !== "object" ||
+    raw === null ||
+    Array.isArray(raw)
+  ) {
+    return raw;
+  }
+  return { ...(raw as Record<string, unknown>), organization_id: headerOrg };
+}
+
 const mapPayloadToRow = (payload: CandidatePayload) => {
   const {
+    organization_id,
     datos_personales,
     perfil_tecnico,
     evaluacion,
@@ -21,6 +36,7 @@ const mapPayloadToRow = (payload: CandidatePayload) => {
     embedding,
   } = payload;
   return {
+    organization_id,
     nombre: datos_personales.nombre,
     email: normalizeEmail(datos_personales.email),
     pais_residencia: datos_personales.pais_residencia,
@@ -57,7 +73,8 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ ok: false, error: "Invalid JSON body" }, 400);
   }
 
-  const parsed = candidatePayloadSchema.safeParse(raw);
+  const rawWithOrg = mergeOrganizationIdFromHeader(req, raw);
+  const parsed = candidatePayloadSchema.safeParse(rawWithOrg);
   if (!parsed.success) {
     return jsonResponse(
       {
@@ -75,6 +92,16 @@ Deno.serve(async (req: Request) => {
   }
 
   const row = mapPayloadToRow(parsed.data);
+  if (
+    row.organization_id === undefined ||
+    row.organization_id === null ||
+    row.organization_id === ""
+  ) {
+    return jsonResponse(
+      { ok: false, error: "organization_id requerido y no vacío" },
+      400,
+    );
+  }
 
   try {
     const { data, error } = await supabaseResult.client
@@ -88,7 +115,8 @@ Deno.serve(async (req: Request) => {
         return jsonResponse(
           {
             ok: false,
-            error: "Ya existe un candidato con este email.",
+            error:
+              "Ya existe un candidato con este email en la misma organización.",
           },
           409,
         );

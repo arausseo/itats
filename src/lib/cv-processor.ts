@@ -145,16 +145,26 @@ async function generateCandidateJson(
   return parsed;
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function callProcessCandidateEdgeFunction(
   payload: unknown,
   storagePath: string,
   embedding: number[],
+  organizationId: string,
 ): Promise<
   { kind: "inserted" } | { kind: "duplicate"; message: string }
 > {
+  if (!UUID_RE.test(organizationId)) {
+    throw new Error(
+      `organizationId no es un UUID válido (¿perfil sin organization_id?): ${organizationId}`,
+    );
+  }
   const url = `${getEnv("NEXT_PUBLIC_SUPABASE_URL")}/functions/v1/process-candidate`;
   cvLog("Edge: llamando process-candidate", {
     storagePath,
+    organizationId,
     embeddingDimensions: embedding.length,
     payloadKeys:
       payload !== null && typeof payload === "object" && !Array.isArray(payload)
@@ -166,11 +176,13 @@ async function callProcessCandidateEdgeFunction(
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${getEnv("SUPABASE_SERVICE_ROLE_KEY")}`,
+      "x-organization-id": organizationId,
     },
     body: JSON.stringify({
       ...(payload as Record<string, unknown>),
       cv_storage_path: storagePath,
       embedding,
+      organization_id: organizationId,
     }),
   });
   const json = (await res.json()) as { ok: boolean; error?: string };
@@ -196,10 +208,11 @@ async function callProcessCandidateEdgeFunction(
 
 export async function runCvPipeline({
   storagePath,
-}: CvProcessingItem): Promise<CvProcessingOutcome> {
+  organizationId,
+}: CvProcessingItem & { organizationId: string }): Promise<CvProcessingOutcome> {
   const pipelineT0 = performance.now();
   try {
-    cvLog("Pipeline: inicio", { storagePath });
+    cvLog("Pipeline: inicio", { storagePath, organizationId });
     const [pdfBytes, summaryPrompt, jsonPrompt] = await Promise.all([
       downloadPdfBytes(storagePath),
       fetchPrompt("cv_summary"),
@@ -219,6 +232,7 @@ export async function runCvPipeline({
       candidatePayload,
       storagePath,
       embedding,
+      organizationId,
     );
     cvLog("Pipeline: completado", {
       storagePath,

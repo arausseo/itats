@@ -10,6 +10,7 @@ export const redFlagsField = z
 
 /** Contrato exacto del body POST (validación estricta con Zod). */
 export const candidatePayloadSchema = z.object({
+  organization_id: z.string().uuid(),
   datos_personales: z.object({
     nombre: z.string(),
     pais_residencia: z.string(),

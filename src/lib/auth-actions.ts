@@ -3,6 +3,7 @@
 import { redirect as nextRedirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@/src/utils/supabase/server";
+import { ensureUserProfile } from "@/src/lib/user-profile";
 
 export async function signIn(
   _prevState: { error: string | null } | undefined,
@@ -23,6 +24,12 @@ export async function signIn(
 
   if (error) {
     return { error: t("errors.invalidCredentials") };
+  }
+
+  try {
+    await ensureUserProfile();
+  } catch {
+    return { error: t("errors.profileSetup") };
   }
 
   nextRedirect(next);

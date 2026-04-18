@@ -9,6 +9,10 @@ import {
   MAX_FILE_SIZE_BYTES,
 } from "@/src/lib/upload-config";
 import { runCvPipeline } from "@/src/lib/cv-processor";
+import {
+  ensureUserProfile,
+  getCurrentOrganizationId,
+} from "@/src/lib/user-profile";
 import type {
   UploadCvResult,
   StartProcessingResult,
@@ -24,12 +28,16 @@ function getServiceClient() {
   });
 }
 
-async function assertAuthenticated(): Promise<void> {
+async function requireOrganizationId(): Promise<string> {
   const supabase = await createSsrClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("No autorizado");
+  await ensureUserProfile();
+  const organizationId = await getCurrentOrganizationId();
+  if (!organizationId) throw new Error("No autorizado");
+  return organizationId;
 }
 
 export async function uploadCvFile(
@@ -37,8 +45,9 @@ export async function uploadCvFile(
 ): Promise<UploadCvResult> {
   const te = await getTranslations("errors");
 
+  let organizationId: string;
   try {
-    await assertAuthenticated();
+    organizationId = await requireOrganizationId();
   } catch {
     return { ok: false, error: te("unauthorized") };
   }
@@ -52,7 +61,7 @@ export async function uploadCvFile(
 
   const bytes = await file.arrayBuffer();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const storagePath = `${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
+  const storagePath = `${organizationId}/${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
 
   const { error } = await getServiceClient()
     .storage.from("resumes")
@@ -70,8 +79,9 @@ export async function startCvProcessing(
 ): Promise<StartProcessingResult> {
   const te = await getTranslations("errors");
 
+  let organizationId: string;
   try {
-    await assertAuthenticated();
+    organizationId = await requireOrganizationId();
   } catch {
     return { ok: false, error: te("unauthorized") };
   }
@@ -80,7 +90,9 @@ export async function startCvProcessing(
 
   const limit = pLimit(PROCESS_CONCURRENCY_LIMIT);
   const results = await Promise.all(
-    items.map((item) => limit(() => runCvPipeline(item))),
+    items.map((item) =>
+      limit(() => runCvPipeline({ ...item, organizationId })),
+    ),
   );
 
   return { ok: true, results };

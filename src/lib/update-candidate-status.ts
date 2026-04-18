@@ -1,22 +1,11 @@
 "use server";
 
-import { createClient } from "@supabase/supabase-js";
 import { getTranslations } from "next-intl/server";
+import { createClient } from "@/src/utils/supabase/server";
 import {
   CANDIDATE_STATUSES,
   type CandidateStatus,
 } from "@/src/types/candidate";
-
-function getServiceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
-  }
-  return createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-}
 
 export async function updateCandidateStatus(
   id: string,
@@ -32,7 +21,14 @@ export async function updateCandidateStatus(
   }
 
   try {
-    const supabase = getServiceClient();
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { ok: false, error: te("unauthorized") };
+    }
+
     const { data, error } = await supabase
       .from("candidates")
       .update({ status })

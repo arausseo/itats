@@ -15,6 +15,7 @@
   },
   "header": {
     "brand": "ATS",
+    "organization": "Organization: {name}",
     "uploadCvs": "Upload CVs",
     "signOut": "Sign out",
     "language": "Language",
@@ -38,7 +39,8 @@
     "submitting": "Signing in…",
     "errors": {
       "required": "Email and password are required.",
-      "invalidCredentials": "Invalid credentials. Check your email and password."
+      "invalidCredentials": "Invalid credentials. Check your email and password.",
+      "profileSetup": "Your account could not be prepared. Try again or contact support."
     }
   },
   "upload": {
