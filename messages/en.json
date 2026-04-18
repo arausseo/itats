@@ -1,0 +1,153 @@
+{
+  "metadata": {
+    "homeTitle": "ATS — Candidates",
+    "homeDescription": "Applicant Tracking System candidate panel.",
+    "loginTitle": "Sign in — ATS",
+    "uploadTitle": "Bulk CV upload — ATS"
+  },
+  "common": {
+    "dash": "—",
+    "connectionError": "Could not connect to the server."
+  },
+  "loading": {
+    "candidates": "Loading candidates…",
+    "generic": "Loading…"
+  },
+  "header": {
+    "brand": "ATS",
+    "uploadCvs": "Upload CVs",
+    "signOut": "Sign out",
+    "language": "Language",
+    "localeEs": "Español",
+    "localeEn": "English"
+  },
+  "home": {
+    "title": "Candidates",
+    "description": "Overview of the talent pipeline. Filter by country, seniority, role, stack, frameworks and patterns; sort columns from the table.",
+    "loadErrorTitle": "Error loading candidates"
+  },
+  "login": {
+    "cardTitle": "ATS — Sign in"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "emailPlaceholder": "recruiter@company.com",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "errors": {
+      "required": "Email and password are required.",
+      "invalidCredentials": "Invalid credentials. Check your email and password."
+    }
+  },
+  "upload": {
+    "title": "Bulk CV upload",
+    "description": "Upload up to {maxFiles} PDF files. Each CV will be processed automatically with AI to extract candidate data and register it in the system."
+  },
+  "filters": {
+    "searchName": "Search by name",
+    "namePlaceholder": "Name…",
+    "searchLibre": "Search in summary, stacks, certifications…",
+    "librePlaceholder": "Term in summary, languages, frameworks…",
+    "seniority": "Seniority",
+    "seniorityAll": "All levels",
+    "seniorityAllWithCount": "All levels ({count})",
+    "country": "Country",
+    "countryAll": "All countries",
+    "countryAllWithCount": "All countries ({count})",
+    "rol": "Primary role",
+    "stack": "Stack (languages)",
+    "frameworks": "Frameworks",
+    "patrones": "Patterns"
+  },
+  "multiSelect": {
+    "all": "All",
+    "allWithCount": "All ({count})",
+    "selectedCount": "{count} selected",
+    "noOptions": "No options in data"
+  },
+  "table": {
+    "name": "Name",
+    "rolPrincipal": "Primary role",
+    "seniority": "Seniority",
+    "yearsExperience": "Years of experience",
+    "sectors": "Sectors",
+    "empty": "No candidates match the filters."
+  },
+  "pagination": {
+    "empty": "No results",
+    "range": "Showing {from}–{to} of {total}",
+    "perPage": "Per page",
+    "prev": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} / {totalPages}"
+  },
+  "candidateStatus": {
+    "nuevo": "New",
+    "en_proceso": "In process",
+    "en_espera": "On hold",
+    "rechazado": "Rejected",
+    "contratado": "Hired"
+  },
+  "sheet": {
+    "downloadCv": "Download CV",
+    "generatingLink": "Generating link…",
+    "cvUnavailable": "No CV is stored for this candidate.",
+    "locationContact": "Location and contact",
+    "countryResidence": "Country of residence",
+    "phone": "Phone",
+    "executiveSummary": "Executive summary",
+    "redFlags": "Red flags",
+    "redFlagsClear": "Nothing relevant",
+    "techStack": "Tech stack",
+    "languages": "Languages",
+    "frameworks": "Frameworks",
+    "patterns": "Patterns / practices",
+    "education": "Education",
+    "certifications": "Certifications",
+    "close": "Close"
+  },
+  "uploadZone": {
+    "maxFiles": "You can upload at most {maxFiles} files at a time.",
+    "invalidFiles": "{count} file(s) are not valid PDFs or exceed 20 MB: {names}",
+    "fileUnavailable": "File not available",
+    "dropzone": "Drag files here or",
+    "select": "browse",
+    "hint": "PDF only · Up to {maxFiles} files · 20 MB per file",
+    "filesSelected": "{count} file(s) selected",
+    "clear": "Clear",
+    "uploading": "Uploading…",
+    "processing": "Processing…",
+    "uploadCvs": "Upload CVs",
+    "doneTitle": "Upload finished.",
+    "doneNew": "New candidates are now in the system.",
+    "doneDuplicate": "Some CVs were not imported because that candidate already existed.",
+    "doneErrors": "Review files marked with an error.",
+    "viewCandidates": "View candidates",
+    "uploadMore": "Upload more"
+  },
+  "fileStatus": {
+    "pendiente": "Pending",
+    "subiendo": "Uploading",
+    "procesando": "Processing",
+    "completado": "Completed",
+    "duplicado": "Already existed",
+    "error": "Error"
+  },
+  "errors": {
+    "unauthorized": "Unauthorized",
+    "invalidFile": "Invalid file",
+    "pdfOnly": "Only PDF files are accepted",
+    "fileTooLarge": "The file exceeds the maximum size of 20 MB",
+    "nothingToProcess": "No files to process",
+    "candidateIdRequired": "Candidate ID is required",
+    "invalidStatus": "Invalid status",
+    "candidateNotFound": "Candidate not found",
+    "unexpected": "Unexpected error",
+    "cvAccess": "Could not get the CV or you do not have access.",
+    "noCvStored": "This candidate has no stored CV",
+    "signUrlFailed": "Could not generate the download link",
+    "signLinkUnexpected": "Unexpected error generating the link"
+  }
+}

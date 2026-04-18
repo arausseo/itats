@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { usePathname, useRouter } from "@/src/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -59,6 +61,7 @@ export function CandidateFilters({
   facetCounts,
   className,
 }: CandidateFiltersProps) {
+  const t = useTranslations("filters");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
@@ -128,23 +131,23 @@ export function CandidateFilters({
   );
 
   useEffect(() => {
-    const t = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       if (qInput.trim() === qFromUrl.trim()) {
         return;
       }
       pushTextFilters({ q: qInput });
     }, 320);
-    return () => window.clearTimeout(t);
+    return () => window.clearTimeout(timer);
   }, [qInput, qFromUrl, pushTextFilters]);
 
   useEffect(() => {
-    const t = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       if (libreInput.trim() === libreFromUrl.trim()) {
         return;
       }
       pushTextFilters({ libre: libreInput });
     }, 320);
-    return () => window.clearTimeout(t);
+    return () => window.clearTimeout(timer);
   }, [libreInput, libreFromUrl, pushTextFilters]);
 
   const selectValue = seniorityFromUrl.trim() || ALL_SENIORITY;
@@ -162,12 +165,12 @@ export function CandidateFilters({
           htmlFor="candidate-q"
           className="text-xs font-medium text-muted-foreground"
         >
-          Buscar por nombre
+          {t("searchName")}
         </label>
         <Input
           id="candidate-q"
           type="search"
-          placeholder="Nombre…"
+          placeholder={t("namePlaceholder")}
           value={qInput}
           onChange={(e) => setQInput(e.target.value)}
           autoComplete="off"
@@ -178,12 +181,12 @@ export function CandidateFilters({
           htmlFor="candidate-libre"
           className="text-xs font-medium text-muted-foreground"
         >
-          Buscar en resumen, stacks, certificaciones…
+          {t("searchLibre")}
         </label>
         <Input
           id="candidate-libre"
           type="search"
-          placeholder="Término en resumen, lenguajes, frameworks…"
+          placeholder={t("librePlaceholder")}
           value={libreInput}
           onChange={(e) => setLibreInput(e.target.value)}
           autoComplete="off"
@@ -191,7 +194,7 @@ export function CandidateFilters({
       </div>
       <div className="min-w-[200px] space-y-1.5">
         <span className="block text-xs font-medium text-muted-foreground">
-          Seniority
+          {t("seniority")}
         </span>
         <Select
           value={selectValue}
@@ -201,11 +204,13 @@ export function CandidateFilters({
           }}
         >
           <SelectTrigger className="w-full min-w-[200px]">
-            <SelectValue placeholder="Todos los niveles" />
+            <SelectValue placeholder={t("seniorityAll")} />
           </SelectTrigger>
           <SelectContent position="popper">
             <SelectItem value={ALL_SENIORITY}>
-              Todos los niveles ({facetCounts.seniorityTotal})
+              {t("seniorityAllWithCount", {
+                count: facetCounts.seniorityTotal,
+              })}
             </SelectItem>
             {seniorityOptions.map((s) => (
               <SelectItem key={s} value={s}>
@@ -218,7 +223,7 @@ export function CandidateFilters({
 
       <div className="min-w-[200px] space-y-1.5">
         <span className="block text-xs font-medium text-muted-foreground">
-          País
+          {t("country")}
         </span>
         <Select
           value={paisSelectValue}
@@ -228,11 +233,11 @@ export function CandidateFilters({
           }}
         >
           <SelectTrigger className="w-full min-w-[200px]">
-            <SelectValue placeholder="Todos los países" />
+            <SelectValue placeholder={t("countryAll")} />
           </SelectTrigger>
           <SelectContent position="popper">
             <SelectItem value={ALL_PAIS}>
-              Todos los países ({facetCounts.paisTotal})
+              {t("countryAllWithCount", { count: facetCounts.paisTotal })}
             </SelectItem>
             {paisOptions.map((p) => (
               <SelectItem key={p} value={p}>
@@ -244,7 +249,7 @@ export function CandidateFilters({
       </div>
 
       <MultiSelectFilter
-        label="Rol principal"
+        label={t("rol")}
         options={rolOptions}
         selected={rolSelected}
         onChange={(rol) => replaceUrl({ rol, page: "1" })}
@@ -252,7 +257,7 @@ export function CandidateFilters({
         facetTotal={facetCounts.rolTotal}
       />
       <MultiSelectFilter
-        label="Stack (lenguajes)"
+        label={t("stack")}
         options={stackOptions}
         selected={stackSelected}
         onChange={(stack) => replaceUrl({ stack, page: "1" })}
@@ -260,7 +265,7 @@ export function CandidateFilters({
         facetTotal={facetCounts.stackTotal}
       />
       <MultiSelectFilter
-        label="Frameworks"
+        label={t("frameworks")}
         options={frameworkOptions}
         selected={fwSelected}
         onChange={(fw) => replaceUrl({ fw, page: "1" })}
@@ -268,7 +273,7 @@ export function CandidateFilters({
         facetTotal={facetCounts.frameworksTotal}
       />
       <MultiSelectFilter
-        label="Patrones"
+        label={t("patrones")}
         options={patronOptions}
         selected={patSelected}
         onChange={(pat) => replaceUrl({ pat, page: "1" })}

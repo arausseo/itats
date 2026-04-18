@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import { getTranslations } from "next-intl/server";
 import { createClient as createSsrClient } from "@/src/utils/supabase/server";
 import pLimit from "p-limit";
 import {
@@ -34,18 +35,20 @@ async function assertAuthenticated(): Promise<void> {
 export async function uploadCvFile(
   formData: FormData,
 ): Promise<UploadCvResult> {
+  const te = await getTranslations("errors");
+
   try {
     await assertAuthenticated();
   } catch {
-    return { ok: false, error: "No autorizado" };
+    return { ok: false, error: te("unauthorized") };
   }
 
   const file = formData.get("file");
-  if (!(file instanceof File)) return { ok: false, error: "Archivo inválido" };
+  if (!(file instanceof File)) return { ok: false, error: te("invalidFile") };
   if (file.type !== "application/pdf")
-    return { ok: false, error: "Solo se aceptan archivos PDF" };
+    return { ok: false, error: te("pdfOnly") };
   if (file.size > MAX_FILE_SIZE_BYTES)
-    return { ok: false, error: "El archivo supera el tamaño máximo de 20 MB" };
+    return { ok: false, error: te("fileTooLarge") };
 
   const bytes = await file.arrayBuffer();
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
@@ -65,13 +68,15 @@ export async function uploadCvFile(
 export async function startCvProcessing(
   items: CvProcessingItem[],
 ): Promise<StartProcessingResult> {
+  const te = await getTranslations("errors");
+
   try {
     await assertAuthenticated();
   } catch {
-    return { ok: false, error: "No autorizado" };
+    return { ok: false, error: te("unauthorized") };
   }
 
-  if (!items.length) return { ok: false, error: "Sin archivos para procesar" };
+  if (!items.length) return { ok: false, error: te("nothingToProcess") };
 
   const limit = pLimit(PROCESS_CONCURRENCY_LIMIT);
   const results = await Promise.all(

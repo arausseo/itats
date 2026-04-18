@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { signIn } from "@/src/lib/auth-actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ const initialState = { error: null as string | null };
 
 export function LoginForm({ next }: Props) {
   const [state, action, isPending] = useActionState(signIn, initialState);
+  const t = useTranslations("auth");
 
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -18,7 +20,7 @@ export function LoginForm({ next }: Props) {
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-xs font-medium text-foreground">
-          Email
+          {t("email")}
         </label>
         <Input
           id="email"
@@ -26,14 +28,14 @@ export function LoginForm({ next }: Props) {
           type="email"
           autoComplete="email"
           required
-          placeholder="recruiter@empresa.com"
+          placeholder={t("emailPlaceholder")}
           className="h-9 text-sm"
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="password" className="text-xs font-medium text-foreground">
-          Contraseña
+          {t("password")}
         </label>
         <Input
           id="password"
@@ -41,7 +43,7 @@ export function LoginForm({ next }: Props) {
           type="password"
           autoComplete="current-password"
           required
-          placeholder="••••••••"
+          placeholder={t("passwordPlaceholder")}
           className="h-9 text-sm"
         />
       </div>
@@ -53,7 +55,7 @@ export function LoginForm({ next }: Props) {
       ) : null}
 
       <Button type="submit" disabled={isPending} className="mt-1 h-9 text-sm">
-        {isPending ? "Iniciando sesión…" : "Iniciar sesión"}
+        {isPending ? t("submitting") : t("submit")}
       </Button>
     </form>
   );

@@ -1,9 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { getLocale } from "next-intl/server";
 import { normalizeStringArray } from "@/src/types/candidate";
+
+function sortLocaleTag(locale: string): string {
+  return locale === "en" ? "en" : "es";
+}
 
 export async function fetchSeniorityOptions(
   supabase: SupabaseClient,
 ): Promise<string[]> {
+  const collator = sortLocaleTag(await getLocale());
   const { data, error } = await supabase
     .from("candidates")
     .select("seniority_estimado");
@@ -17,12 +23,13 @@ export async function fetchSeniorityOptions(
       set.add(s.trim());
     }
   }
-  return [...set].sort((a, b) => a.localeCompare(b, "es"));
+  return [...set].sort((a, b) => a.localeCompare(b, collator));
 }
 
 export async function fetchPaisOptions(
   supabase: SupabaseClient,
 ): Promise<string[]> {
+  const collator = sortLocaleTag(await getLocale());
   const { data, error } = await supabase
     .from("candidates")
     .select("pais_residencia");
@@ -36,12 +43,13 @@ export async function fetchPaisOptions(
       set.add(s.trim());
     }
   }
-  return [...set].sort((a, b) => a.localeCompare(b, "es"));
+  return [...set].sort((a, b) => a.localeCompare(b, collator));
 }
 
 export async function fetchRolOptions(
   supabase: SupabaseClient,
 ): Promise<string[]> {
+  const collator = sortLocaleTag(await getLocale());
   const { data, error } = await supabase.from("candidates").select("rol_principal");
   if (error || !data) {
     return [];
@@ -53,7 +61,7 @@ export async function fetchRolOptions(
       set.add(s.trim());
     }
   }
-  return [...set].sort((a, b) => a.localeCompare(b, "es"));
+  return [...set].sort((a, b) => a.localeCompare(b, collator));
 }
 
 function mergeJsonbStringSets(
@@ -81,6 +89,7 @@ export async function fetchJsonbArrayOptions(
   supabase: SupabaseClient,
   column: "lenguajes" | "frameworks" | "patrones",
 ): Promise<string[]> {
+  const collator = sortLocaleTag(await getLocale());
   const { data, error } = await supabase
     .from("candidates")
     .select(column);
@@ -89,7 +98,7 @@ export async function fetchJsonbArrayOptions(
   }
   const set = new Set<string>();
   mergeJsonbStringSets(data, column, set);
-  return [...set].sort((a, b) => a.localeCompare(b, "es"));
+  return [...set].sort((a, b) => a.localeCompare(b, collator));
 }
 
 /** Requiere la migración `match_candidate_ids_by_libre` en Supabase. */

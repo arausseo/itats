@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { createClient } from "@/src/utils/supabase/server";
 import { parseCandidateRows, type Candidate } from "@/src/types/candidate";
 import {
@@ -43,23 +44,41 @@ function firstString(
   return value;
 }
 
-export default async function Home(props: PageProps<"/">) {
-  const searchParams = await props.searchParams;
-  const q = (firstString(searchParams.q) ?? "").trim();
-  const libre = (firstString(searchParams.libre) ?? "").trim();
-  const seniority = (firstString(searchParams.seniority) ?? "").trim();
-  const pais = (firstString(searchParams.pais) ?? "").trim();
+type HomePageProps = {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-  const roles = getStringListParam(searchParams, "rol");
-  const stacks = getStringListParam(searchParams, "stack");
-  const frameworks = getStringListParam(searchParams, "fw");
-  const patrones = getStringListParam(searchParams, "pat");
+export async function generateMetadata({ params }: HomePageProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "metadata" });
+  return {
+    title: t("homeTitle"),
+    description: t("homeDescription"),
+  };
+}
 
-  const { column: sortColumn, ascending } = parseSortFromSearchParams(
-    searchParams,
-  );
+export default async function HomePage({ params, searchParams }: HomePageProps) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const t = await getTranslations("home");
+  const tCommon = await getTranslations("common");
+  const search = await searchParams;
+
+  const q = (firstString(search.q) ?? "").trim();
+  const libre = (firstString(search.libre) ?? "").trim();
+  const seniority = (firstString(search.seniority) ?? "").trim();
+  const pais = (firstString(search.pais) ?? "").trim();
+
+  const roles = getStringListParam(search, "rol");
+  const stacks = getStringListParam(search, "stack");
+  const frameworks = getStringListParam(search, "fw");
+  const patrones = getStringListParam(search, "pat");
+
+  const { column: sortColumn, ascending } = parseSortFromSearchParams(search);
   const { page: requestedPage, pageSize } =
-    parsePaginationFromSearchParams(searchParams);
+    parsePaginationFromSearchParams(search);
 
   let candidates: Candidate[] = [];
   let totalCount = 0;
@@ -137,7 +156,9 @@ export default async function Home(props: PageProps<"/">) {
     const baseQuery = buildFiltered();
     let from = (requestedPage - 1) * pageSize;
     let to = from + pageSize - 1;
-    let { data, error, count } = await baseQuery.range(from, to);
+    const firstRange = await baseQuery.range(from, to);
+    let { data } = firstRange;
+    const { error, count } = firstRange;
 
     if (error) {
       queryError = error.message;
@@ -163,7 +184,7 @@ export default async function Home(props: PageProps<"/">) {
     }
   } catch (e) {
     queryError =
-      e instanceof Error ? e.message : "No se pudo conectar con el servidor.";
+      e instanceof Error ? e.message : tCommon("connectionError");
   } finally {
     if (facetPromise) {
       facetCounts = await facetPromise;
@@ -180,11 +201,8 @@ export default async function Home(props: PageProps<"/">) {
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <Card className="border-border/80 shadow-sm ring-1 ring-border/60">
           <CardHeader className="border-b border-border/60 pb-6">
-            <CardTitle className="text-lg sm:text-xl">Candidatos</CardTitle>
-            <CardDescription>
-              Vista general del pipeline de talento. Filtra por país, seniority,
-              rol, stack, frameworks y patrones; ordena columnas desde la tabla.
-            </CardDescription>
+            <CardTitle className="text-lg sm:text-xl">{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
             <Suspense
               fallback={
                 <div className="mt-4 h-16 animate-pulse rounded-md bg-muted/80" />
@@ -208,7 +226,7 @@ export default async function Home(props: PageProps<"/">) {
                 className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-xs text-destructive"
                 role="alert"
               >
-                <p className="font-medium">Error al cargar candidatos</p>
+                <p className="font-medium">{t("loadErrorTitle")}</p>
                 <p className="mt-1 text-destructive/90">{queryError}</p>
               </div>
             ) : (

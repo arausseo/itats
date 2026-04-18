@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -31,6 +32,8 @@ export function MultiSelectFilter({
   facetTotal,
   className,
 }: MultiSelectFilterProps) {
+  const t = useTranslations("multiSelect");
+
   const toggle = useCallback(
     (value: string, checked: boolean) => {
       if (checked) {
@@ -45,11 +48,11 @@ export function MultiSelectFilter({
   const summary =
     selected.length === 0
       ? facetTotal !== undefined
-        ? `Todos (${facetTotal})`
-        : "Todos"
+        ? t("allWithCount", { count: facetTotal })
+        : t("all")
       : selected.length === 1
         ? selected[0]
-        : `${selected.length} seleccionados`;
+        : t("selectedCount", { count: selected.length });
 
   return (
     <div className={cn("min-w-[200px] space-y-1.5", className)}>
@@ -72,7 +75,7 @@ export function MultiSelectFilter({
         >
           {options.length === 0 ? (
             <p className="px-2 py-1.5 text-xs text-muted-foreground">
-              Sin opciones en datos
+              {t("noOptions")}
             </p>
           ) : (
             <ul className="space-y-1">

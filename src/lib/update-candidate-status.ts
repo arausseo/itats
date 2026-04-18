@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import { getTranslations } from "next-intl/server";
 import {
   CANDIDATE_STATUSES,
   type CandidateStatus,
@@ -21,11 +22,13 @@ export async function updateCandidateStatus(
   id: string,
   status: CandidateStatus,
 ): Promise<{ ok: true; status: CandidateStatus } | { ok: false; error: string }> {
+  const te = await getTranslations("errors");
+
   if (!id) {
-    return { ok: false, error: "ID de candidato requerido" };
+    return { ok: false, error: te("candidateIdRequired") };
   }
   if (!CANDIDATE_STATUSES.includes(status)) {
-    return { ok: false, error: "Estado inválido" };
+    return { ok: false, error: te("invalidStatus") };
   }
 
   try {
@@ -41,11 +44,11 @@ export async function updateCandidateStatus(
       return { ok: false, error: error.message };
     }
     if (!data) {
-      return { ok: false, error: "Candidato no encontrado" };
+      return { ok: false, error: te("candidateNotFound") };
     }
 
     return { ok: true, status: data.status as CandidateStatus };
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado" };
+    return { ok: false, error: e instanceof Error ? e.message : te("unexpected") };
   }
 }

@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useState, useTransition } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useFormatter, useTranslations } from "next-intl";
+import { usePathname, useRouter } from "@/src/i18n/navigation";
 import { redFlagsIsClear, type Candidate } from "@/src/types/candidate";
 import {
   formatSectores,
@@ -52,11 +54,13 @@ export type CandidatesTableSheetProps = {
 };
 
 function RolPrincipalCell({ text }: { text: string }) {
-  const t = text.trim() || "—";
-  if (t === "—" || t.length <= ROL_TABLE_MAX_LEN) {
-    return <span className="max-w-[14rem] truncate">{t}</span>;
+  const tCommon = useTranslations("common");
+  const dash = tCommon("dash");
+  const trimmed = text.trim() || dash;
+  if (trimmed === dash || trimmed.length <= ROL_TABLE_MAX_LEN) {
+    return <span className="max-w-[14rem] truncate">{trimmed}</span>;
   }
-  const short = `${t.slice(0, ROL_TABLE_MAX_LEN)}…`;
+  const short = `${trimmed.slice(0, ROL_TABLE_MAX_LEN)}…`;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -65,7 +69,7 @@ function RolPrincipalCell({ text }: { text: string }) {
         </span>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-sm">
-        <p className="break-words">{t}</p>
+        <p className="break-words">{trimmed}</p>
       </TooltipContent>
     </Tooltip>
   );
@@ -138,6 +142,12 @@ export function CandidatesTableSheet({
   page,
   pageSize,
 }: CandidatesTableSheetProps) {
+  const tTable = useTranslations("table");
+  const tSheet = useTranslations("sheet");
+  const tCommon = useTranslations("common");
+  const format = useFormatter();
+  const dash = tCommon("dash");
+
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Candidate | null>(null);
@@ -183,35 +193,35 @@ export function CandidatesTableSheet({
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <SortableColumnHead
-                label="Nombre"
+                label={tTable("name")}
                 column="nombre"
                 sortColumn={sortColumn}
                 sortDir={sortDir}
                 startTransition={startTransition}
               />
               <SortableColumnHead
-                label="Rol principal"
+                label={tTable("rolPrincipal")}
                 column="rol_principal"
                 sortColumn={sortColumn}
                 sortDir={sortDir}
                 startTransition={startTransition}
               />
               <SortableColumnHead
-                label="Seniority"
+                label={tTable("seniority")}
                 column="seniority_estimado"
                 sortColumn={sortColumn}
                 sortDir={sortDir}
                 startTransition={startTransition}
               />
               <SortableColumnHead
-                label="Años de experiencia"
+                label={tTable("yearsExperience")}
                 column="anos_experiencia_total"
                 align="right"
                 sortColumn={sortColumn}
                 sortDir={sortDir}
                 startTransition={startTransition}
               />
-              <TableHead>Sectores</TableHead>
+              <TableHead>{tTable("sectors")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -221,7 +231,7 @@ export function CandidatesTableSheet({
                   colSpan={5}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  No hay candidatos que coincidan con los filtros.
+                  {tTable("empty")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -241,7 +251,7 @@ export function CandidatesTableSheet({
                     }}
                   >
                     <TableCell className="font-medium">
-                      {row.nombre || "—"}
+                      {row.nombre || dash}
                     </TableCell>
                     <TableCell>
                       <RolPrincipalCell text={row.rol_principal} />
@@ -255,7 +265,7 @@ export function CandidatesTableSheet({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
-                      {row.anos_experiencia_total.toLocaleString("es-ES")}
+                      {format.number(row.anos_experiencia_total)}
                     </TableCell>
                     <TableCell className="max-w-[14rem] truncate text-muted-foreground">
                       {formatSectores(row.sectores)}
@@ -311,15 +321,15 @@ export function CandidatesTableSheet({
                     {cvDownloadPending ? (
                       <span className="inline-flex items-center gap-2">
                         <Spinner className="h-3.5 w-3.5" />
-                        Generando enlace…
+                        {tSheet("generatingLink")}
                       </span>
                     ) : (
-                      "Descargar CV"
+                      tSheet("downloadCv")
                     )}
                   </Button>
                   {!selected.cv_storage_path ? (
                     <p className="text-xs text-muted-foreground">
-                      CV no disponible para este candidato.
+                      {tSheet("cvUnavailable")}
                     </p>
                   ) : null}
                   {cvDownloadError ? (
@@ -333,21 +343,21 @@ export function CandidatesTableSheet({
               <div className="flex flex-col gap-7 px-6 pb-8 pt-5 sm:px-8">
                 <section className="space-y-3">
                   <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Ubicación y contacto
+                    {tSheet("locationContact")}
                   </h3>
                   <dl className="grid gap-2 text-xs/relaxed sm:grid-cols-2">
                     <div>
-                      <dt className="text-muted-foreground">País de residencia</dt>
+                      <dt className="text-muted-foreground">{tSheet("countryResidence")}</dt>
                       <dd className="font-medium text-foreground">
                         {selected.pais_residencia?.trim()
                           ? selected.pais_residencia
-                          : "—"}
+                          : dash}
                       </dd>
                     </div>
                     <div>
-                      <dt className="text-muted-foreground">Teléfono</dt>
+                      <dt className="text-muted-foreground">{tSheet("phone")}</dt>
                       <dd className="font-medium text-foreground">
-                        {selected.telefono?.trim() ? selected.telefono : "—"}
+                        {selected.telefono?.trim() ? selected.telefono : dash}
                       </dd>
                     </div>
                   </dl>
@@ -355,20 +365,20 @@ export function CandidatesTableSheet({
 
                 <section className="space-y-2">
                   <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Resumen ejecutivo
+                    {tSheet("executiveSummary")}
                   </h3>
                   <p className="text-xs/relaxed text-foreground whitespace-pre-wrap">
-                    {selected.resumen_ejecutivo || "—"}
+                    {selected.resumen_ejecutivo || dash}
                   </p>
                 </section>
 
                 <section className="space-y-2">
                   <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Red flags
+                    {tSheet("redFlags")}
                   </h3>
                   {redFlagsIsClear(selected.red_flags) ? (
                     <p className="text-xs/relaxed text-emerald-800 dark:text-emerald-100/90">
-                      Nada relevante
+                      {tSheet("redFlagsClear")}
                     </p>
                   ) : (
                     <p className="max-w-full whitespace-pre-wrap text-xs/relaxed text-destructive">
@@ -379,11 +389,11 @@ export function CandidatesTableSheet({
 
                 <section className="space-y-3">
                   <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Stack tecnológico
+                    {tSheet("techStack")}
                   </h3>
                   <div className="space-y-2">
                     <p className="text-[0.625rem] font-medium text-muted-foreground">
-                      Lenguajes
+                      {tSheet("languages")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {selected.lenguajes.length ? (
@@ -393,11 +403,11 @@ export function CandidatesTableSheet({
                           </Badge>
                         ))
                       ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
+                        <span className="text-xs text-muted-foreground">{dash}</span>
                       )}
                     </div>
                     <p className="text-[0.625rem] font-medium text-muted-foreground">
-                      Frameworks
+                      {tSheet("frameworks")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {selected.frameworks.length ? (
@@ -407,11 +417,11 @@ export function CandidatesTableSheet({
                           </Badge>
                         ))
                       ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
+                        <span className="text-xs text-muted-foreground">{dash}</span>
                       )}
                     </div>
                     <p className="text-[0.625rem] font-medium text-muted-foreground">
-                      Patrones / prácticas
+                      {tSheet("patterns")}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {selected.patrones.length ? (
@@ -421,7 +431,7 @@ export function CandidatesTableSheet({
                           </Badge>
                         ))
                       ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
+                        <span className="text-xs text-muted-foreground">{dash}</span>
                       )}
                     </div>
                   </div>
@@ -429,18 +439,18 @@ export function CandidatesTableSheet({
 
                 <section className="space-y-2">
                   <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Educación
+                    {tSheet("education")}
                   </h3>
                   <p className="text-xs/relaxed text-foreground whitespace-pre-wrap">
                     {selected.educacion_formal?.trim()
                       ? selected.educacion_formal
-                      : "—"}
+                      : dash}
                   </p>
                 </section>
 
                 <section className="space-y-2">
                   <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Certificaciones
+                    {tSheet("certifications")}
                   </h3>
                   {selected.certificaciones.length ? (
                     <ul className="list-inside list-disc space-y-1.5 text-xs/relaxed text-foreground">
@@ -449,13 +459,13 @@ export function CandidatesTableSheet({
                       ))}
                     </ul>
                   ) : (
-                    <p className="text-xs text-muted-foreground">—</p>
+                    <p className="text-xs text-muted-foreground">{dash}</p>
                   )}
                 </section>
 
                 <div className="pt-2">
                   <Button type="button" variant="secondary" onClick={closeSheet}>
-                    Cerrar
+                    {tSheet("close")}
                   </Button>
                 </div>
               </div>

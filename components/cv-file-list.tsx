@@ -1,18 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import type { FileUploadEntry, FileUploadStatus } from "@/src/types/upload";
-
-const STATUS_LABELS: Record<FileUploadStatus, string> = {
-  pendiente: "Pendiente",
-  subiendo: "Subiendo",
-  procesando: "Procesando",
-  completado: "Completado",
-  duplicado: "Ya existía",
-  error: "Error",
-};
 
 const STATUS_VARIANTS: Record<
   FileUploadStatus,
@@ -37,6 +29,8 @@ interface CvFileListProps {
 }
 
 export function CvFileList({ entries }: CvFileListProps) {
+  const t = useTranslations("fileStatus");
+
   if (!entries.length) return null;
 
   return (
@@ -85,7 +79,7 @@ export function CvFileList({ entries }: CvFileListProps) {
                   "border-amber-500/60 bg-amber-50 text-amber-900 hover:bg-amber-50 dark:bg-amber-950/40 dark:text-amber-100",
               )}
             >
-              {STATUS_LABELS[entry.status]}
+              {t(entry.status)}
             </Badge>
           </div>
         </li>

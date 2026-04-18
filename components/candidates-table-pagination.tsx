@@ -1,7 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useFormatter, useTranslations } from "next-intl";
+import { usePathname, useRouter } from "@/src/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -25,6 +27,8 @@ export function CandidatesTablePagination({
   pageSize,
   totalCount,
 }: CandidatesTablePaginationProps) {
+  const t = useTranslations("pagination");
+  const format = useFormatter();
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
@@ -60,13 +64,17 @@ export function CandidatesTablePagination({
     <div className="flex flex-col gap-3 border-t border-border/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-xs text-muted-foreground">
         {totalCount === 0
-          ? "Sin resultados"
-          : `Mostrando ${from}–${to} de ${totalCount}`}
+          ? t("empty")
+          : t("range", {
+              from: format.number(from),
+              to: format.number(to),
+              total: format.number(totalCount),
+            })}
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground" id="page-size-label">
-            Por página
+            {t("perPage")}
           </span>
           <Select
             value={String(pageSize)}
@@ -92,11 +100,14 @@ export function CandidatesTablePagination({
           disabled={page <= 1 || isPending}
           onClick={() => goToPage(page - 1)}
         >
-          Anterior
+          {t("prev")}
         </Button>
         <span className="flex items-center gap-1.5 text-xs tabular-nums text-muted-foreground">
           {isPending && <Spinner className="h-3.5 w-3.5 text-primary" />}
-          Página {page} / {totalPages}
+          {t("pageOf", {
+            page: format.number(page),
+            totalPages: format.number(totalPages),
+          })}
         </span>
         <Button
           type="button"
@@ -105,7 +116,7 @@ export function CandidatesTablePagination({
           disabled={page >= totalPages || totalCount === 0 || isPending}
           onClick={() => goToPage(page + 1)}
         >
-          Siguiente
+          {t("next")}
         </Button>
       </div>
     </div>

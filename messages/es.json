@@ -1,0 +1,153 @@
+{
+  "metadata": {
+    "homeTitle": "ATS — Candidatos",
+    "homeDescription": "Panel de candidatos del Applicant Tracking System.",
+    "loginTitle": "Iniciar sesión — ATS",
+    "uploadTitle": "Carga masiva de CVs — ATS"
+  },
+  "common": {
+    "dash": "—",
+    "connectionError": "No se pudo conectar con el servidor."
+  },
+  "loading": {
+    "candidates": "Cargando candidatos…",
+    "generic": "Cargando…"
+  },
+  "header": {
+    "brand": "ATS",
+    "uploadCvs": "Subir CVs",
+    "signOut": "Cerrar sesión",
+    "language": "Idioma",
+    "localeEs": "Español",
+    "localeEn": "English"
+  },
+  "home": {
+    "title": "Candidatos",
+    "description": "Vista general del pipeline de talento. Filtra por país, seniority, rol, stack, frameworks y patrones; ordena columnas desde la tabla.",
+    "loadErrorTitle": "Error al cargar candidatos"
+  },
+  "login": {
+    "cardTitle": "ATS — Iniciar sesión"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Contraseña",
+    "emailPlaceholder": "recruiter@empresa.com",
+    "passwordPlaceholder": "••••••••",
+    "submit": "Iniciar sesión",
+    "submitting": "Iniciando sesión…",
+    "errors": {
+      "required": "Email y contraseña son obligatorios.",
+      "invalidCredentials": "Credenciales incorrectas. Verifica email y contraseña."
+    }
+  },
+  "upload": {
+    "title": "Carga masiva de CVs",
+    "description": "Sube hasta {maxFiles} archivos PDF. Cada CV se procesará automáticamente con IA para extraer los datos del candidato y registrarlo en el sistema."
+  },
+  "filters": {
+    "searchName": "Buscar por nombre",
+    "namePlaceholder": "Nombre…",
+    "searchLibre": "Buscar en resumen, stacks, certificaciones…",
+    "librePlaceholder": "Término en resumen, lenguajes, frameworks…",
+    "seniority": "Seniority",
+    "seniorityAll": "Todos los niveles",
+    "seniorityAllWithCount": "Todos los niveles ({count})",
+    "country": "País",
+    "countryAll": "Todos los países",
+    "countryAllWithCount": "Todos los países ({count})",
+    "rol": "Rol principal",
+    "stack": "Stack (lenguajes)",
+    "frameworks": "Frameworks",
+    "patrones": "Patrones"
+  },
+  "multiSelect": {
+    "all": "Todos",
+    "allWithCount": "Todos ({count})",
+    "selectedCount": "{count} seleccionados",
+    "noOptions": "Sin opciones en datos"
+  },
+  "table": {
+    "name": "Nombre",
+    "rolPrincipal": "Rol principal",
+    "seniority": "Seniority",
+    "yearsExperience": "Años de experiencia",
+    "sectors": "Sectores",
+    "empty": "No hay candidatos que coincidan con los filtros."
+  },
+  "pagination": {
+    "empty": "Sin resultados",
+    "range": "Mostrando {from}–{to} de {total}",
+    "perPage": "Por página",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "pageOf": "Página {page} / {totalPages}"
+  },
+  "candidateStatus": {
+    "nuevo": "Nuevo",
+    "en_proceso": "En proceso",
+    "en_espera": "En espera",
+    "rechazado": "Rechazado",
+    "contratado": "Contratado"
+  },
+  "sheet": {
+    "downloadCv": "Descargar CV",
+    "generatingLink": "Generando enlace…",
+    "cvUnavailable": "CV no disponible para este candidato.",
+    "locationContact": "Ubicación y contacto",
+    "countryResidence": "País de residencia",
+    "phone": "Teléfono",
+    "executiveSummary": "Resumen ejecutivo",
+    "redFlags": "Red flags",
+    "redFlagsClear": "Nada relevante",
+    "techStack": "Stack tecnológico",
+    "languages": "Lenguajes",
+    "frameworks": "Frameworks",
+    "patterns": "Patrones / prácticas",
+    "education": "Educación",
+    "certifications": "Certificaciones",
+    "close": "Cerrar"
+  },
+  "uploadZone": {
+    "maxFiles": "Puedes subir como máximo {maxFiles} archivos a la vez.",
+    "invalidFiles": "{count} archivo(s) no son PDF válidos o superan 20 MB: {names}",
+    "fileUnavailable": "Archivo no disponible",
+    "dropzone": "Arrastra archivos aquí o",
+    "select": "selecciona",
+    "hint": "Solo PDF · Máximo {maxFiles} archivos · 20 MB por archivo",
+    "filesSelected": "{count} archivo(s) seleccionado(s)",
+    "clear": "Limpiar",
+    "uploading": "Subiendo…",
+    "processing": "Procesando…",
+    "uploadCvs": "Subir CVs",
+    "doneTitle": "Carga completada.",
+    "doneNew": "Los candidatos nuevos ya están en el sistema.",
+    "doneDuplicate": "Algunos CVs no se importaron porque ya existía ese candidato.",
+    "doneErrors": "Revisa los archivos marcados con error.",
+    "viewCandidates": "Ver candidatos",
+    "uploadMore": "Subir más"
+  },
+  "fileStatus": {
+    "pendiente": "Pendiente",
+    "subiendo": "Subiendo",
+    "procesando": "Procesando",
+    "completado": "Completado",
+    "duplicado": "Ya existía",
+    "error": "Error"
+  },
+  "errors": {
+    "unauthorized": "No autorizado",
+    "invalidFile": "Archivo inválido",
+    "pdfOnly": "Solo se aceptan archivos PDF",
+    "fileTooLarge": "El archivo supera el tamaño máximo de 20 MB",
+    "nothingToProcess": "Sin archivos para procesar",
+    "candidateIdRequired": "ID de candidato requerido",
+    "invalidStatus": "Estado inválido",
+    "candidateNotFound": "Candidato no encontrado",
+    "unexpected": "Error inesperado",
+    "cvAccess": "No se pudo obtener el CV o no tienes acceso.",
+    "noCvStored": "Este candidato no tiene CV almacenado",
+    "signUrlFailed": "No se pudo generar el enlace de descarga",
+    "signLinkUnexpected": "Error inesperado al generar el enlace"
+  }
+}

@@ -2,7 +2,8 @@
 
 import { useRef, useState, useCallback } from "react";
 import pLimit from "p-limit";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/src/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { CvFileList } from "@/components/cv-file-list";
 import { uploadCvFile, startCvProcessing } from "@/src/lib/upload-actions";
@@ -23,6 +24,7 @@ function buildKey(file: File, index: number) {
 }
 
 export function CvUploadZone() {
+  const t = useTranslations("uploadZone");
   const inputRef = useRef<HTMLInputElement>(null);
   const filesRef = useRef<File[]>([]);
   const [entries, setEntries] = useState<FileUploadEntry[]>([]);
@@ -39,41 +41,45 @@ export function CvUploadZone() {
     );
   }
 
-  const validateAndSetFiles = useCallback((files: File[]) => {
-    setGlobalError(null);
+  const validateAndSetFiles = useCallback(
+    (files: File[]) => {
+      setGlobalError(null);
 
-    if (files.length === 0) return;
+      if (files.length === 0) return;
 
-    if (files.length > MAX_FILES) {
-      setGlobalError(
-        `Puedes subir como máximo ${MAX_FILES} archivos a la vez.`,
+      if (files.length > MAX_FILES) {
+        setGlobalError(t("maxFiles", { maxFiles: MAX_FILES }));
+        return;
+      }
+
+      const invalid = files.filter(
+        (f) => f.type !== "application/pdf" || f.size > MAX_FILE_SIZE_BYTES,
       );
-      return;
-    }
+      if (invalid.length > 0) {
+        setGlobalError(
+          t("invalidFiles", {
+            count: invalid.length,
+            names: invalid.map((f) => f.name).join(", "),
+          }),
+        );
+        return;
+      }
 
-    const invalid = files.filter(
-      (f) => f.type !== "application/pdf" || f.size > MAX_FILE_SIZE_BYTES,
-    );
-    if (invalid.length > 0) {
-      setGlobalError(
-        `${invalid.length} archivo(s) no son PDF válidos o superan 20 MB: ${invalid.map((f) => f.name).join(", ")}`,
-      );
-      return;
-    }
+      const newEntries: FileUploadEntry[] = files.map((f, i) => ({
+        key: buildKey(f, Date.now() + i),
+        fileName: f.name,
+        fileSizeBytes: f.size,
+        status: "pendiente",
+        storagePath: null,
+        errorMessage: null,
+      }));
 
-    const newEntries: FileUploadEntry[] = files.map((f, i) => ({
-      key: buildKey(f, Date.now() + i),
-      fileName: f.name,
-      fileSizeBytes: f.size,
-      status: "pendiente",
-      storagePath: null,
-      errorMessage: null,
-    }));
-
-    filesRef.current = files;
-    setEntries(newEntries);
-    setPhase("idle");
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+      filesRef.current = files;
+      setEntries(newEntries);
+      setPhase("idle");
+    },
+    [t],
+  );
 
   function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     validateAndSetFiles(Array.from(e.target.files ?? []));
@@ -87,12 +93,15 @@ export function CvUploadZone() {
 
   const handleDragLeave = useCallback(() => setIsDragging(false), []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = Array.from(e.dataTransfer.files);
-    validateAndSetFiles(files);
-  }, [validateAndSetFiles]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const files = Array.from(e.dataTransfer.files);
+      validateAndSetFiles(files);
+    },
+    [validateAndSetFiles],
+  );
 
   async function handleUpload() {
     if (!entries.length || phase === "uploading" || phase === "processing")
@@ -119,7 +128,7 @@ export function CvUploadZone() {
           if (!file) {
             updateEntry(entry.key, {
               status: "error",
-              errorMessage: "Archivo no disponible",
+              errorMessage: t("fileUnavailable"),
             });
             return;
           }
@@ -196,7 +205,6 @@ export function CvUploadZone() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Drop zone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -234,32 +242,29 @@ export function CvUploadZone() {
         </div>
         <div className="text-center">
           <p className="text-sm font-medium text-foreground">
-            Arrastra archivos aquí o{" "}
+            {t("dropzone")}{" "}
             <span className="text-primary underline-offset-2 hover:underline">
-              selecciona
+              {t("select")}
             </span>
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Solo PDF · Máximo {MAX_FILES} archivos · 20 MB por archivo
+            {t("hint", { maxFiles: MAX_FILES })}
           </p>
         </div>
       </div>
 
-      {/* Global error */}
       {globalError && (
         <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {globalError}
         </p>
       )}
 
-      {/* File list */}
       <CvFileList entries={entries} />
 
-      {/* Actions */}
       {entries.length > 0 && phase !== "done" && (
         <div className="flex items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
-            {entries.length} archivo(s) seleccionado(s)
+            {t("filesSelected", { count: entries.length })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -273,7 +278,7 @@ export function CvUploadZone() {
               }}
               disabled={phase === "uploading" || phase === "processing"}
             >
-              Limpiar
+              {t("clear")}
             </Button>
             <Button
               size="sm"
@@ -281,31 +286,27 @@ export function CvUploadZone() {
               disabled={!canUpload}
             >
               {phase === "uploading"
-                ? "Subiendo…"
+                ? t("uploading")
                 : phase === "processing"
-                  ? "Procesando…"
-                  : "Subir CVs"}
+                  ? t("processing")
+                  : t("uploadCvs")}
             </Button>
           </div>
         </div>
       )}
 
-      {/* Done state */}
       {phase === "done" && (
         <div className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-800 dark:bg-green-950 dark:text-green-200">
           <p className="font-medium">
-            Carga completada.{" "}
-            {entries.some((e) => e.status === "completado") &&
-              "Los candidatos nuevos ya están en el sistema."}
-            {entries.some((e) => e.status === "duplicado") &&
-              " Algunos CVs no se importaron porque ya existía ese candidato."}
-            {entries.some((e) => e.status === "error") &&
-              " Revisa los archivos marcados con error."}
+            {t("doneTitle")}{" "}
+            {entries.some((e) => e.status === "completado") && t("doneNew")}
+            {entries.some((e) => e.status === "duplicado") && ` ${t("doneDuplicate")}`}
+            {entries.some((e) => e.status === "error") && ` ${t("doneErrors")}`}
           </p>
           <div className="mt-2 flex gap-2">
             <Link href="/">
               <Button variant="outline" size="sm">
-                Ver candidatos
+                {t("viewCandidates")}
               </Button>
             </Link>
             <Button
@@ -318,7 +319,7 @@ export function CvUploadZone() {
                 setGlobalError(null);
               }}
             >
-              Subir más
+              {t("uploadMore")}
             </Button>
           </div>
         </div>

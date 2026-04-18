@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import { getTranslations } from "next-intl/server";
 import { createClient as createSsrClient } from "@/src/utils/supabase/server";
 
 const SIGNED_URL_TTL_SECONDS = 600;
@@ -23,9 +24,10 @@ export type CvDownloadSignedUrlResult =
 export async function getCvDownloadSignedUrl(
   candidateId: string,
 ): Promise<CvDownloadSignedUrlResult> {
+  const te = await getTranslations("errors");
   const id = candidateId.trim();
   if (!id) {
-    return { ok: false, error: "ID de candidato requerido" };
+    return { ok: false, error: te("candidateIdRequired") };
   }
 
   try {
@@ -34,7 +36,7 @@ export async function getCvDownloadSignedUrl(
       data: { user },
     } = await ssr.auth.getUser();
     if (!user) {
-      return { ok: false, error: "No autorizado" };
+      return { ok: false, error: te("unauthorized") };
     }
 
     const { data, error } = await ssr
@@ -46,7 +48,7 @@ export async function getCvDownloadSignedUrl(
     if (error || !data) {
       return {
         ok: false,
-        error: "No se pudo obtener el CV o no tienes acceso.",
+        error: te("cvAccess"),
       };
     }
 
@@ -54,7 +56,7 @@ export async function getCvDownloadSignedUrl(
     if (typeof path !== "string" || !path.trim()) {
       return {
         ok: false,
-        error: "Este candidato no tiene CV almacenado",
+        error: te("noCvStored"),
       };
     }
 
@@ -66,14 +68,14 @@ export async function getCvDownloadSignedUrl(
     if (signError || !signed?.signedUrl) {
       return {
         ok: false,
-        error: signError?.message ?? "No se pudo generar el enlace de descarga",
+        error: signError?.message ?? te("signUrlFailed"),
       };
     }
 
     return { ok: true, url: signed.signedUrl };
   } catch (e) {
     const message =
-      e instanceof Error ? e.message : "Error inesperado al generar el enlace";
+      e instanceof Error ? e.message : te("signLinkUnexpected");
     return { ok: false, error: message };
   }
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import {
-  CANDIDATE_STATUS_LABELS,
   CANDIDATE_STATUSES,
   type CandidateStatus,
 } from "@/src/types/candidate";
@@ -30,6 +30,7 @@ type Props = {
 };
 
 export function CandidateStatusSelect({ candidateId, currentStatus }: Props) {
+  const t = useTranslations("candidateStatus");
   const [status, setStatus] = useState<CandidateStatus>(currentStatus);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +65,7 @@ export function CandidateStatusSelect({ candidateId, currentStatus }: Props) {
         <SelectContent>
           {CANDIDATE_STATUSES.map((s) => (
             <SelectItem key={s} value={s} className="text-xs">
-              {CANDIDATE_STATUS_LABELS[s]}
+              {t(s)}
             </SelectItem>
           ))}
         </SelectContent>

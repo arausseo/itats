@@ -1,32 +1,37 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect as nextRedirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { createClient } from "@/src/utils/supabase/server";
 
 export async function signIn(
-  _prevState: { error: string | null },
+  _prevState: { error: string | null } | undefined,
   formData: FormData,
 ): Promise<{ error: string | null }> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "/").trim() || "/";
 
+  const t = await getTranslations("auth");
+
   if (!email || !password) {
-    return { error: "Email y contraseña son obligatorios." };
+    return { error: t("errors.required") };
   }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { error: "Credenciales incorrectas. Verifica email y contraseña." };
+    return { error: t("errors.invalidCredentials") };
   }
 
-  redirect(next);
+  nextRedirect(next);
+  return { error: null };
 }
 
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  const locale = await getLocale();
+  nextRedirect(`/${locale}/login`);
 }
