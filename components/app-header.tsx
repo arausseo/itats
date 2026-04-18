@@ -31,6 +31,11 @@ export async function AppHeader() {
             {user.email}
           </span>
           <LanguageSwitcher />
+          <Link href="/positions">
+            <Button variant="ghost" size="sm" className="h-7 text-xs">
+              {t("positions")}
+            </Button>
+          </Link>
           <Link href="/upload">
             <Button variant="ghost" size="sm" className="h-7 text-xs">
               {t("uploadCvs")}
