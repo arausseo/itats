@@ -25,7 +25,19 @@ function mergeOrganizationIdFromHeader(req: Request, raw: unknown): unknown {
   return { ...(raw as Record<string, unknown>), organization_id: headerOrg };
 }
 
-const mapPayloadToRow = (payload: CandidatePayload) => {
+/** Markdown del CV: se lee del body crudo para no depender solo del Zod parseado (despliegues viejos). */
+function readCvMarkdownFromBody(body: unknown): string | undefined {
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return undefined;
+  }
+  const v = (body as Record<string, unknown>).cv_markdown;
+  return typeof v === "string" ? v : undefined;
+}
+
+const mapPayloadToRow = (
+  payload: CandidatePayload,
+  cvMarkdownFromBody: string | undefined,
+) => {
   const {
     organization_id,
     datos_personales,
@@ -33,8 +45,11 @@ const mapPayloadToRow = (payload: CandidatePayload) => {
     evaluacion,
     educacion_y_certificaciones,
     cv_storage_path,
+    cv_markdown,
     embedding,
   } = payload;
+  const markdown =
+    cvMarkdownFromBody ?? cv_markdown ?? "";
   return {
     organization_id,
     nombre: datos_personales.nombre,
@@ -54,6 +69,7 @@ const mapPayloadToRow = (payload: CandidatePayload) => {
     red_flags: evaluacion.red_flags,
     raw_analysis: payload,
     ...(cv_storage_path !== undefined ? { cv_storage_path } : {}),
+    cv_markdown: markdown,
     ...(embedding !== undefined ? { embedding } : {}),
   };
 };
@@ -74,6 +90,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const rawWithOrg = mergeOrganizationIdFromHeader(req, raw);
+  const cvMarkdownFromBody = readCvMarkdownFromBody(rawWithOrg);
   const parsed = candidatePayloadSchema.safeParse(rawWithOrg);
   if (!parsed.success) {
     return jsonResponse(
@@ -91,7 +108,7 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({ ok: false, error: supabaseResult.error }, 500);
   }
 
-  const row = mapPayloadToRow(parsed.data);
+  const row = mapPayloadToRow(parsed.data, cvMarkdownFromBody);
   if (
     row.organization_id === undefined ||
     row.organization_id === null ||

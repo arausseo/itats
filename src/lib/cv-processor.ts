@@ -292,6 +292,7 @@ async function callProcessCandidateEdgeFunction(
   storagePath: string,
   embedding: number[],
   organizationId: string,
+  cvMarkdown: string,
 ): Promise<{ kind: "inserted" } | { kind: "duplicate"; message: string }> {
   if (!UUID_RE.test(organizationId)) {
     throw new Error(
@@ -318,6 +319,7 @@ async function callProcessCandidateEdgeFunction(
     body: JSON.stringify({
       ...(payload as Record<string, unknown>),
       cv_storage_path: storagePath,
+      cv_markdown: cvMarkdown,
       embedding,
       organization_id: organizationId,
     }),
@@ -382,6 +384,7 @@ export async function runCvPipeline({
       storagePath,
       embedding,
       organizationId,
+      markdown,
     );
 
     cvLog("Pipeline: completado", {

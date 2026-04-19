@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { PipelineStatusSelect } from "@/components/positions/pipeline-status-select";
 import { CandidateDetailSheet } from "@/components/candidate-detail-sheet";
+import { getCandidateById } from "@/src/lib/positions-actions";
 import type { PositionCandidateWithCandidate } from "@/src/types/position";
 import type { Candidate } from "@/src/types/candidate";
 import {
@@ -22,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 const ALL = "__all__";
 
@@ -36,6 +38,8 @@ export function PipelineView({ positionCandidates }: PipelineViewProps) {
   const [seniority, setSeniority] = useState<string>(ALL);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [fetchingId, setFetchingId] = useState<string | null>(null);
+  const [fetchTransition, startFetchTransition] = useTransition();
 
   const seniorityOptions = Array.from(
     new Set(
@@ -52,9 +56,16 @@ export function PipelineView({ positionCandidates }: PipelineViewProps) {
           (pc) => pc.candidate.seniority_estimado === seniority,
         );
 
-  function openDetail(candidate: Candidate) {
-    setSelectedCandidate(candidate);
-    setSheetOpen(true);
+  function openDetail(candidateId: string) {
+    setFetchingId(candidateId);
+    startFetchTransition(async () => {
+      const res = await getCandidateById(candidateId);
+      setFetchingId(null);
+      if (res.ok) {
+        setSelectedCandidate(res.candidate);
+        setSheetOpen(true);
+      }
+    });
   }
 
   if (positionCandidates.length === 0) {
@@ -151,9 +162,17 @@ export function PipelineView({ positionCandidates }: PipelineViewProps) {
                         variant="ghost"
                         size="sm"
                         className="h-7 px-2 text-xs"
-                        onClick={() => openDetail(pc.candidate)}
+                        disabled={fetchingId === pc.candidate_id && fetchTransition}
+                        onClick={() => openDetail(pc.candidate_id)}
                       >
-                        {t("viewProfile")}
+                        {fetchingId === pc.candidate_id && fetchTransition ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Spinner className="h-3 w-3" />
+                            {t("viewProfile")}
+                          </span>
+                        ) : (
+                          t("viewProfile")
+                        )}
                       </Button>
                     </TableCell>
                   </TableRow>

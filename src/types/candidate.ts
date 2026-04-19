@@ -50,6 +50,8 @@ export interface Candidate {
   status: CandidateStatus;
   /** Ruta en el bucket `resumes` de Supabase Storage; null si no hay PDF asociado. */
   cv_storage_path: string | null;
+  /** Texto markdown extraído del CV por la IA. Vacío en registros anteriores a la migración. */
+  cv_markdown: string;
 }
 
 export function normalizeStringArray(value: unknown): string[] {
@@ -114,6 +116,7 @@ export function parseCandidateRow(row: unknown): Candidate {
       typeof r.cv_storage_path === "string" && r.cv_storage_path.trim().length > 0
         ? r.cv_storage_path.trim()
         : null,
+    cv_markdown: String(r.cv_markdown ?? ""),
   };
 }
 

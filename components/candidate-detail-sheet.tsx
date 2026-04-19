@@ -13,8 +13,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { getCvDownloadSignedUrl } from "@/src/lib/candidate-cv-download";
+import { cn } from "@/lib/utils";
+import { CvMarkdownPreview } from "@/components/cv-markdown-preview";
 
 export interface CandidateDetailSheetProps {
   candidate: Candidate | null;
@@ -33,6 +41,7 @@ export function CandidateDetailSheet({
 
   const [cvDownloadPending, setCvDownloadPending] = useState(false);
   const [cvDownloadError, setCvDownloadError] = useState<string | null>(null);
+  const [markdownOpen, setMarkdownOpen] = useState(false);
 
   const handleDownloadCv = useCallback(async () => {
     if (!candidate?.cv_storage_path) return;
@@ -56,6 +65,7 @@ export function CandidateDetailSheet({
   }
 
   return (
+    <>
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="right"
@@ -94,6 +104,16 @@ export function CandidateDetailSheet({
                   ) : (
                     tSheet("downloadCv")
                   )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-fit"
+                  disabled={!candidate.cv_markdown}
+                  onClick={() => setMarkdownOpen(true)}
+                >
+                  {tSheet("viewMarkdown")}
                 </Button>
                 {!candidate.cv_storage_path ? (
                   <p className="text-xs text-muted-foreground">
@@ -241,5 +261,27 @@ export function CandidateDetailSheet({
         ) : null}
       </SheetContent>
     </Sheet>
+
+    {candidate && (
+      <Dialog open={markdownOpen} onOpenChange={setMarkdownOpen}>
+        <DialogContent
+          className={cn(
+            "flex max-h-[90vh] w-full flex-col gap-0 overflow-hidden p-0",
+            "w-[min(96vw,92rem)] max-w-[min(96vw,92rem)] sm:max-w-none",
+            "text-base",
+          )}
+        >
+          <DialogHeader className="border-b border-border/60 px-5 py-4 sm:px-8">
+            <DialogTitle className="text-sm font-semibold">
+              {candidate.nombre} — {tSheet("viewMarkdown")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-10 sm:py-6">
+            <CvMarkdownPreview markdown={candidate.cv_markdown} />
+          </div>
+        </DialogContent>
+      </Dialog>
+    )}
+    </>
   );
 }
