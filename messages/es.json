@@ -97,7 +97,11 @@
     "loadErrorTitle": "Error al cargar candidatos"
   },
   "login": {
-    "cardTitle": "ATS — Iniciar sesión"
+    "cardTitle": "Bienvenido de nuevo",
+    "formSubtitle": "Inicia sesión en tu cuenta para continuar.",
+    "panelTagline": "Selección de talento",
+    "panelHeadline": "Encuentra a los mejores candidatos, más rápido.",
+    "panelSubtitle": "Una plataforma unificada para gestionar tu pipeline de reclutamiento, evaluar candidatos y tomar mejores decisiones de contratación."
   },
   "auth": {
     "email": "Email",

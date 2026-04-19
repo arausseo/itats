@@ -97,7 +97,11 @@
     "loadErrorTitle": "Error loading candidates"
   },
   "login": {
-    "cardTitle": "ATS — Sign in"
+    "cardTitle": "Welcome back",
+    "formSubtitle": "Sign in to your account to continue.",
+    "panelTagline": "Talent Acquisition",
+    "panelHeadline": "Find the best candidates, faster.",
+    "panelSubtitle": "A unified platform to manage your recruitment pipeline, evaluate candidates, and make better hiring decisions."
   },
   "auth": {
     "email": "Email",
