@@ -181,6 +181,7 @@ export default async function PositionDetailPage({ params, searchParams }: Props
               <PipelineView
                 positionCandidates={pipelineCandidates}
                 positionId={id}
+                positionTitle={position.title}
               />
             ) : (
               <AiSearchView positionId={id} position={position} seniorityOptions={seniorityOptions} />

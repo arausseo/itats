@@ -8,7 +8,7 @@
   "positions": {
     "metaTitle": "Positions — ATS",
     "title": "Positions",
-    "description": "Manage open positions and their candidate pipelines.",
+    "description": "Manage open positions and their candidate processes.",
     "createButton": "New position",
     "createTitle": "Create new position",
     "fieldTitle": "Title",
@@ -33,7 +33,7 @@
     "candidate": "candidate",
     "candidates": "candidates",
     "backToPositions": "Positions",
-    "candidatesInPipeline": "in pipeline",
+    "candidatesInPipeline": "in process",
     "closePosition": "Close position",
     "reopenPosition": "Reopen position",
     "tabPipeline": "Options",
@@ -136,7 +136,9 @@
     "all": "All",
     "allWithCount": "All ({count})",
     "selectedCount": "{count} selected",
-    "noOptions": "No options in data"
+    "noOptions": "No options in data",
+    "searchPlaceholder": "Search in list…",
+    "noMatches": "No matching options"
   },
   "table": {
     "name": "Name",
@@ -181,7 +183,14 @@
     "viewMarkdown": "View details",
     "copyEmail": "Copy email to clipboard",
     "copyPhone": "Copy phone to clipboard",
-    "copied": "Copied"
+    "copied": "Copied",
+    "addToPositionSection": "Position",
+    "selectPositionPlaceholder": "Choose a position",
+    "addToPipeline": "Add to pipeline",
+    "lockedPositionHint": "Position",
+    "noOpenPositions": "There are no open positions. Create one under Positions or reopen a closed one.",
+    "addToPipelineSuccess": "Candidate added to the pipeline.",
+    "addingToPipeline": "Adding…"
   },
   "uploadZone": {
     "maxFiles": "You can upload at most {maxFiles} files at a time.",

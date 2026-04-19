@@ -136,7 +136,9 @@
     "all": "Todos",
     "allWithCount": "Todos ({count})",
     "selectedCount": "{count} seleccionados",
-    "noOptions": "Sin opciones en datos"
+    "noOptions": "Sin opciones en datos",
+    "searchPlaceholder": "Buscar en la lista…",
+    "noMatches": "Ninguna opción coincide"
   },
   "table": {
     "name": "Nombre",
@@ -181,7 +183,14 @@
     "viewMarkdown": "Ver detalles",
     "copyEmail": "Copiar correo al portapapeles",
     "copyPhone": "Copiar teléfono al portapapeles",
-    "copied": "Copiado"
+    "copied": "Copiado",
+    "addToPositionSection": "Plaza",
+    "selectPositionPlaceholder": "Elige una plaza",
+    "addToPipeline": "Añadir al pipeline",
+    "lockedPositionHint": "Plaza",
+    "noOpenPositions": "No hay plazas abiertas. Crea una en Plazas o reabre una cerrada.",
+    "addToPipelineSuccess": "Candidato añadido al pipeline.",
+    "addingToPipeline": "Añadiendo…"
   },
   "uploadZone": {
     "maxFiles": "Puedes subir como máximo {maxFiles} archivos a la vez.",

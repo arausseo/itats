@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "@/src/i18n/navigation";
 import { redFlagsIsClear, type Candidate } from "@/src/types/candidate";
 import { CandidateStatusSelect } from "@/components/candidate-status-select";
 import { Badge } from "@/components/ui/badge";
@@ -23,25 +24,56 @@ import { getCvDownloadSignedUrl } from "@/src/lib/candidate-cv-download";
 import { cn } from "@/lib/utils";
 import { CvMarkdownPreview } from "@/components/cv-markdown-preview";
 import { CopyToClipboardButton } from "@/components/copy-to-clipboard-button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { addCandidateToPosition } from "@/src/lib/positions-actions";
+
+export type AddToPositionContext =
+  | { mode: "select"; positions: { id: string; title: string }[] }
+  | { mode: "locked"; positionId: string; positionTitle: string };
 
 export interface CandidateDetailSheetProps {
   candidate: Candidate | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  addToPosition?: AddToPositionContext;
 }
 
 export function CandidateDetailSheet({
   candidate,
   open,
   onOpenChange,
+  addToPosition,
 }: CandidateDetailSheetProps) {
   const tSheet = useTranslations("sheet");
   const tCommon = useTranslations("common");
   const dash = tCommon("dash");
 
+  const router = useRouter();
   const [cvDownloadPending, setCvDownloadPending] = useState(false);
   const [cvDownloadError, setCvDownloadError] = useState<string | null>(null);
   const [markdownOpen, setMarkdownOpen] = useState(false);
+  const [addPipelinePending, startAddPipeline] = useTransition();
+  const [selectedPositionId, setSelectedPositionId] = useState("");
+
+  const effectiveSelectPositionId = useMemo(() => {
+    if (addToPosition?.mode !== "select") return "";
+    const { positions } = addToPosition;
+    if (positions.length === 0) return "";
+    if (
+      selectedPositionId &&
+      positions.some((p) => p.id === selectedPositionId)
+    ) {
+      return selectedPositionId;
+    }
+    return positions[0]?.id ?? "";
+  }, [addToPosition, selectedPositionId]);
 
   const handleDownloadCv = useCallback(async () => {
     if (!candidate?.cv_storage_path) return;
@@ -60,9 +92,27 @@ export function CandidateDetailSheet({
   }, [candidate]);
 
   function handleOpenChange(next: boolean) {
-    if (!next) setCvDownloadError(null);
+    if (!next) {
+      setCvDownloadError(null);
+    }
     onOpenChange(next);
   }
+
+  const runAddToPipeline = useCallback(
+    (positionId: string) => {
+      if (!candidate?.id || !positionId) return;
+      startAddPipeline(async () => {
+        const res = await addCandidateToPosition(positionId, candidate.id);
+        if (!res.ok) {
+          toast.error(res.error);
+          return;
+        }
+        toast.success(tSheet("addToPipelineSuccess"));
+        router.refresh();
+      });
+    },
+    [candidate?.id, router, tSheet],
+  );
 
   return (
     <>
@@ -136,6 +186,93 @@ export function CandidateDetailSheet({
             </SheetHeader>
 
             <div className="flex flex-col gap-7 px-6 pb-8 pt-5 sm:px-8">
+              {addToPosition ? (
+                <section className="space-y-3 rounded-lg border border-border/60 bg-muted/30 p-4">
+                  <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    {tSheet("addToPositionSection")}
+                  </h3>
+                  {addToPosition.mode === "select" ? (
+                    addToPosition.positions.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        {tSheet("noOpenPositions")}
+                      </p>
+                    ) : (
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <Select
+                            value={effectiveSelectPositionId}
+                            onValueChange={setSelectedPositionId}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue
+                                placeholder={tSheet("selectPositionPlaceholder")}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {addToPosition.positions.map((p) => (
+                                <SelectItem key={p.id} value={p.id}>
+                                  {p.title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="shrink-0 sm:w-auto"
+                          disabled={
+                            addPipelinePending || !effectiveSelectPositionId
+                          }
+                          onClick={() =>
+                            runAddToPipeline(effectiveSelectPositionId)
+                          }
+                        >
+                          {addPipelinePending ? (
+                            <span className="inline-flex items-center gap-2">
+                              <Spinner className="h-3.5 w-3.5" />
+                              {tSheet("addingToPipeline")}
+                            </span>
+                          ) : (
+                            tSheet("addToPipeline")
+                          )}
+                        </Button>
+                      </div>
+                    )
+                  ) : (
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs text-foreground">
+                        <span className="text-muted-foreground">
+                          {tSheet("lockedPositionHint")}
+                          {": "}
+                        </span>
+                        <span className="font-medium">
+                          {addToPosition.positionTitle}
+                        </span>
+                      </p>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="shrink-0"
+                        disabled={addPipelinePending}
+                        onClick={() =>
+                          runAddToPipeline(addToPosition.positionId)
+                        }
+                      >
+                        {addPipelinePending ? (
+                          <span className="inline-flex items-center gap-2">
+                            <Spinner className="h-3.5 w-3.5" />
+                            {tSheet("addingToPipeline")}
+                          </span>
+                        ) : (
+                          tSheet("addToPipeline")
+                        )}
+                      </Button>
+                    </div>
+                  )}
+                </section>
+              ) : null}
+
               <section className="space-y-3">
                 <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {tSheet("locationContact")}

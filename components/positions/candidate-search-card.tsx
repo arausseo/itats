@@ -2,6 +2,7 @@
 
 import { useState, useOptimistic, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
@@ -13,15 +14,18 @@ import type { Candidate } from "@/src/types/candidate";
 interface CandidateSearchCardProps {
   result: CandidateSearchResult;
   positionId: string;
+  positionTitle: string;
   onAdded: (candidateId: string) => void;
 }
 
 export function CandidateSearchCard({
   result,
   positionId,
+  positionTitle,
   onAdded,
 }: CandidateSearchCardProps) {
   const t = useTranslations("positions");
+  const tSheet = useTranslations("sheet");
   const [isPending, startTransition] = useTransition();
   const [fetchPending, startFetchTransition] = useTransition();
   const [added, setAdded] = useOptimistic(false);
@@ -42,7 +46,11 @@ export function CandidateSearchCard({
       setAdded(true);
       const res = await addCandidateToPosition(positionId, result.id);
       if (res.ok) {
+        toast.success(tSheet("addToPipelineSuccess"));
         onAdded(result.id);
+      } else {
+        toast.error(res.error);
+        setAdded(false);
       }
     });
   }
@@ -113,6 +121,11 @@ export function CandidateSearchCard({
         candidate={fullCandidate}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
+        addToPosition={{
+          mode: "locked",
+          positionId,
+          positionTitle,
+        }}
       />
     </>
   );

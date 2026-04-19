@@ -136,6 +136,7 @@ export function AiSearchView({ positionId, position, seniorityOptions }: AiSearc
                 key={r.id}
                 result={r}
                 positionId={positionId}
+                positionTitle={position.title}
                 onAdded={handleAdded}
               />
             ))}

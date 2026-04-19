@@ -42,6 +42,7 @@ export type CandidatesTableSheetProps = {
   totalCount: number;
   page: number;
   pageSize: number;
+  openPositions: { id: string; title: string }[];
 };
 
 function RolPrincipalCell({ text }: { text: string }) {
@@ -132,6 +133,7 @@ export function CandidatesTableSheet({
   totalCount,
   page,
   pageSize,
+  openPositions,
 }: CandidatesTableSheetProps) {
   const tTable = useTranslations("table");
   const tCommon = useTranslations("common");
@@ -256,6 +258,7 @@ export function CandidatesTableSheet({
         candidate={selected}
         open={open}
         onOpenChange={setOpen}
+        addToPosition={{ mode: "select", positions: openPositions }}
       />
     </>
   );

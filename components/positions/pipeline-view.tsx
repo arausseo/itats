@@ -30,9 +30,14 @@ const ALL = "__all__";
 interface PipelineViewProps {
   positionCandidates: PositionCandidateWithCandidate[];
   positionId: string;
+  positionTitle: string;
 }
 
-export function PipelineView({ positionCandidates }: PipelineViewProps) {
+export function PipelineView({
+  positionCandidates,
+  positionId,
+  positionTitle,
+}: PipelineViewProps) {
   const t = useTranslations("positions");
 
   const [seniority, setSeniority] = useState<string>(ALL);
@@ -187,6 +192,11 @@ export function PipelineView({ positionCandidates }: PipelineViewProps) {
         candidate={selectedCandidate}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
+        addToPosition={{
+          mode: "locked",
+          positionId,
+          positionTitle,
+        }}
       />
     </>
   );

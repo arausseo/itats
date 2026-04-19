@@ -98,6 +98,7 @@ export default async function HomePage({ params, searchParams }: HomePageProps) 
     patronOptions: [],
   });
   let facetPromise: Promise<FacetCountBundle> | undefined;
+  let openPositions: { id: string; title: string }[] = [];
 
   try {
     const supabase = await createClient();
@@ -117,6 +118,16 @@ export default async function HomePage({ params, searchParams }: HomePageProps) 
       fetchJsonbArrayOptions(supabase, "frameworks"),
       fetchJsonbArrayOptions(supabase, "patrones"),
     ]);
+
+    const { data: openPosRows } = await supabase
+      .from("positions")
+      .select("id, title")
+      .eq("status", "Open")
+      .order("title");
+    openPositions = (openPosRows ?? []).map((row) => ({
+      id: row.id,
+      title: row.title,
+    }));
 
     let libreCandidateIds: string[] | undefined;
     if (libre.trim()) {
@@ -237,6 +248,7 @@ export default async function HomePage({ params, searchParams }: HomePageProps) 
                 totalCount={totalCount}
                 page={pageDisplay}
                 pageSize={pageSize}
+                openPositions={openPositions}
               />
             )}
           </CardContent>
