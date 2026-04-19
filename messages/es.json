@@ -178,7 +178,10 @@
     "education": "Educación",
     "certifications": "Certificaciones",
     "close": "Cerrar",
-    "viewMarkdown": "Ver detalles"
+    "viewMarkdown": "Ver detalles",
+    "copyEmail": "Copiar correo al portapapeles",
+    "copyPhone": "Copiar teléfono al portapapeles",
+    "copied": "Copiado"
   },
   "uploadZone": {
     "maxFiles": "Puedes subir como máximo {maxFiles} archivos a la vez.",

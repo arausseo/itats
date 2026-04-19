@@ -178,7 +178,10 @@
     "education": "Education",
     "certifications": "Certifications",
     "close": "Close",
-    "viewMarkdown": "View details"
+    "viewMarkdown": "View details",
+    "copyEmail": "Copy email to clipboard",
+    "copyPhone": "Copy phone to clipboard",
+    "copied": "Copied"
   },
   "uploadZone": {
     "maxFiles": "You can upload at most {maxFiles} files at a time.",

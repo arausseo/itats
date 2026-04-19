@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -23,6 +22,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { getCvDownloadSignedUrl } from "@/src/lib/candidate-cv-download";
 import { cn } from "@/lib/utils";
 import { CvMarkdownPreview } from "@/components/cv-markdown-preview";
+import { CopyToClipboardButton } from "@/components/copy-to-clipboard-button";
 
 export interface CandidateDetailSheetProps {
   candidate: Candidate | null;
@@ -78,9 +78,16 @@ export function CandidateDetailSheet({
               <SheetTitle className="pr-10 font-heading text-lg sm:text-xl">
                 {candidate.nombre}
               </SheetTitle>
-              <SheetDescription>
-                {candidate.rol_principal} · {candidate.email}
-              </SheetDescription>
+              <div className="space-y-2 text-xs/relaxed text-muted-foreground">
+                <p className="text-foreground">{candidate.rol_principal}</p>
+                <div className="flex items-center gap-0.5">
+                  <span className="min-w-0 flex-1 break-all">{candidate.email}</span>
+                  <CopyToClipboardButton
+                    value={candidate.email}
+                    aria-label={tSheet("copyEmail")}
+                  />
+                </div>
+              </div>
               <CandidateStatusSelect
                 candidateId={candidate.id}
                 currentStatus={candidate.status}
@@ -140,10 +147,18 @@ export function CandidateDetailSheet({
                       {candidate.pais_residencia?.trim() ? candidate.pais_residencia : dash}
                     </dd>
                   </div>
-                  <div>
+                  <div className="sm:col-span-2">
                     <dt className="text-muted-foreground">{tSheet("phone")}</dt>
-                    <dd className="font-medium text-foreground">
-                      {candidate.telefono?.trim() ? candidate.telefono : dash}
+                    <dd className="mt-0.5 flex items-start gap-0.5 font-medium text-foreground">
+                      <span className="min-w-0 flex-1 break-words">
+                        {candidate.telefono?.trim() ? candidate.telefono : dash}
+                      </span>
+                      {candidate.telefono?.trim() ? (
+                        <CopyToClipboardButton
+                          value={candidate.telefono.trim()}
+                          aria-label={tSheet("copyPhone")}
+                        />
+                      ) : null}
                     </dd>
                   </div>
                 </dl>
