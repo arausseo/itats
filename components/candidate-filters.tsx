@@ -155,10 +155,9 @@ export function CandidateFilters({
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Grid: 1 col mobile, 2 cols tablet, 4 cols desktop */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Row 1: Search fields + Demographics */}
-        <div className="space-y-1.5">
+      {/* Fila 1: solo nombre y búsqueda libre */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <div className="min-w-0 flex-1 space-y-1.5">
           <label
             htmlFor="candidate-q"
             className="text-xs font-medium text-muted-foreground"
@@ -175,7 +174,7 @@ export function CandidateFilters({
           />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="min-w-0 flex-1 space-y-1.5">
           <label
             htmlFor="candidate-libre"
             className="text-xs font-medium text-muted-foreground"
@@ -192,6 +191,15 @@ export function CandidateFilters({
           />
         </div>
 
+        {isPending ? (
+          <div className="flex shrink-0 items-center justify-center pb-0.5 sm:pb-1.5">
+            <Spinner className="h-4 w-4 text-primary" />
+          </div>
+        ) : null}
+      </div>
+
+      {/* Fila 2: senioridad, país, rol */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
           <span className="block text-xs font-medium text-muted-foreground">
             {t("seniority")}
@@ -248,7 +256,6 @@ export function CandidateFilters({
           </Select>
         </div>
 
-        {/* Row 2: Technical filters */}
         <MultiSelectFilter
           label={t("rol")}
           options={rolOptions}
@@ -258,6 +265,10 @@ export function CandidateFilters({
           facetTotal={facetCounts.rolTotal}
           className="min-w-0"
         />
+      </div>
+
+      {/* Fila 3: stack, frameworks, patrones */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <MultiSelectFilter
           label={t("stack")}
           options={stackOptions}
@@ -276,22 +287,15 @@ export function CandidateFilters({
           facetTotal={facetCounts.frameworksTotal}
           className="min-w-0"
         />
-        <div className="flex items-end gap-3">
-          <MultiSelectFilter
-            label={t("patrones")}
-            options={patronOptions}
-            selected={patSelected}
-            onChange={(pat) => replaceUrl({ pat, page: "1" })}
-            optionCounts={facetCounts.patrones}
-            facetTotal={facetCounts.patronesTotal}
-            className="min-w-0 flex-1"
-          />
-          {isPending && (
-            <div className="pb-1.5">
-              <Spinner className="h-4 w-4 text-primary" />
-            </div>
-          )}
-        </div>
+        <MultiSelectFilter
+          label={t("patrones")}
+          options={patronOptions}
+          selected={patSelected}
+          onChange={(pat) => replaceUrl({ pat, page: "1" })}
+          optionCounts={facetCounts.patrones}
+          facetTotal={facetCounts.patronesTotal}
+          className="min-w-0"
+        />
       </div>
     </div>
   );
