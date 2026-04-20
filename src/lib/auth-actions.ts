@@ -32,8 +32,18 @@ export async function signIn(
     return { error: t("errors.profileSetup") };
   }
 
-  nextRedirect(next);
-  return { error: null };
+  // Get the current locale for the redirect
+  const locale = await getLocale();
+  
+  // Return the redirect URL to be handled on the client after cookies are set
+  return { error: null, redirect: next };
+}
+
+export async function signOut() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  const locale = await getLocale();
+  nextRedirect(`/${locale}/login`);
 }
 
 export async function signOut() {
