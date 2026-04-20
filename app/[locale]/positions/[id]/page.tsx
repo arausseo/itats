@@ -6,10 +6,10 @@ import {
   parsePositionCandidateWithCandidate,
   type PositionCandidateWithCandidate,
 } from "@/src/types/position";
-import { PipelineView } from "@/components/positions/pipeline-view";
-import { AiSearchView } from "@/components/positions/ai-search-view";
-import { closePosition, reopenPosition, getSeniorityOptions } from "@/src/lib/positions-actions";
+import { PositionTabs } from "@/components/positions/position-tabs";
+import { reopenPosition, getSeniorityOptions } from "@/src/lib/positions-actions";
 import { EditPositionDialog } from "@/components/positions/edit-position-dialog";
+import { ClosePositionDialog } from "@/components/positions/close-position-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/src/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props) {
   return { title: data?.title ? `${data.title} — ${t("title")}` : t("title") };
 }
 
-export default async function PositionDetailPage({ params, searchParams }: Props) {
+export default async function PositionDetailPage({ params }: Props) {
   const { locale, id } = await params;
   setRequestLocale(locale);
 
@@ -70,18 +70,10 @@ export default async function PositionDetailPage({ params, searchParams }: Props
     parsePositionCandidateWithCandidate,
   );
 
-  const sp = await searchParams;
-  const tab = sp.tab === "search" ? "search" : "pipeline";
-
   const [t, seniorityOptions] = await Promise.all([
     getTranslations("positions"),
     getSeniorityOptions(),
   ]);
-
-  async function closeAction() {
-    "use server";
-    await closePosition(id);
-  }
 
   async function reopenAction() {
     "use server";
@@ -121,21 +113,18 @@ export default async function PositionDetailPage({ params, searchParams }: Props
                   <span className="text-xs text-muted-foreground">
                     {pipelineCandidates.length} {t("candidatesInPipeline")}
                   </span>
+                  <span className="text-xs text-muted-foreground">
+                    · {t("createdAt", { date: new Date(position.created_at).toLocaleDateString() })}
+                  </span>
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <EditPositionDialog position={position} />
                 {position.status === "Open" ? (
-                  <form action={closeAction}>
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                    >
-                      {t("closePosition")}
-                    </Button>
-                  </form>
+                  <ClosePositionDialog
+                    positionId={position.id}
+                    positionTitle={position.title}
+                  />
                 ) : (
                   <form action={reopenAction}>
                     <Button
@@ -150,42 +139,14 @@ export default async function PositionDetailPage({ params, searchParams }: Props
                 )}
               </div>
             </div>
-
-            {/* Tabs */}
-            <div className="mt-4 flex gap-1 border-b border-transparent">
-              <Link
-                href={`/positions/${id}?tab=pipeline`}
-                className={`rounded-t-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  tab === "pipeline"
-                    ? "border-b-2 border-primary text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t("tabPipeline")} ({pipelineCandidates.length})
-              </Link>
-              <Link
-                href={`/positions/${id}?tab=search`}
-                className={`rounded-t-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  tab === "search"
-                    ? "border-b-2 border-primary text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t("tabSearch")}
-              </Link>
-            </div>
           </CardHeader>
 
           <CardContent className="pt-6">
-            {tab === "pipeline" ? (
-              <PipelineView
-                positionCandidates={pipelineCandidates}
-                positionId={id}
-                positionTitle={position.title}
-              />
-            ) : (
-              <AiSearchView positionId={id} position={position} seniorityOptions={seniorityOptions} />
-            )}
+            <PositionTabs
+              position={position}
+              positionCandidates={pipelineCandidates}
+              seniorityOptions={seniorityOptions}
+            />
           </CardContent>
         </Card>
       </div>

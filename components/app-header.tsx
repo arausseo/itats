@@ -5,6 +5,7 @@ import { getUserProfile } from "@/src/lib/user-profile";
 import { signOut } from "@/src/lib/auth-actions";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { AppNavLinks } from "@/components/app-nav-links";
 
 export async function AppHeader() {
   const supabase = await createClient();
@@ -18,12 +19,29 @@ export async function AppHeader() {
   const profile = await getUserProfile();
 
   return (
-    <header className="border-b border-border/60 bg-background">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-        <span className="text-sm font-semibold tracking-tight">{t("brand")}</span>
-        <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur-sm">
+      <div className="mx-auto flex w-full max-w-6xl items-center gap-6 px-4 py-3 sm:px-6 lg:px-8">
+        {/* Brand */}
+        <Link href="/" className="shrink-0">
+          <span className="text-sm font-bold tracking-tight text-foreground">
+            {t("brand")}
+          </span>
+        </Link>
+
+        {/* Nav links */}
+        <AppNavLinks
+          labels={{
+            dashboard: t("dashboard"),
+            candidates: t("candidates"),
+            positions: t("positions"),
+            upload: t("uploadCvs"),
+          }}
+        />
+
+        {/* Right side */}
+        <div className="ml-auto flex items-center gap-2">
           {profile && (
-            <span className="hidden max-w-[10rem] truncate text-xs text-muted-foreground md:block">
+            <span className="hidden max-w-[10rem] truncate text-xs text-muted-foreground lg:block">
               {t("organization", { name: profile.organizationName })}
             </span>
           )}
@@ -31,16 +49,6 @@ export async function AppHeader() {
             {user.email}
           </span>
           <LanguageSwitcher />
-          <Link href="/positions">
-            <Button variant="ghost" size="sm" className="h-7 text-xs">
-              {t("positions")}
-            </Button>
-          </Link>
-          <Link href="/upload">
-            <Button variant="ghost" size="sm" className="h-7 text-xs">
-              {t("uploadCvs")}
-            </Button>
-          </Link>
           <form action={signOut}>
             <Button type="submit" variant="ghost" size="sm" className="h-7 text-xs">
               {t("signOut")}

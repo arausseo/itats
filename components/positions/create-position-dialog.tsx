@@ -6,6 +6,15 @@ import { useTranslations } from "next-intl";
 import { createPosition } from "@/src/lib/positions-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export function CreatePositionDialog() {
   const t = useTranslations("positions");
@@ -31,18 +40,18 @@ export function CreatePositionDialog() {
     });
   }
 
-  if (!open) {
-    return (
-      <Button size="sm" onClick={() => setOpen(true)} className="shrink-0">
-        + {t("createButton")}
-      </Button>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl">
-        <h2 className="mb-4 text-base font-semibold">{t("createTitle")}</h2>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" className="shrink-0">
+          + {t("createButton")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("createTitle")}</DialogTitle>
+          <DialogDescription>{t("createDescription")}</DialogDescription>
+        </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div>
             <label className="mb-1 block text-xs font-medium text-foreground">
@@ -86,7 +95,7 @@ export function CreatePositionDialog() {
             </p>
           )}
 
-          <div className="flex justify-end gap-2 pt-1">
+          <DialogFooter className="pt-2">
             <Button
               type="button"
               variant="ghost"
@@ -102,9 +111,9 @@ export function CreatePositionDialog() {
             <Button type="submit" size="sm" disabled={isPending}>
               {isPending ? t("creating") : t("create")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

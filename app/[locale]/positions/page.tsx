@@ -4,7 +4,7 @@ import { createClient } from "@/src/utils/supabase/server";
 import { parsePositionRow } from "@/src/types/position";
 import type { PositionWithCount } from "@/src/types/position";
 import { CreatePositionDialog } from "@/components/positions/create-position-dialog";
-import { PositionCard } from "@/components/positions/position-card";
+import { PositionsList } from "@/components/positions/positions-list";
 import {
   Card,
   CardContent,
@@ -51,9 +51,6 @@ export default async function PositionsPage({ params }: Props) {
     return { ...base, candidate_count: count };
   });
 
-  const open = positions.filter((p) => p.status === "Open");
-  const closed = positions.filter((p) => p.status === "Closed");
-
   return (
     <div className="min-h-full flex-1 bg-muted/30">
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
@@ -75,38 +72,7 @@ export default async function PositionsPage({ params }: Props) {
               </p>
             )}
 
-            {positions.length === 0 && !error && (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <p className="text-sm text-muted-foreground">{t("empty")}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{t("emptyHint")}</p>
-              </div>
-            )}
-
-            {open.length > 0 && (
-              <section className="mb-8">
-                <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  {t("sectionOpen")} ({open.length})
-                </h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {open.map((pos) => (
-                    <PositionCard key={pos.id} position={pos} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {closed.length > 0 && (
-              <section>
-                <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  {t("sectionClosed")} ({closed.length})
-                </h2>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 opacity-60">
-                  {closed.map((pos) => (
-                    <PositionCard key={pos.id} position={pos} />
-                  ))}
-                </div>
-              </section>
-            )}
+            <PositionsList positions={positions} />
           </CardContent>
         </Card>
       </div>
