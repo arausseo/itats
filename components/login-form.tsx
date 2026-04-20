@@ -24,9 +24,10 @@ export function LoginForm({ next }: Props) {
   // Handle redirect after successful login and cookies are set
   useEffect(() => {
     if (state.redirect) {
-      router.push(state.redirect);
+      // Force a full page navigation to ensure cookies are sent with the request
+      window.location.href = state.redirect;
     }
-  }, [state.redirect, router]);
+  }, [state.redirect]);
 
   return (
     <form action={action} className="flex flex-col gap-5">
