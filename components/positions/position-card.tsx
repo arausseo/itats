@@ -7,6 +7,26 @@ interface PositionCardProps {
   position: PositionWithCount;
 }
 
+function getRelativeTime(dateStr: string, t: ReturnType<typeof useTranslations>): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return t("createdToday");
+  if (diffDays === 1) return t("createdYesterday");
+  if (diffDays < 7) return t("createdDaysAgo", { days: diffDays });
+  if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return t("createdWeeksAgo", { weeks });
+  }
+  if (diffDays < 365) {
+    const months = Math.floor(diffDays / 30);
+    return t("createdMonthsAgo", { months });
+  }
+  return date.toLocaleDateString();
+}
+
 export function PositionCard({ position }: PositionCardProps) {
   const t = useTranslations("positions");
 
@@ -31,10 +51,13 @@ export function PositionCard({ position }: PositionCardProps) {
           </p>
         )}
 
-        <div className="mt-auto pt-3">
+        <div className="mt-auto flex items-center justify-between gap-2 pt-3">
           <span className="text-xs text-muted-foreground">
             {position.candidate_count}{" "}
             {position.candidate_count === 1 ? t("candidate") : t("candidates")}
+          </span>
+          <span className="text-xs text-muted-foreground/70">
+            {getRelativeTime(position.created_at, t)}
           </span>
         </div>
       </div>

@@ -7,6 +7,15 @@ import { updatePosition } from "@/src/lib/positions-actions";
 import type { Position } from "@/src/types/position";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface EditPositionDialogProps {
   position: Position;
@@ -35,23 +44,18 @@ export function EditPositionDialog({ position }: EditPositionDialogProps) {
     });
   }
 
-  if (!open) {
-    return (
-      <Button
-        size="sm"
-        variant="outline"
-        className="h-7 text-xs"
-        onClick={() => setOpen(true)}
-      >
-        {t("editButton")}
-      </Button>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-xl border border-border bg-background p-6 shadow-xl">
-        <h2 className="mb-4 text-base font-semibold">{t("editTitle")}</h2>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline" className="h-7 text-xs">
+          {t("editButton")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("editTitle")}</DialogTitle>
+          <DialogDescription>{t("editDescription")}</DialogDescription>
+        </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div>
             <label className="mb-1 block text-xs font-medium text-foreground">
@@ -98,7 +102,7 @@ export function EditPositionDialog({ position }: EditPositionDialogProps) {
             </p>
           )}
 
-          <div className="flex justify-end gap-2 pt-1">
+          <DialogFooter className="pt-2">
             <Button
               type="button"
               variant="ghost"
@@ -114,9 +118,9 @@ export function EditPositionDialog({ position }: EditPositionDialogProps) {
             <Button type="submit" size="sm" disabled={isPending}>
               {isPending ? t("saving") : t("save")}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
