@@ -64,7 +64,7 @@ export function MultiSelectFilter({
         : t("selectedCount", { count: selected.length });
 
   return (
-    <div className={cn("min-w-[200px] space-y-1.5", className)}>
+    <div className={cn("space-y-1.5", className)}>
       <span className="block text-xs font-medium text-muted-foreground">
         {label}
       </span>
@@ -79,7 +79,7 @@ export function MultiSelectFilter({
           <Button
             type="button"
             variant="outline"
-            className="h-7 w-full min-w-[200px] justify-between font-normal"
+            className="h-9 w-full justify-between font-normal"
           >
             <span className="truncate text-left">{summary}</span>
           </Button>
