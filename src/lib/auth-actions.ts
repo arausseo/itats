@@ -6,9 +6,9 @@ import { createClient } from "@/src/utils/supabase/server";
 import { ensureUserProfile } from "@/src/lib/user-profile";
 
 export async function signIn(
-  _prevState: { error: string | null } | undefined,
+  _prevState: { error: string | null; redirect?: string } | undefined,
   formData: FormData,
-): Promise<{ error: string | null }> {
+): Promise<{ error: string | null; redirect?: string }> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "/").trim() || "/";
@@ -37,13 +37,6 @@ export async function signIn(
   
   // Return the redirect URL to be handled on the client after cookies are set
   return { error: null, redirect: next };
-}
-
-export async function signOut() {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  const locale = await getLocale();
-  nextRedirect(`/${locale}/login`);
 }
 
 export async function signOut() {
