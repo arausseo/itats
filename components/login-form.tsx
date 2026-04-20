@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { signIn } from "@/src/lib/auth-actions";
 import { Input } from "@/components/ui/input";
@@ -8,11 +9,25 @@ import { Button } from "@/components/ui/button";
 
 type Props = { next?: string };
 
-const initialState = { error: null as string | null };
+type LoginState = { 
+  error: string | null;
+  redirect?: string;
+};
+
+const initialState: LoginState = { error: null };
 
 export function LoginForm({ next }: Props) {
   const [state, action, isPending] = useActionState(signIn, initialState);
   const t = useTranslations("auth");
+  const router = useRouter();
+
+  // Handle redirect after successful login and cookies are set
+  useEffect(() => {
+    if (state.redirect) {
+      // Force a full page navigation to ensure cookies are sent with the request
+      window.location.href = state.redirect;
+    }
+  }, [state.redirect]);
 
   return (
     <form action={action} className="flex flex-col gap-5">

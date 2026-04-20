@@ -28,13 +28,6 @@ function localeFromPathname(pathname: string): string {
   return routing.defaultLocale;
 }
 
-function withCookies(from: NextResponse, to: NextResponse): NextResponse {
-  from.cookies.getAll().forEach((c) => {
-    to.cookies.set(c.name, c.value);
-  });
-  return to;
-}
-
 export async function proxy(request: NextRequest) {
   const intlResponse = intlMiddleware(request);
   const { supabase, response } = createMiddlewareClient(request, intlResponse);
@@ -54,14 +47,18 @@ export async function proxy(request: NextRequest) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = `/${locale}/login`;
     loginUrl.searchParams.set("next", pathname);
-    return withCookies(response, NextResponse.redirect(loginUrl));
+    return NextResponse.redirect(loginUrl, { 
+      headers: response.headers 
+    });
   }
 
   if (user && barePath === "/login") {
     const homeUrl = request.nextUrl.clone();
     homeUrl.pathname = `/${locale}`;
     homeUrl.search = "";
-    return withCookies(response, NextResponse.redirect(homeUrl));
+    return NextResponse.redirect(homeUrl, { 
+      headers: response.headers 
+    });
   }
 
   return response;
