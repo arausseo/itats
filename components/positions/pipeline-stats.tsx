@@ -2,29 +2,29 @@
 
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import type { PositionCandidateWithCandidate, PipelineStatus } from "@/src/types/position";
+import {
+  PIPELINE_STATUSES,
+  type PositionCandidateWithCandidate,
+  type PipelineStatus,
+} from "@/src/types/position";
 
-const STATUS_ORDER: PipelineStatus[] = [
-  "Sourced",
-  "To_Contact",
-  "Screening",
-  "Tech_Assessment",
-  "Interview",
-  "Offer",
-  "Hired",
-  "Rejected",
-];
+/** Mismo orden que el flujo del pipeline (clave i18n: pipelineStatus.To_Contact, etc.) */
+const STATUS_ORDER: PipelineStatus[] = [...PIPELINE_STATUSES];
 
 const STATUS_COLORS: Record<PipelineStatus, string> = {
   Sourced: "bg-slate-400",
-  To_Contact: "bg-amber-400",
+  "To Contact": "bg-amber-400",
   Screening: "bg-sky-400",
-  Tech_Assessment: "bg-indigo-400",
+  "Tech Assessment": "bg-indigo-400",
   Interview: "bg-purple-400",
   Offer: "bg-emerald-400",
   Hired: "bg-green-500",
   Rejected: "bg-red-400",
 };
+
+function pipelineStatusMessageKey(status: PipelineStatus): string {
+  return status.replace(/ /g, "_");
+}
 
 interface PipelineStatsProps {
   candidates: PositionCandidateWithCandidate[];
@@ -64,7 +64,7 @@ export function PipelineStats({ candidates, className }: PipelineStatsProps) {
               key={status}
               className={cn("transition-all", STATUS_COLORS[status])}
               style={{ width: `${pct}%` }}
-              title={`${t(`pipelineStatus.${status}`)}: ${count}`}
+              title={`${t(`pipelineStatus.${pipelineStatusMessageKey(status)}`)}: ${count}`}
             />
           );
         })}
@@ -76,7 +76,8 @@ export function PipelineStats({ candidates, className }: PipelineStatsProps) {
           <div key={status} className="flex items-center gap-1.5">
             <div className={cn("h-2.5 w-2.5 rounded-full", STATUS_COLORS[status])} />
             <span className="text-xs text-muted-foreground">
-              {t(`pipelineStatus.${status}`)} ({counts[status]})
+              {t(`pipelineStatus.${pipelineStatusMessageKey(status)}`)}{" "}
+              ({counts[status]})
             </span>
           </div>
         ))}

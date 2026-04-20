@@ -2,6 +2,8 @@
 
 import { useOptimistic, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { useRouter } from "@/src/i18n/navigation";
 import {
   Select,
   SelectContent,
@@ -22,6 +24,7 @@ export function PipelineStatusSelect({
   currentStatus,
 }: PipelineStatusSelectProps) {
   const t = useTranslations("positions");
+  const router = useRouter();
   const [, startTransition] = useTransition();
   const [optimisticStatus, setOptimisticStatus] = useOptimistic(currentStatus);
 
@@ -30,7 +33,12 @@ export function PipelineStatusSelect({
     const next = value as PipelineStatus;
     startTransition(async () => {
       setOptimisticStatus(next);
-      await updatePipelineStatus(positionCandidateId, next);
+      const res = await updatePipelineStatus(positionCandidateId, next);
+      if (!res.ok) {
+        toast.error(res.error);
+        return;
+      }
+      router.refresh();
     });
   }
 
