@@ -17,7 +17,7 @@ import type {
   CvProcessingItem,
 } from "@/src/types/upload";
 
-type Phase = "idle" | "uploading" | "processing" | "done";
+type Phase = "idle" | "busy" | "done";
 
 function buildKey(file: File, index: number) {
   return `${index}-${file.name}-${file.size}`;
@@ -104,10 +104,9 @@ export function CvUploadZone() {
   );
 
   async function handleUpload() {
-    if (!entries.length || phase === "uploading" || phase === "processing")
-      return;
+    if (!entries.length || phase === "busy") return;
 
-    setPhase("uploading");
+    setPhase("busy");
     setGlobalError(null);
 
     const fileMap = new Map<string, File>();
@@ -119,7 +118,6 @@ export function CvUploadZone() {
     }
 
     const limit = pLimit(UPLOAD_CONCURRENCY_LIMIT);
-    const successItems: CvProcessingItem[] = [];
 
     await Promise.allSettled(
       entries.map((entry) =>
@@ -140,60 +138,62 @@ export function CvUploadZone() {
 
           const result = await uploadCvFile(formData);
 
-          if (result.ok) {
+          if (!result.ok) {
             updateEntry(entry.key, {
-              status: "procesando",
-              storagePath: result.storagePath,
+              status: "error",
+              errorMessage: result.error,
             });
-            successItems.push({
-              fileName: entry.fileName,
-              storagePath: result.storagePath,
+            return;
+          }
+
+          const item: CvProcessingItem = {
+            fileName: entry.fileName,
+            storagePath: result.storagePath,
+          };
+
+          updateEntry(entry.key, {
+            status: "procesando",
+            storagePath: result.storagePath,
+          });
+
+          const proc = await startCvProcessing([item]);
+
+          if (!proc.ok) {
+            updateEntry(entry.key, {
+              status: "error",
+              errorMessage: proc.error,
+            });
+            return;
+          }
+
+          const r = proc.results[0];
+          if (!r) {
+            updateEntry(entry.key, {
+              status: "error",
+              errorMessage: t("fileUnavailable"),
+            });
+            return;
+          }
+
+          if (r.status === "completado") {
+            updateEntry(entry.key, {
+              status: "completado",
+              errorMessage: null,
+            });
+          } else if (r.status === "duplicado") {
+            updateEntry(entry.key, {
+              status: "duplicado",
+              errorMessage: r.message,
             });
           } else {
             updateEntry(entry.key, {
               status: "error",
-              errorMessage: result.error,
+              errorMessage: r.error,
             });
           }
         }),
       ),
     );
-
-    if (successItems.length > 0) {
-      setPhase("processing");
-      const proc = await startCvProcessing(successItems);
-      if (proc.ok) {
-        setEntries((prev) =>
-          prev.map((e) => {
-            const r = proc.results.find((x) => x.storagePath === e.storagePath);
-            if (!r) return e;
-            if (r.status === "completado") {
-              return { ...e, status: "completado", errorMessage: null };
-            }
-            if (r.status === "duplicado") {
-              return {
-                ...e,
-                status: "duplicado",
-                errorMessage: r.message,
-              };
-            }
-            return { ...e, status: "error", errorMessage: r.error };
-          }),
-        );
-      } else {
-        setEntries((prev) =>
-          prev.map((e) =>
-            successItems.some((s) => s.storagePath === e.storagePath)
-              ? {
-                  ...e,
-                  status: "error",
-                  errorMessage: proc.error,
-                }
-              : e,
-          ),
-        );
-      }
-    }
 
     setPhase("done");
   }
@@ -276,7 +276,7 @@ export function CvUploadZone() {
                 setPhase("idle");
                 setGlobalError(null);
               }}
-              disabled={phase === "uploading" || phase === "processing"}
+              disabled={phase === "busy"}
             >
               {t("clear")}
             </Button>
@@ -285,11 +285,7 @@ export function CvUploadZone() {
               onClick={handleUpload}
               disabled={!canUpload}
             >
-              {phase === "uploading"
-                ? t("uploading")
-                : phase === "processing"
-                  ? t("processing")
-                  : t("uploadCvs")}
+              {phase === "busy" ? t("processing") : t("uploadCvs")}
             </Button>
           </div>
         </div>
