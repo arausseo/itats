@@ -259,6 +259,8 @@ export function CandidatesTableSheet({
         open={open}
         onOpenChange={setOpen}
         addToPosition={{ mode: "select", positions: openPositions }}
+        candidates={candidates}
+        onNavigate={(c) => setSelected(c)}
       />
     </>
   );

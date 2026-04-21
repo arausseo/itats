@@ -231,6 +231,7 @@
     "cvUnavailable": "CV no disponible para este candidato.",
     "locationContact": "Ubicación y contacto",
     "countryResidence": "País de residencia",
+    "email": "Correo electrónico",
     "phone": "Teléfono",
     "executiveSummary": "Resumen ejecutivo",
     "redFlags": "Red flags",
@@ -242,6 +243,7 @@
     "education": "Educación",
     "certifications": "Certificaciones",
     "close": "Cerrar",
+    "cancel": "Cancelar",
     "viewMarkdown": "Ver detalles",
     "copyEmail": "Copiar correo al portapapeles",
     "copyPhone": "Copiar teléfono al portapapeles",
@@ -252,7 +254,22 @@
     "lockedPositionHint": "Plaza",
     "noOpenPositions": "No hay plazas abiertas. Crea una en Plazas o reabre una cerrada.",
     "addToPipelineSuccess": "Candidato añadido al pipeline.",
-    "addingToPipeline": "Añadiendo…"
+    "addingToPipeline": "Añadiendo…",
+    "prevCandidate": "Anterior",
+    "nextCandidate": "Siguiente",
+    "copyLink": "Copiar enlace del perfil",
+    "linkCopied": "Enlace copiado al portapapeles",
+    "deleteCandidate": "Eliminar candidato",
+    "deleteConfirmTitle": "¿Eliminar candidato?",
+    "deleteConfirmDescription": "Esta acción eliminará permanentemente a {name} y todas sus notas asociadas. Esta acción no se puede deshacer.",
+    "deleting": "Eliminando…",
+    "candidateDeleted": "Candidato eliminado correctamente.",
+    "notesTitle": "Notas",
+    "loadNotes": "Cargar notas",
+    "notePlaceholder": "Escribe una nota sobre este candidato…",
+    "addNote": "Añadir nota",
+    "deleteNote": "Eliminar nota",
+    "noNotes": "No hay notas para este candidato."
   },
   "uploadZone": {
     "maxFiles": "Puedes subir como máximo {maxFiles} archivos a la vez.",
@@ -294,6 +311,8 @@
     "cvAccess": "No se pudo obtener el CV o no tienes acceso.",
     "noCvStored": "Este candidato no tiene CV almacenado",
     "signUrlFailed": "No se pudo generar el enlace de descarga",
-    "signLinkUnexpected": "Error inesperado al generar el enlace"
+    "signLinkUnexpected": "Error inesperado al generar el enlace",
+    "noteContentRequired": "El contenido de la nota es obligatorio",
+    "noteIdRequired": "ID de nota requerido"
   }
 }
