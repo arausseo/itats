@@ -231,6 +231,7 @@
     "cvUnavailable": "No CV is stored for this candidate.",
     "locationContact": "Location and contact",
     "countryResidence": "Country of residence",
+    "email": "Email",
     "phone": "Phone",
     "executiveSummary": "Executive summary",
     "redFlags": "Red flags",
@@ -242,6 +243,7 @@
     "education": "Education",
     "certifications": "Certifications",
     "close": "Close",
+    "cancel": "Cancel",
     "viewMarkdown": "View details",
     "copyEmail": "Copy email to clipboard",
     "copyPhone": "Copy phone to clipboard",
@@ -252,7 +254,22 @@
     "lockedPositionHint": "Position",
     "noOpenPositions": "There are no open positions. Create one under Positions or reopen a closed one.",
     "addToPipelineSuccess": "Candidate added to the pipeline.",
-    "addingToPipeline": "Adding…"
+    "addingToPipeline": "Adding…",
+    "prevCandidate": "Previous",
+    "nextCandidate": "Next",
+    "copyLink": "Copy profile link",
+    "linkCopied": "Link copied to clipboard",
+    "deleteCandidate": "Delete candidate",
+    "deleteConfirmTitle": "Delete candidate?",
+    "deleteConfirmDescription": "This will permanently delete {name} and all associated notes. This action cannot be undone.",
+    "deleting": "Deleting…",
+    "candidateDeleted": "Candidate deleted successfully.",
+    "notesTitle": "Notes",
+    "loadNotes": "Load notes",
+    "notePlaceholder": "Write a note about this candidate…",
+    "addNote": "Add note",
+    "deleteNote": "Delete note",
+    "noNotes": "No notes for this candidate."
   },
   "uploadZone": {
     "maxFiles": "You can upload at most {maxFiles} files at a time.",
@@ -294,6 +311,8 @@
     "cvAccess": "Could not get the CV or you do not have access.",
     "noCvStored": "This candidate has no stored CV",
     "signUrlFailed": "Could not generate the download link",
-    "signLinkUnexpected": "Unexpected error generating the link"
+    "signLinkUnexpected": "Unexpected error generating the link",
+    "noteContentRequired": "Note content is required",
+    "noteIdRequired": "Note ID is required"
   }
 }

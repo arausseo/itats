@@ -253,6 +253,8 @@ export function PipelineView({
           positionId,
           positionTitle,
         }}
+        candidates={filtered.map((pc) => pc.candidate)}
+        onNavigate={(c) => setSelectedCandidate(c)}
       />
     </>
   );
