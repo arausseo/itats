@@ -77,21 +77,37 @@ export function PipelineView({
 
   const hasActiveFilters = seniority !== ALL || status !== ALL;
 
+  const sheetNavigationCandidates = useMemo(
+    () =>
+      filtered.map(
+        (pc) =>
+          ({
+            id: pc.candidate_id,
+            ...pc.candidate,
+          }) as Candidate,
+      ),
+    [filtered],
+  );
+
   function clearFilters() {
     setSeniority(ALL);
     setStatus(ALL);
   }
 
-  function openDetail(candidateId: string) {
+  function loadCandidateById(candidateId: string, openSheet: boolean) {
     setFetchingId(candidateId);
     startFetchTransition(async () => {
       const res = await getCandidateById(candidateId);
       setFetchingId(null);
       if (res.ok) {
         setSelectedCandidate(res.candidate);
-        setSheetOpen(true);
+        if (openSheet) setSheetOpen(true);
       }
     });
+  }
+
+  function openDetail(candidateId: string) {
+    loadCandidateById(candidateId, true);
   }
 
   if (positionCandidates.length === 0) {
@@ -253,8 +269,9 @@ export function PipelineView({
           positionId,
           positionTitle,
         }}
-        candidates={filtered.map((pc) => pc.candidate)}
-        onNavigate={(c) => setSelectedCandidate(c)}
+        candidates={sheetNavigationCandidates}
+        onNavigate={(c) => loadCandidateById(c.id, false)}
+        isLoadingCandidate={sheetOpen && fetchTransition}
       />
     </>
   );
