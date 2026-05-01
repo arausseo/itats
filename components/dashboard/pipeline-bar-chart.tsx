@@ -68,9 +68,11 @@ export function PipelineBarChart({ data, labelMap }: PipelineBarChartProps) {
             color: "hsl(var(--foreground))",
             boxShadow: "0 2px 8px rgba(0,0,0,.08)",
           }}
-          formatter={(value: number, _name: string, props) => [
-            value,
-            props.payload.label,
+          formatter={(value, _name, item) => [
+            Number(value ?? 0),
+            typeof item?.payload === "object" && item.payload !== null && "label" in item.payload
+              ? String((item.payload as { label: string }).label)
+              : "",
           ]}
           labelFormatter={() => ""}
         />

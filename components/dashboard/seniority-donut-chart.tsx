@@ -47,7 +47,7 @@ export function SeniorityDonutChart({ data }: SeniorityDonutChartProps) {
               color: "hsl(var(--foreground))",
               boxShadow: "0 2px 8px rgba(0,0,0,.08)",
             }}
-            formatter={(value: number, name: string) => [value, name]}
+            formatter={(value, name) => [Number(value ?? 0), String(name ?? "")]}
           />
         </PieChart>
       </ResponsiveContainer>

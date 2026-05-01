@@ -33,8 +33,10 @@ const STATUS_STYLES: Record<CandidateStatus, string> = {
   contratado: "text-emerald-700 dark:text-emerald-300",
 };
 
-// Status icons mapping
-const STATUS_ICONS: Record<CandidateStatus, React.ComponentType<{ className?: string }>> = {
+// Hugeicons exports icon definitions (IconSvgObject), not React components — use HugeiconsIcon with `icon`.
+type HugeiconDef = typeof UserAdd01Icon;
+
+const STATUS_ICONS: Record<CandidateStatus, HugeiconDef> = {
   nuevo: UserAdd01Icon,
   en_proceso: Clock01Icon,
   en_espera: PauseIcon,
@@ -70,8 +72,6 @@ export function CandidateStatusSelect({ candidateId, currentStatus, compact = fa
       }
     });
   };
-
-  const StatusIcon = STATUS_ICONS[status];
 
   return (
     <div className="flex flex-col gap-1">
