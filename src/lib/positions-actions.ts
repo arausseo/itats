@@ -263,6 +263,58 @@ export async function searchCandidatesForPosition(
   }
 }
 
+// ─── Refinar campo con IA ─────────────────────────────────────────────────────
+
+export async function refinePositionField(
+  field: "description" | "requirements",
+  currentText: string,
+  positionTitle: string,
+): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+  const trimmed = currentText.trim();
+  if (!trimmed) {
+    return { ok: false, error: "Escribe algo antes de mejorar con IA." };
+  }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return { ok: false, error: "OPENAI_API_KEY no configurada." };
+
+  const fieldLabel = field === "description" ? "descripción" : "requisitos";
+  const systemPrompt = `Eres un experto en reclutamiento técnico. Mejora el texto de ${fieldLabel} de la oferta de trabajo que te proporciona el usuario para que sea óptimo como contexto de búsqueda semántica de candidatos. El texto se convertirá en un embedding que se comparará contra CVs y perfiles.
+Reglas estrictas:
+- Responde ÚNICAMENTE con el texto mejorado. Sin títulos, sin encabezados, sin explicaciones, sin frases como "Texto mejorado:" o "Plaza:".
+- Usa terminología técnica precisa y específica.
+- Menciona tecnologías, frameworks, lenguajes y años de experiencia cuando sea relevante.
+- Elimina lenguaje corporativo vago o genérico.
+- Mantén el idioma original del texto.
+- No añadas información que no esté implícita en el texto original.`;
+
+  try {
+    const openai = new OpenAI({ apiKey });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: `Título de la plaza: ${positionTitle}\n\nTexto actual:\n${trimmed}`,
+        },
+      ],
+      temperature: 0.4,
+      max_tokens: 1024,
+    });
+
+    const refined = response.choices[0]?.message?.content?.trim() ?? "";
+    if (!refined) return { ok: false, error: "La IA no devolvió un resultado válido." };
+
+    return { ok: true, text: refined };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Error al conectar con la IA.",
+    };
+  }
+}
+
 // ─── Obtener candidato por ID ─────────────────────────────────────────────────
 
 export async function getCandidateById(

@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "@/src/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { updatePosition } from "@/src/lib/positions-actions";
+import { POSITION_FIELD_LIMITS } from "@/src/lib/position-config";
 import type { Position } from "@/src/types/position";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { RefinableTextarea } from "@/components/positions/refinable-textarea";
 
 interface EditPositionDialogProps {
   position: Position;
@@ -27,10 +29,18 @@ export function EditPositionDialog({ position }: EditPositionDialogProps) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const formRef = useRef<HTMLFormElement>(null);
+  const [title, setTitle] = useState(position.title ?? "");
+
+  // Client-side validation for title
+  const titleLength = title.trim().length;
+  const titleLimits = POSITION_FIELD_LIMITS.title;
+  const titleTooShort = titleLength > 0 && titleLength < titleLimits.min;
+  const titleTooLong = titleLength > titleLimits.max;
+  const titleInvalid = titleTooShort || titleTooLong;
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (titleInvalid) return;
     setError(null);
     const formData = new FormData(e.currentTarget);
     startTransition(async () => {
@@ -44,57 +54,73 @@ export function EditPositionDialog({ position }: EditPositionDialogProps) {
     });
   }
 
+  function handleClose() {
+    setOpen(false);
+    setError(null);
+    setTitle(position.title ?? "");
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true); }}>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline" className="h-7 text-xs">
           {t("editButton")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{t("editTitle")}</DialogTitle>
           <DialogDescription>{t("editDescription")}</DialogDescription>
         </DialogHeader>
-        <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Título */}
           <div>
-            <label className="mb-1 block text-xs font-medium text-foreground">
-              {t("fieldTitle")} <span className="text-destructive">*</span>
-            </label>
+            <div className="mb-1 flex items-center justify-between">
+              <label className="block text-xs font-medium text-foreground">
+                {t("fieldTitle")} <span className="text-destructive">*</span>
+              </label>
+              <p className="tabular-nums text-xs text-muted-foreground">
+                {titleLength} / {titleLimits.max}
+              </p>
+            </div>
             <Input
               name="title"
               required
-              defaultValue={position.title}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder={t("fieldTitlePlaceholder")}
               autoFocus
+              className={titleInvalid ? "border-destructive focus-visible:ring-destructive/40" : ""}
             />
+            {titleTooShort && (
+              <p className="mt-1 text-xs text-destructive">{t("fieldTitleMin")}</p>
+            )}
+            {titleTooLong && (
+              <p className="mt-1 text-xs text-destructive">{t("fieldTitleMax")}</p>
+            )}
           </div>
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-foreground">
-              {t("fieldDescription")}
-            </label>
-            <textarea
-              name="description"
-              rows={3}
-              defaultValue={position.description}
-              placeholder={t("fieldDescriptionPlaceholder")}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
+          {/* Descripción */}
+          <RefinableTextarea
+            name="description"
+            field="description"
+            label={t("fieldDescription")}
+            placeholder={t("fieldDescriptionPlaceholder")}
+            defaultValue={position.description}
+            rows={7}
+            positionTitle={title}
+          />
 
-          <div>
-            <label className="mb-1 block text-xs font-medium text-foreground">
-              {t("fieldRequirements")}
-            </label>
-            <textarea
-              name="requirements"
-              rows={4}
-              defaultValue={position.requirements}
-              placeholder={t("fieldRequirementsPlaceholder")}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
+          {/* Requisitos */}
+          <RefinableTextarea
+            name="requirements"
+            field="requirements"
+            label={t("fieldRequirements")}
+            placeholder={t("fieldRequirementsPlaceholder")}
+            defaultValue={position.requirements}
+            rows={7}
+            positionTitle={title}
+          />
 
           {error && (
             <p className="rounded-md bg-destructive/10 px-3 py-2 text-xs text-destructive">
@@ -107,15 +133,12 @@ export function EditPositionDialog({ position }: EditPositionDialogProps) {
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => {
-                setOpen(false);
-                setError(null);
-              }}
+              onClick={handleClose}
               disabled={isPending}
             >
               {t("cancel")}
             </Button>
-            <Button type="submit" size="sm" disabled={isPending}>
+            <Button type="submit" size="sm" disabled={isPending || titleInvalid}>
               {isPending ? t("saving") : t("save")}
             </Button>
           </DialogFooter>
