@@ -46,6 +46,7 @@ const mapPayloadToRow = (
     educacion_y_certificaciones,
     cv_storage_path,
     cv_markdown,
+    cv_sha256,
     embedding,
   } = payload;
   const markdown =
@@ -70,6 +71,7 @@ const mapPayloadToRow = (
     raw_analysis: payload,
     ...(cv_storage_path !== undefined ? { cv_storage_path } : {}),
     cv_markdown: markdown,
+    ...(cv_sha256 !== undefined ? { cv_sha256 } : {}),
     ...(embedding !== undefined ? { embedding } : {}),
   };
 };

@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { createHash } from "crypto";
 import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
 import type { CvProcessingItem, CvProcessingOutcome } from "@/src/types/upload";
@@ -281,6 +282,101 @@ async function generateEmbedding(
 }
 
 // ---------------------------------------------------------------------------
+// Pre-check: detección de duplicados antes de invocar la IA
+// ---------------------------------------------------------------------------
+
+interface ExistingCandidate {
+  id: string;
+  nombre: string;
+  email: string;
+}
+
+interface DuplicateResult {
+  found: true;
+  message: string;
+}
+
+interface NoDuplicateResult {
+  found: false;
+  sha256: string;
+}
+
+type DuplicateCheckResult = DuplicateResult | NoDuplicateResult;
+
+async function findExistingCandidate(
+  pdfBytes: Uint8Array,
+  organizationId: string,
+): Promise<DuplicateCheckResult> {
+  const sha256 = createHash("sha256").update(pdfBytes).digest("hex");
+  const supabase = getServiceClient();
+
+  // 1. Chequeo por hash SHA-256
+  const { data: hashMatch } = await supabase
+    .from("candidates")
+    .select("id, nombre, email")
+    .eq("organization_id", organizationId)
+    .eq("cv_sha256", sha256)
+    .maybeSingle<ExistingCandidate>();
+
+  if (hashMatch) {
+    cvLog("Pre-check: hash duplicado", {
+      sha256,
+      existingId: hashMatch.id,
+      nombre: hashMatch.nombre,
+    });
+    return {
+      found: true,
+      message: `CV ya cargado para ${hashMatch.nombre} (${hashMatch.email}).`,
+    };
+  }
+
+  // 2. Chequeo por email extraído del PDF (respaldo para PDFs sin hash previo)
+  try {
+    const { extractText } = await import("unpdf");
+    const { text } = await extractText(new Uint8Array(pdfBytes), { mergePages: true });
+
+    if (text && text.trim().length > 0) {
+      const emailRegex = /\b[\w.+-]+@[\w-]+\.[\w.-]+\b/gi;
+      const emails = [
+        ...new Set(
+          (text.match(emailRegex) ?? []).map((e) => e.toLowerCase()),
+        ),
+      ];
+
+      if (emails.length > 0) {
+        const { data: emailMatch } = await supabase
+          .from("candidates")
+          .select("id, nombre, email")
+          .eq("organization_id", organizationId)
+          .in("email", emails)
+          .limit(1)
+          .maybeSingle<ExistingCandidate>();
+
+        if (emailMatch) {
+          cvLog("Pre-check: email duplicado", {
+            email: emailMatch.email,
+            existingId: emailMatch.id,
+          });
+          return {
+            found: true,
+            message: `CV con email ya registrado: ${emailMatch.email}.`,
+          };
+        }
+      }
+    } else {
+      cvLog("Pre-check: PDF sin texto extraíble (posiblemente escaneado), continuando con IA");
+    }
+  } catch (extractErr) {
+    cvLog("Pre-check: advertencia al extraer texto del PDF, continuando con IA", {
+      error: extractErr instanceof Error ? extractErr.message : String(extractErr),
+    });
+  }
+
+  cvLog("Pre-check: sin coincidencias, sigue pipeline IA", { sha256 });
+  return { found: false, sha256 };
+}
+
+// ---------------------------------------------------------------------------
 // Llamada a la Edge Function process-candidate
 // ---------------------------------------------------------------------------
 
@@ -293,6 +389,7 @@ async function callProcessCandidateEdgeFunction(
   embedding: number[],
   organizationId: string,
   cvMarkdown: string,
+  sha256: string,
 ): Promise<{ kind: "inserted" } | { kind: "duplicate"; message: string }> {
   if (!UUID_RE.test(organizationId)) {
     throw new Error(
@@ -320,6 +417,7 @@ async function callProcessCandidateEdgeFunction(
       ...(payload as Record<string, unknown>),
       cv_storage_path: storagePath,
       cv_markdown: cvMarkdown,
+      cv_sha256: sha256,
       embedding,
       organization_id: organizationId,
     }),
@@ -357,14 +455,27 @@ export async function runCvPipeline({
   try {
     cvLog("Pipeline: inicio", { storagePath, organizationId });
 
-    const [pdfBytes, summaryConfig, jsonConfig, embConfig] = await Promise.all([
-      downloadPdfBytes(storagePath),
+    const pdfBytes = await downloadPdfBytes(storagePath);
+
+    // Pre-check: detectar duplicado antes de gastar tokens de IA
+    const duplicateCheck = await findExistingCandidate(pdfBytes, organizationId);
+    if (duplicateCheck.found) {
+      cvLog("Pipeline: duplicado detectado pre-IA, abortando", {
+        storagePath,
+        message: duplicateCheck.message,
+      });
+      return { storagePath, status: "duplicado", message: duplicateCheck.message };
+    }
+
+    const { sha256 } = duplicateCheck;
+
+    const [summaryConfig, jsonConfig, embConfig] = await Promise.all([
       fetchPromptConfig("cv_summary"),
       fetchPromptConfig("candidate_json"),
       fetchPromptConfig("embedding_config"),
     ]);
 
-    cvLog("Pipeline: recursos iniciales listos (paralelo)", {
+    cvLog("Pipeline: prompts listos (paralelo)", {
       pdfBytes: pdfBytes.length,
       summaryApi: summaryConfig.api,
       summaryModel: summaryConfig.model,
@@ -385,6 +496,7 @@ export async function runCvPipeline({
       embedding,
       organizationId,
       markdown,
+      sha256,
     );
 
     cvLog("Pipeline: completado", {

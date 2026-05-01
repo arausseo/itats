@@ -36,6 +36,7 @@ export const candidatePayloadSchema = z.object({
   }),
   cv_storage_path: z.string().optional(),
   cv_markdown: z.string().optional(),
+  cv_sha256: z.string().optional(),
   embedding: z.array(z.number()).length(1536).optional(),
 });
 
