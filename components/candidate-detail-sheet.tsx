@@ -76,6 +76,8 @@ export interface CandidateDetailSheetProps {
   /** For navigation between candidates */
   candidates?: Candidate[];
   onNavigate?: (candidate: Candidate) => void;
+  /** Cargando candidato completo (p. ej. navegación en pipeline) */
+  isLoadingCandidate?: boolean;
 }
 
 export function CandidateDetailSheet({
@@ -85,6 +87,7 @@ export function CandidateDetailSheet({
   addToPosition,
   candidates,
   onNavigate,
+  isLoadingCandidate = false,
 }: CandidateDetailSheetProps) {
   const tSheet = useTranslations("sheet");
   const tCommon = useTranslations("common");
@@ -110,18 +113,18 @@ export function CandidateDetailSheet({
 
   const handleNavigate = useCallback(
     (direction: "prev" | "next") => {
-      if (!candidates || !onNavigate) return;
+      if (!candidates || !onNavigate || isLoadingCandidate) return;
       const newIndex = direction === "prev" ? currentIndex - 1 : currentIndex + 1;
       if (newIndex >= 0 && newIndex < candidates.length) {
         onNavigate(candidates[newIndex]);
       }
     },
-    [candidates, currentIndex, onNavigate]
+    [candidates, currentIndex, onNavigate, isLoadingCandidate],
   );
 
   // Keyboard navigation
   useEffect(() => {
-    if (!open || !candidates || !onNavigate) return;
+    if (!open || !candidates || !onNavigate || isLoadingCandidate) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft" && canNavigatePrev) {
@@ -135,7 +138,15 @@ export function CandidateDetailSheet({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, candidates, onNavigate, canNavigatePrev, canNavigateNext, handleNavigate]);
+  }, [
+    open,
+    candidates,
+    onNavigate,
+    canNavigatePrev,
+    canNavigateNext,
+    handleNavigate,
+    isLoadingCandidate,
+  ]);
 
   const effectiveSelectPositionId = useMemo(() => {
     if (addToPosition?.mode !== "select") return "";
@@ -230,37 +241,77 @@ export function CandidateDetailSheet({
           showCloseButton
         >
           {candidate ? (
-            <>
+            <div className="relative flex min-h-0 w-full flex-1 flex-col">
+              {isLoadingCandidate ? (
+                <div
+                  className="absolute inset-0 z-20 flex items-center justify-center bg-background/75 px-4 backdrop-blur-[2px]"
+                  role="status"
+                  aria-live="polite"
+                  aria-busy="true"
+                >
+                  <div className="flex max-w-sm flex-col items-center gap-3 rounded-xl border border-border/60 bg-card px-6 py-5 text-center shadow-lg">
+                    <Spinner className="h-9 w-9 text-primary" />
+                    <p className="text-sm font-medium text-foreground">
+                      {tSheet("loadingCandidate")}
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+              <div
+                className={cn(
+                  "flex min-h-0 w-full flex-col",
+                  isLoadingCandidate &&
+                    "pointer-events-none select-none opacity-40",
+                )}
+              >
               {/* Enhanced Header with Actions Bar */}
               <SheetHeader className="border-b border-border/60 px-6 py-5 text-left sm:px-8">
                 {/* Navigation Row */}
                 {candidates && candidates.length > 1 && onNavigate && (
-                  <div className="mb-3 flex items-center justify-between">
-                    <div className="flex items-center gap-1">
+                  <div
+                    className="mb-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-lg border border-border/50 bg-muted/30 px-2 py-2 sm:px-3"
+                    aria-busy={isLoadingCandidate}
+                  >
+                    <div className="flex justify-start gap-1.5">
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        disabled={!canNavigatePrev}
+                        variant="outline"
+                        size="icon"
+                        className="h-9 w-9 shrink-0"
+                        disabled={!canNavigatePrev || isLoadingCandidate}
                         onClick={() => handleNavigate("prev")}
                         aria-label={tSheet("prevCandidate")}
                       >
-                        <HugeiconsIcon icon={ArrowLeft02Icon} className="h-4 w-4" strokeWidth={2} />
+                        <HugeiconsIcon
+                          icon={ArrowLeft02Icon}
+                          className="h-4 w-4"
+                          strokeWidth={2}
+                        />
                       </Button>
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        disabled={!canNavigateNext}
+                        variant="outline"
+                        size="icon"
+                        className="h-9 w-9 shrink-0"
+                        disabled={!canNavigateNext || isLoadingCandidate}
                         onClick={() => handleNavigate("next")}
                         aria-label={tSheet("nextCandidate")}
                       >
-                        <HugeiconsIcon icon={ArrowRight02Icon} className="h-4 w-4" strokeWidth={2} />
+                        <HugeiconsIcon
+                          icon={ArrowRight02Icon}
+                          className="h-4 w-4"
+                          strokeWidth={2}
+                        />
                       </Button>
                     </div>
-                    <span className="text-[0.625rem] text-muted-foreground">
-                      {currentIndex + 1} / {candidates.length}
-                    </span>
+                    <div className="flex min-w-[5.5rem] items-center justify-center">
+                      <span className="text-sm font-semibold tabular-nums tracking-tight text-foreground">
+                        {currentIndex >= 0
+                          ? `${currentIndex + 1} / ${candidates.length}`
+                          : `— / ${candidates.length}`}
+                      </span>
+                    </div>
+                    <div className="min-w-0" aria-hidden />
                   </div>
                 )}
 
@@ -635,34 +686,54 @@ export function CandidateDetailSheet({
                     {tSheet("close")}
                   </Button>
                   {candidates && candidates.length > 1 && onNavigate && (
-                    <div className="flex items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={!canNavigatePrev}
-                        onClick={() => handleNavigate("prev")}
-                        className="gap-1"
-                      >
-                        <HugeiconsIcon icon={ArrowLeft02Icon} className="h-3.5 w-3.5" strokeWidth={2} />
-                        {tSheet("prevCandidate")}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={!canNavigateNext}
-                        onClick={() => handleNavigate("next")}
-                        className="gap-1"
-                      >
-                        {tSheet("nextCandidate")}
-                        <HugeiconsIcon icon={ArrowRight02Icon} className="h-3.5 w-3.5" strokeWidth={2} />
-                      </Button>
+                    <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                      <span className="w-full text-center text-sm font-semibold tabular-nums text-muted-foreground sm:w-auto sm:min-w-[4.5rem] sm:text-right">
+                        {currentIndex >= 0
+                          ? `${currentIndex + 1} / ${candidates.length}`
+                          : `— / ${candidates.length}`}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-9 min-w-9 gap-1.5 px-2.5"
+                          disabled={!canNavigatePrev || isLoadingCandidate}
+                          onClick={() => handleNavigate("prev")}
+                        >
+                          <HugeiconsIcon
+                            icon={ArrowLeft02Icon}
+                            className="h-4 w-4 shrink-0"
+                            strokeWidth={2}
+                          />
+                          <span className="hidden sm:inline">
+                            {tSheet("prevCandidate")}
+                          </span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-9 min-w-9 gap-1.5 px-2.5"
+                          disabled={!canNavigateNext || isLoadingCandidate}
+                          onClick={() => handleNavigate("next")}
+                        >
+                          <span className="hidden sm:inline">
+                            {tSheet("nextCandidate")}
+                          </span>
+                          <HugeiconsIcon
+                            icon={ArrowRight02Icon}
+                            className="h-4 w-4 shrink-0"
+                            strokeWidth={2}
+                          />
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
-            </>
+              </div>
+            </div>
           ) : null}
         </SheetContent>
       </Sheet>

@@ -83,11 +83,7 @@ export function CandidateStatusSelect({ candidateId, currentStatus, compact = fa
             STATUS_STYLES[status],
           )}
         >
-          <HugeiconsIcon
-            icon={StatusIcon}
-            className={cn("shrink-0", compact ? "h-3.5 w-3.5" : "h-4 w-4")}
-            strokeWidth={2}
-          />
+
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

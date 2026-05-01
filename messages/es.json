@@ -257,6 +257,7 @@
     "addingToPipeline": "Añadiendo…",
     "prevCandidate": "Anterior",
     "nextCandidate": "Siguiente",
+    "loadingCandidate": "Cargando candidato…",
     "copyLink": "Copiar enlace del perfil",
     "linkCopied": "Enlace copiado al portapapeles",
     "deleteCandidate": "Eliminar candidato",
