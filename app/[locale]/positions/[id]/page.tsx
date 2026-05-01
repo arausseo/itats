@@ -62,7 +62,15 @@ export default async function PositionDetailPage({ params }: Props) {
 
   const { data: pcRows } = await supabase
     .from("position_candidates")
-    .select("*, candidates(nombre, rol_principal, seniority_estimado, email)")
+    .select(`
+      *,
+      candidates(
+        nombre, rol_principal, seniority_estimado, email,
+        pais_residencia, resumen_ejecutivo,
+        lenguajes, frameworks, patrones,
+        anos_experiencia_total
+      )
+    `)
     .eq("position_id", id)
     .order("created_at", { ascending: true });
 

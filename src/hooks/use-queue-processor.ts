@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { claimAndProcessNextQueueItem } from "@/src/lib/queue-actions";
 
-const IDLE_POLL_MS = 4_000;
+const IDLE_POLL_MS = 30_000;
 const ERROR_RETRY_MS = 6_000;
 
 /**

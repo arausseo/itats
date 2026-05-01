@@ -315,6 +315,280 @@ Reglas estrictas:
   }
 }
 
+// ─── Generar ranking IA de candidatos en pipeline ────────────────────────────
+
+interface RankingEntry {
+  candidate_id: string;
+  ranking_score: number;
+  ranking_phrase: string;
+  ranking_analysis: string;
+}
+
+export async function generatePositionRanking(
+  positionId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (!positionId) return { ok: false, error: "ID de plaza requerido." };
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return { ok: false, error: "OPENAI_API_KEY no configurada." };
+
+  try {
+    const { supabase, organizationId } = await requireAuth();
+
+    // Verificar que la plaza pertenece a la organización
+    const { data: pos, error: posErr } = await supabase
+      .from("positions")
+      .select("id, title, description, requirements")
+      .eq("id", positionId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (posErr || !pos) return { ok: false, error: "Plaza no encontrada." };
+
+    // Obtener candidatos del pipeline con sus datos completos
+    const { data: pcRows, error: pcErr } = await supabase
+      .from("position_candidates")
+      .select(`
+        id, candidate_id,
+        candidates(
+          nombre, rol_principal, seniority_estimado,
+          pais_residencia, resumen_ejecutivo,
+          lenguajes, frameworks, patrones,
+          anos_experiencia_total, sectores
+        )
+      `)
+      .eq("position_id", positionId);
+
+    if (pcErr) return { ok: false, error: pcErr.message };
+
+    type PcRow = { id: string; candidate_id: string; candidates: unknown };
+    const candidates = (pcRows ?? []) as PcRow[];
+
+    if (candidates.length < 3) {
+      return { ok: false, error: "Se necesitan al menos 3 candidatos para generar el ranking." };
+    }
+
+    function getCandidateRecord(raw: unknown): Record<string, unknown> {
+      if (Array.isArray(raw)) return (raw[0] ?? {}) as Record<string, unknown>;
+      if (raw && typeof raw === "object") return raw as Record<string, unknown>;
+      return {};
+    }
+
+    // Construir descripción de cada candidato para el prompt
+    const candidateDescriptions = candidates
+      .map((pc, i) => {
+        const c = getCandidateRecord(pc.candidates);
+        return `Candidato ${i + 1} (ID: ${pc.candidate_id}):
+- Nombre: ${c.nombre ?? "N/A"}
+- Rol: ${c.rol_principal ?? "N/A"} — Seniority: ${c.seniority_estimado ?? "N/A"}
+- Experiencia: ${c.anos_experiencia_total ?? 0} años
+- Lenguajes: ${(Array.isArray(c.lenguajes) ? c.lenguajes : []).join(", ") || "N/A"}
+- Frameworks: ${(Array.isArray(c.frameworks) ? c.frameworks : []).join(", ") || "N/A"}
+- Patrones: ${(Array.isArray(c.patrones) ? c.patrones : []).join(", ") || "N/A"}
+- Resumen: ${c.resumen_ejecutivo ?? "N/A"}`;
+      })
+      .join("\n\n");
+
+    const systemPrompt = `Eres un experto en reclutamiento técnico. Tu tarea es analizar candidatos para una plaza y generar un ranking de recomendación.
+Reglas estrictas:
+- Responde ÚNICAMENTE con un JSON array válido. Sin texto adicional, sin markdown, sin explicaciones.
+- El array debe contener un objeto por cada candidato con exactamente estas claves: candidate_id, ranking_score, ranking_phrase, ranking_analysis.
+- ranking_score: número entero de posición (1 = mejor candidato, N = peor).
+- ranking_phrase: frase de MÁXIMO 10 palabras que resuma por qué es buena opción para la plaza.
+- ranking_analysis: párrafo corto de 2-3 oraciones con el razonamiento técnico detallado.
+- Mantén el idioma del contenido de los candidatos.`;
+
+    const userPrompt = `Plaza: ${pos.title}
+Descripción: ${pos.description || "N/A"}
+Requisitos: ${pos.requirements || "N/A"}
+
+Candidatos a rankear:
+
+${candidateDescriptions}`;
+
+    const openai = new OpenAI({ apiKey });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 2048,
+      response_format: { type: "json_object" },
+    });
+
+    const raw = response.choices[0]?.message?.content?.trim() ?? "";
+    if (!raw) return { ok: false, error: "La IA no devolvió un resultado." };
+
+    let parsed: unknown;
+    try {
+      const outer = JSON.parse(raw) as Record<string, unknown>;
+      // El modelo puede devolver { ranking: [...] } o directamente [...]
+      parsed = Array.isArray(outer) ? outer : (Object.values(outer)[0] ?? outer);
+    } catch {
+      return { ok: false, error: "La respuesta de la IA no es un JSON válido." };
+    }
+
+    if (!Array.isArray(parsed)) {
+      return { ok: false, error: "La IA devolvió un formato inesperado." };
+    }
+
+    const entries = parsed as RankingEntry[];
+
+    // Actualizar cada position_candidate con el ranking
+    const now = new Date().toISOString();
+    await Promise.all(
+      entries.map((entry) => {
+        const pc = candidates.find((c) => c.candidate_id === entry.candidate_id);
+        if (!pc) return Promise.resolve();
+        return supabase
+          .from("position_candidates")
+          .update({
+            ranking_score: entry.ranking_score,
+            ranking_phrase: entry.ranking_phrase,
+            ranking_analysis: entry.ranking_analysis,
+            ranking_generated_at: now,
+          })
+          .eq("id", pc.id);
+      }),
+    );
+
+    return { ok: true };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Error al generar el ranking.",
+    };
+  }
+}
+
+// ─── Generar reporte Markdown del ranking ────────────────────────────────────
+
+export async function generateRankingReport(
+  positionId: string,
+): Promise<{ ok: true; markdown: string; filename: string } | { ok: false; error: string }> {
+  if (!positionId) return { ok: false, error: "ID de plaza requerido." };
+
+  try {
+    const { supabase, organizationId } = await requireAuth();
+
+    const { data: pos, error: posErr } = await supabase
+      .from("positions")
+      .select("id, title, description, requirements, created_at")
+      .eq("id", positionId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+
+    if (posErr || !pos) return { ok: false, error: "Plaza no encontrada." };
+
+    const { data: pcRows, error: pcErr } = await supabase
+      .from("position_candidates")
+      .select(`
+        candidate_id, ranking_score, ranking_phrase, ranking_analysis, ranking_generated_at,
+        candidates(
+          nombre, pais_residencia, resumen_ejecutivo,
+          lenguajes, frameworks, anos_experiencia_total
+        )
+      `)
+      .eq("position_id", positionId)
+      .not("ranking_score", "is", null)
+      .order("ranking_score", { ascending: true });
+
+    if (pcErr) return { ok: false, error: pcErr.message };
+
+    type RankedRow = {
+      candidate_id: string;
+      ranking_score: number;
+      ranking_phrase: string | null;
+      ranking_analysis: string | null;
+      ranking_generated_at: string | null;
+      candidates: unknown;
+    };
+    const ranked = (pcRows ?? []) as RankedRow[];
+
+    function getCandidateField(raw: unknown): Record<string, unknown> {
+      if (Array.isArray(raw)) return (raw[0] ?? {}) as Record<string, unknown>;
+      if (raw && typeof raw === "object") return raw as Record<string, unknown>;
+      return {};
+    }
+
+    if (ranked.length === 0) {
+      return { ok: false, error: "No hay ranking generado para esta plaza." };
+    }
+
+    const generatedAt = ranked[0].ranking_generated_at
+      ? new Date(ranked[0].ranking_generated_at).toLocaleDateString("es-ES", {
+          day: "2-digit", month: "long", year: "numeric",
+        })
+      : new Date().toLocaleDateString("es-ES");
+
+    const lines: string[] = [
+      `# Reporte de Ranking — ${pos.title}`,
+      "",
+      `**Generado:** ${generatedAt}`,
+      "",
+      "---",
+      "",
+      "## Candidatos evaluados",
+      "",
+      "> Los datos de contacto han sido omitidos intencionalmente.",
+      "",
+    ];
+
+    for (const pc of ranked) {
+      const c = getCandidateField(pc.candidates);
+      const fullName = String(c.nombre ?? "").trim();
+      const firstName = fullName.split(" ")[0] ?? "el candidato";
+      const pais = String(c.pais_residencia ?? "N/A");
+      const lenguajes = (Array.isArray(c.lenguajes) ? c.lenguajes : []).join(", ") || "N/A";
+      const frameworks = (Array.isArray(c.frameworks) ? c.frameworks : []).join(", ") || "N/A";
+      const anos = typeof c.anos_experiencia_total === "number" ? c.anos_experiencia_total : 0;
+
+      // Reemplazar nombre completo por primer nombre en resumen y análisis
+      function sanitize(text: string): string {
+        if (!fullName) return text;
+        return text.replaceAll(fullName, firstName);
+      }
+
+      const resumen = sanitize(String(c.resumen_ejecutivo ?? "N/A"));
+      const analysis = sanitize(String(pc.ranking_analysis ?? ""));
+      const phrase = sanitize(String(pc.ranking_phrase ?? ""));
+
+      lines.push(`### Candidato #${pc.ranking_score} — ${firstName}`);
+      lines.push("");
+      lines.push(`| Campo | Valor |`);
+      lines.push(`|---|---|`);
+      lines.push(`| País | ${pais} |`);
+      lines.push(`| Experiencia | ${anos} años |`);
+      lines.push(`| Lenguajes | ${lenguajes} |`);
+      lines.push(`| Frameworks | ${frameworks} |`);
+      lines.push("");
+      lines.push(`**Resumen profesional:**`);
+      lines.push(resumen);
+      lines.push("");
+      lines.push(`**Análisis de ranking:**`);
+      lines.push(`> ${phrase}`);
+      lines.push("");
+      lines.push(analysis);
+      lines.push("");
+      lines.push("---");
+      lines.push("");
+    }
+
+    const markdown = lines.join("\n");
+    const safeTitle = pos.title.replace(/[^a-zA-Z0-9\-_\u00C0-\u024F]/g, "-").toLowerCase();
+    const filename = `ranking-${safeTitle}.md`;
+
+    return { ok: true, markdown, filename };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e instanceof Error ? e.message : "Error al generar el reporte.",
+    };
+  }
+}
+
 // ─── Obtener candidato por ID ─────────────────────────────────────────────────
 
 export async function getCandidateById(
