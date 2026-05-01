@@ -12,6 +12,7 @@ const STATUS_VARIANTS: Record<
 > = {
   pendiente: "outline",
   subiendo: "secondary",
+  en_cola: "secondary",
   procesando: "secondary",
   completado: "default",
   duplicado: "outline",
@@ -66,6 +67,7 @@ export function CvFileList({ entries }: CvFileListProps) {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {(entry.status === "subiendo" ||
+              entry.status === "en_cola" ||
               entry.status === "procesando") && (
               <Spinner className="h-3.5 w-3.5 text-muted-foreground" />
             )}

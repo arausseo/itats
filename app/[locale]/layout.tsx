@@ -3,6 +3,7 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
 import { Toaster } from "@/components/ui/sonner";
+import { QueueProvider } from "@/components/providers/queue-provider";
 import { routing } from "@/src/i18n/routing";
 
 export function generateStaticParams() {
@@ -26,9 +27,11 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
-      <AppHeader />
-      {children}
-      <Toaster />
+      <QueueProvider>
+        <AppHeader />
+        {children}
+        <Toaster />
+      </QueueProvider>
     </NextIntlClientProvider>
   );
 }

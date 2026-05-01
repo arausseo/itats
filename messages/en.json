@@ -176,7 +176,17 @@
   },
   "upload": {
     "title": "Bulk CV upload",
-    "description": "Upload up to {maxFiles} PDF files. Each CV will be processed automatically with AI to extract candidate data and register it in the system."
+    "description": "Upload up to {maxFiles} PDF files. Each CV will be processed automatically with AI to extract candidate data and register it in the system.",
+    "historyTitle": "Recent results",
+    "historyDescription": "Processing status of CVs queued by this organization.",
+    "historyEmpty": "No files in queue yet."
+  },
+  "queueStatus": {
+    "pending": "Pending",
+    "processing": "Processing",
+    "completed": "Completed",
+    "duplicate": "Already existed",
+    "error": "Error"
   },
   "filters": {
     "searchName": "Search by name",
@@ -284,20 +294,27 @@
     "uploading": "Uploading…",
     "processing": "Processing…",
     "uploadCvs": "Upload CVs",
-    "doneTitle": "Upload finished.",
+    "doneTitle": "Files queued.",
+    "doneEnqueued": "{count} CV(s) queued for AI processing.",
     "doneNew": "New candidates are now in the system.",
     "doneDuplicate": "Some CVs were not imported because that candidate already existed.",
     "doneErrors": "Review files marked with an error.",
+    "failedFilesTitle": "Files that could not be processed:",
+    "duplicateReason": "Already exists in the system.",
     "viewCandidates": "View candidates",
     "uploadMore": "Upload more"
   },
   "fileStatus": {
     "pendiente": "Pending",
     "subiendo": "Uploading",
+    "en_cola": "Queued",
     "procesando": "Processing",
     "completado": "Completed",
     "duplicado": "Already existed",
     "error": "Error"
+  },
+  "queueBadge": {
+    "processing": "Processing CVs · {count} remaining"
   },
   "errors": {
     "unauthorized": "Unauthorized",

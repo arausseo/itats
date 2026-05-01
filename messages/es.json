@@ -176,7 +176,17 @@
   },
   "upload": {
     "title": "Carga masiva de CVs",
-    "description": "Sube hasta {maxFiles} archivos PDF. Cada CV se procesará automáticamente con IA para extraer los datos del candidato y registrarlo en el sistema."
+    "description": "Sube hasta {maxFiles} archivos PDF. Cada CV se procesará automáticamente con IA para extraer los datos del candidato y registrarlo en el sistema.",
+    "historyTitle": "Resultados recientes",
+    "historyDescription": "Estado de los CVs procesados por esta organización.",
+    "historyEmpty": "No hay archivos en cola todavía."
+  },
+  "queueStatus": {
+    "pending": "Pendiente",
+    "processing": "Procesando",
+    "completed": "Completado",
+    "duplicate": "Ya existía",
+    "error": "Error"
   },
   "filters": {
     "searchName": "Buscar por nombre",
@@ -284,20 +294,27 @@
     "uploading": "Subiendo…",
     "processing": "Procesando…",
     "uploadCvs": "Subir CVs",
-    "doneTitle": "Carga completada.",
+    "doneTitle": "Archivos encolados.",
+    "doneEnqueued": "{count} CV(s) en cola para procesamiento con IA.",
     "doneNew": "Los candidatos nuevos ya están en el sistema.",
     "doneDuplicate": "Algunos CVs no se importaron porque ya existía ese candidato.",
     "doneErrors": "Revisa los archivos marcados con error.",
+    "failedFilesTitle": "Archivos que no se pudieron procesar:",
+    "duplicateReason": "Ya existía en el sistema.",
     "viewCandidates": "Ver candidatos",
     "uploadMore": "Subir más"
   },
   "fileStatus": {
     "pendiente": "Pendiente",
     "subiendo": "Subiendo",
+    "en_cola": "En cola",
     "procesando": "Procesando",
     "completado": "Completado",
     "duplicado": "Ya existía",
     "error": "Error"
+  },
+  "queueBadge": {
+    "processing": "Procesando CVs · {count} restante(s)"
   },
   "errors": {
     "unauthorized": "No autorizado",

@@ -6,16 +6,13 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { CvFileList } from "@/components/cv-file-list";
-import { uploadCvFile, startCvProcessing } from "@/src/lib/upload-actions";
+import { uploadCvFile, enqueueFiles } from "@/src/lib/upload-actions";
 import {
   UPLOAD_CONCURRENCY_LIMIT,
   MAX_FILES,
   MAX_FILE_SIZE_BYTES,
 } from "@/src/lib/upload-config";
-import type {
-  FileUploadEntry,
-  CvProcessingItem,
-} from "@/src/types/upload";
+import type { FileUploadEntry } from "@/src/types/upload";
 
 type Phase = "idle" | "busy" | "done";
 
@@ -30,12 +27,10 @@ export function CvUploadZone() {
   const [entries, setEntries] = useState<FileUploadEntry[]>([]);
   const [phase, setPhase] = useState<Phase>("idle");
   const [globalError, setGlobalError] = useState<string | null>(null);
+  const [enqueuedCount, setEnqueuedCount] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
-  function updateEntry(
-    key: string,
-    patch: Partial<FileUploadEntry>,
-  ) {
+  function updateEntry(key: string, patch: Partial<FileUploadEntry>) {
     setEntries((prev) =>
       prev.map((e) => (e.key === key ? { ...e, ...patch } : e)),
     );
@@ -44,7 +39,6 @@ export function CvUploadZone() {
   const validateAndSetFiles = useCallback(
     (files: File[]) => {
       setGlobalError(null);
-
       if (files.length === 0) return;
 
       if (files.length > MAX_FILES) {
@@ -108,6 +102,7 @@ export function CvUploadZone() {
 
     setPhase("busy");
     setGlobalError(null);
+    setEnqueuedCount(0);
 
     const fileMap = new Map<string, File>();
     for (const entry of entries) {
@@ -118,6 +113,9 @@ export function CvUploadZone() {
     }
 
     const limit = pLimit(UPLOAD_CONCURRENCY_LIMIT);
+
+    // Paso 1: subir todos los archivos a Storage en paralelo (con límite)
+    const uploadedItems: Array<{ key: string; storagePath: string; fileName: string; sha256: string }> = [];
 
     await Promise.allSettled(
       entries.map((entry) =>
@@ -135,7 +133,6 @@ export function CvUploadZone() {
 
           const formData = new FormData();
           formData.append("file", file);
-
           const result = await uploadCvFile(formData);
 
           if (!result.ok) {
@@ -146,54 +143,55 @@ export function CvUploadZone() {
             return;
           }
 
-          const item: CvProcessingItem = {
+          uploadedItems.push({
+            key: entry.key,
+            storagePath: result.storagePath,
             fileName: entry.fileName,
-            storagePath: result.storagePath,
-          };
-
-          updateEntry(entry.key, {
-            status: "procesando",
-            storagePath: result.storagePath,
+            sha256: result.sha256,
           });
 
-          const proc = await startCvProcessing([item]);
-
-          if (!proc.ok) {
-            updateEntry(entry.key, {
-              status: "error",
-              errorMessage: proc.error,
-            });
-            return;
-          }
-
-          const r = proc.results[0];
-          if (!r) {
-            updateEntry(entry.key, {
-              status: "error",
-              errorMessage: t("fileUnavailable"),
-            });
-            return;
-          }
-
-          if (r.status === "completado") {
-            updateEntry(entry.key, {
-              status: "completado",
-              errorMessage: null,
-            });
-          } else if (r.status === "duplicado") {
-            updateEntry(entry.key, {
-              status: "duplicado",
-              errorMessage: r.message,
-            });
-          } else {
-            updateEntry(entry.key, {
-              status: "error",
-              errorMessage: r.error,
-            });
-          }
+          updateEntry(entry.key, {
+            storagePath: result.storagePath,
+            // Mantener "subiendo" hasta que el enqueue confirme el estado final
+          });
         }),
       ),
     );
+
+    // Paso 2: encolar todos los archivos subidos exitosamente de una sola llamada
+    if (uploadedItems.length > 0) {
+      const enqueueResults = await enqueueFiles(
+        uploadedItems.map(({ storagePath, fileName, sha256 }) => ({
+          storagePath,
+          fileName,
+          sha256,
+        })),
+      );
+
+      let enqueued = 0;
+
+      for (const result of enqueueResults) {
+        const uploaded = uploadedItems.find((u) => u.storagePath === result.storagePath);
+        if (!uploaded) continue;
+
+        if (result.status === "enqueued") {
+          updateEntry(uploaded.key, { status: "en_cola", errorMessage: null });
+          enqueued++;
+        } else if (result.status === "duplicate") {
+          updateEntry(uploaded.key, {
+            status: "duplicado",
+            errorMessage: result.message,
+          });
+        } else {
+          updateEntry(uploaded.key, {
+            status: "error",
+            errorMessage: result.error,
+          });
+        }
+      }
+
+      setEnqueuedCount(enqueued);
+    }
 
     setPhase("done");
   }
@@ -259,7 +257,7 @@ export function CvUploadZone() {
         </p>
       )}
 
-      <CvFileList entries={entries} />
+      {phase !== "done" && <CvFileList entries={entries} />}
 
       {entries.length > 0 && phase !== "done" && (
         <div className="flex items-center justify-between gap-3">
@@ -285,41 +283,65 @@ export function CvUploadZone() {
               onClick={handleUpload}
               disabled={!canUpload}
             >
-              {phase === "busy" ? t("processing") : t("uploadCvs")}
+              {phase === "busy" ? t("uploading") : t("uploadCvs")}
             </Button>
           </div>
         </div>
       )}
 
-      {phase === "done" && (
-        <div className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-800 dark:bg-green-950 dark:text-green-200">
-          <p className="font-medium">
-            {t("doneTitle")}{" "}
-            {entries.some((e) => e.status === "completado") && t("doneNew")}
-            {entries.some((e) => e.status === "duplicado") && ` ${t("doneDuplicate")}`}
-            {entries.some((e) => e.status === "error") && ` ${t("doneErrors")}`}
-          </p>
-          <div className="mt-2 flex gap-2">
-            <Link href="/">
-              <Button variant="outline" size="sm">
-                {t("viewCandidates")}
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                filesRef.current = [];
-                setEntries([]);
-                setPhase("idle");
-                setGlobalError(null);
-              }}
-            >
-              {t("uploadMore")}
-            </Button>
+      {phase === "done" && (() => {
+        const failedEntries = entries.filter(
+          (e) => e.status === "error" || e.status === "duplicado",
+        );
+        return (
+          <div className="flex flex-col gap-3">
+            {/* Resumen exitoso */}
+            {enqueuedCount > 0 && (
+              <div className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-800 dark:bg-green-950 dark:text-green-200">
+                <p className="font-medium">
+                  {t("doneEnqueued", { count: enqueuedCount })}
+                </p>
+              </div>
+            )}
+
+            {/* Archivos fallidos */}
+            {failedEntries.length > 0 && (
+              <div className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
+                <p className="mb-2 font-medium text-destructive">
+                  {t("failedFilesTitle")}
+                </p>
+                <ul className="space-y-1">
+                  {failedEntries.map((e) => (
+                    <li key={e.key} className="flex flex-col gap-0.5">
+                      <span className="truncate font-medium text-foreground" title={e.fileName}>
+                        {e.fileName}
+                      </span>
+                      <span
+                        className={
+                          e.status === "duplicado"
+                            ? "text-xs text-amber-700 dark:text-amber-300"
+                            : "text-xs text-destructive"
+                        }
+                      >
+                        {e.errorMessage ?? (e.status === "duplicado" ? t("duplicateReason") : "")}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Acciones */}
+            <div className="flex gap-2">
+              <Link href="/">
+                <Button variant="outline" size="sm">
+                  {t("viewCandidates")}
+                </Button>
+              </Link>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
