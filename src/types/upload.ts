@@ -20,6 +20,11 @@ export type UploadCvResult =
   | { ok: true; storagePath: string; sha256: string }
   | { ok: false; error: string };
 
+/** Resultado de subir un archivo a Storage y encolarlo en un solo paso. */
+export type UploadAndEnqueueResult =
+  | { ok: true; queueId: string }
+  | { ok: false; error: string };
+
 export interface CvProcessingItem {
   fileName: string;
   storagePath: string;
@@ -56,7 +61,6 @@ export interface QueueItem {
 
 export type EnqueueFileResult =
   | { storagePath: string; fileName: string; status: "enqueued"; queueId: string }
-  | { storagePath: string; fileName: string; status: "duplicate"; message: string }
   | { storagePath: string; fileName: string; status: "error"; error: string };
 
 export type EnqueueResult = EnqueueFileResult[];

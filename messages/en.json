@@ -304,6 +304,7 @@
     "maxFiles": "You can upload at most {maxFiles} files at a time.",
     "invalidFiles": "{count} file(s) are not valid PDFs or exceed 20 MB: {names}",
     "fileUnavailable": "File not available",
+    "enqueueError": "Error adding to processing queue",
     "dropzone": "Drag files here or",
     "select": "browse",
     "hint": "PDF only · Up to {maxFiles} files · 20 MB per file",

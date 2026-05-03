@@ -304,6 +304,7 @@
     "maxFiles": "Puedes subir como máximo {maxFiles} archivos a la vez.",
     "invalidFiles": "{count} archivo(s) no son PDF válidos o superan 20 MB: {names}",
     "fileUnavailable": "Archivo no disponible",
+    "enqueueError": "Error al agregar a la cola de procesamiento",
     "dropzone": "Arrastra archivos aquí o",
     "select": "selecciona",
     "hint": "Solo PDF · Máximo {maxFiles} archivos · 20 MB por archivo",

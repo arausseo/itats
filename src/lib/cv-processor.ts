@@ -193,11 +193,11 @@ async function generateCandidateJson(
       parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
         ? Object.keys(parsed as Record<string, unknown>)
         : [];
-    cvLog("OpenAI: JSON de candidato parseado", {
-      rawChars: raw.length,
-      topLevelKeys: topKeys,
-      ms: Math.round(performance.now() - t0),
-    });
+    // cvLog("OpenAI: JSON de candidato parseado", {
+    //   rawChars: raw.length,
+    //   topLevelKeys: topKeys,
+    //   ms: Math.round(performance.now() - t0),
+    // });
     return parsed;
   }
 
@@ -225,11 +225,11 @@ async function generateCandidateJson(
     parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
       ? Object.keys(parsed as Record<string, unknown>)
       : [];
-  cvLog("Gemini: JSON de candidato parseado", {
-    rawChars: raw.length,
-    topLevelKeys: topKeys,
-    ms: Math.round(performance.now() - t0),
-  });
+  // cvLog("Gemini: JSON de candidato parseado", {
+  //   rawChars: raw.length,
+  //   topLevelKeys: topKeys,
+  //   ms: Math.round(performance.now() - t0),
+  // });
   return parsed;
 }
 
@@ -397,15 +397,15 @@ async function callProcessCandidateEdgeFunction(
     );
   }
   const url = `${getEnv("NEXT_PUBLIC_SUPABASE_URL")}/functions/v1/process-candidate`;
-  cvLog("Edge: llamando process-candidate", {
-    storagePath,
-    organizationId,
-    embeddingDimensions: embedding.length,
-    payloadKeys:
-      payload !== null && typeof payload === "object" && !Array.isArray(payload)
-        ? Object.keys(payload as Record<string, unknown>)
-        : [],
-  });
+  // cvLog("Edge: llamando process-candidate", {
+  //   storagePath,
+  //   organizationId,
+  //   embeddingDimensions: embedding.length,
+  //   payloadKeys:
+  //     payload !== null && typeof payload === "object" && !Array.isArray(payload)
+  //       ? Object.keys(payload as Record<string, unknown>)
+  //       : [],
+  // });
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -475,16 +475,16 @@ export async function runCvPipeline({
       fetchPromptConfig("embedding_config"),
     ]);
 
-    cvLog("Pipeline: prompts listos (paralelo)", {
-      pdfBytes: pdfBytes.length,
-      summaryApi: summaryConfig.api,
-      summaryModel: summaryConfig.model,
-      jsonApi: jsonConfig.api,
-      jsonModel: jsonConfig.model,
-      embApi: embConfig.api,
-      embModel: embConfig.model,
-      ms: Math.round(performance.now() - pipelineT0),
-    });
+    // cvLog("Pipeline: prompts listos (paralelo)", {
+    //   pdfBytes: pdfBytes.length,
+    //   summaryApi: summaryConfig.api,
+    //   summaryModel: summaryConfig.model,
+    //   jsonApi: jsonConfig.api,
+    //   jsonModel: jsonConfig.model,
+    //   embApi: embConfig.api,
+    //   embModel: embConfig.model,
+    //   ms: Math.round(performance.now() - pipelineT0),
+    // });
 
     const markdown = await extractMarkdownFromPdf(pdfBytes, summaryConfig);
     const embedding = await generateEmbedding(markdown, embConfig);

@@ -16,10 +16,19 @@ import {
 } from "@/src/lib/user-profile";
 import type {
   UploadCvResult,
+  UploadAndEnqueueResult,
   StartProcessingResult,
   CvProcessingItem,
   EnqueueResult,
 } from "@/src/types/upload";
+
+function uploadLog(message: string, meta?: Record<string, unknown>): void {
+  if (meta && Object.keys(meta).length > 0) {
+    console.log(`[upload-actions] ${message}`, meta);
+  } else {
+    console.log(`[upload-actions] ${message}`);
+  }
+}
 
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -31,14 +40,27 @@ function getServiceClient() {
 }
 
 async function requireOrganizationId(): Promise<string> {
+  const t0 = performance.now();
+
   const supabase = await createSsrClient();
+  const t1 = performance.now();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  uploadLog("auth.getUser", { ms: Math.round(performance.now() - t1) });
+
   if (!user) throw new Error("No autorizado");
+
+  const t2 = performance.now();
   await ensureUserProfile();
+  uploadLog("ensureUserProfile", { ms: Math.round(performance.now() - t2) });
+
+  const t3 = performance.now();
   const organizationId = await getCurrentOrganizationId();
+  uploadLog("getCurrentOrganizationId", { ms: Math.round(performance.now() - t3) });
+
   if (!organizationId) throw new Error("No autorizado");
+  uploadLog("requireOrganizationId total", { ms: Math.round(performance.now() - t0) });
   return organizationId;
 }
 
@@ -77,6 +99,69 @@ export async function uploadCvFile(
   return { ok: true, storagePath, sha256 };
 }
 
+/**
+ * Sube un archivo a Storage y lo encola para procesamiento, en una sola
+ * Server Action. Evita el doble ciclo de autenticación que ocurre al llamar
+ * `uploadCvFile` y `enqueueFiles` por separado.
+ */
+export async function uploadAndEnqueueFile(
+  formData: FormData,
+): Promise<UploadAndEnqueueResult> {
+  const te = await getTranslations("errors");
+
+  let organizationId: string;
+  try {
+    organizationId = await requireOrganizationId();
+  } catch {
+    return { ok: false, error: te("unauthorized") };
+  }
+
+  const file = formData.get("file");
+  if (!(file instanceof File)) return { ok: false, error: te("invalidFile") };
+  if (file.type !== "application/pdf")
+    return { ok: false, error: te("pdfOnly") };
+  if (file.size > MAX_FILE_SIZE_BYTES)
+    return { ok: false, error: te("fileTooLarge") };
+
+  const tFile = performance.now();
+  const bytes = await file.arrayBuffer();
+  const sha256 = createHash("sha256").update(Buffer.from(bytes)).digest("hex");
+  uploadLog("sha256 calculado", { fileName: file.name, sizeKB: Math.round(file.size / 1024), ms: Math.round(performance.now() - tFile) });
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storagePath = `${organizationId}/${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
+
+  const supabase = getServiceClient();
+
+  const tStorage = performance.now();
+  const { error: storageError } = await supabase.storage
+    .from("resumes")
+    .upload(storagePath, bytes, { contentType: "application/pdf", upsert: false });
+  uploadLog("storage.upload", { fileName: file.name, ms: Math.round(performance.now() - tStorage) });
+
+  if (storageError) return { ok: false, error: storageError.message };
+
+  const tQueue = performance.now();
+  const { data: queueItem, error: queueError } = await supabase
+    .from("cv_processing_queue")
+    .insert({
+      organization_id: organizationId,
+      storage_path: storagePath,
+      file_name: file.name,
+      cv_sha256: sha256,
+      status: "pending",
+    })
+    .select("id")
+    .single<{ id: string }>();
+  uploadLog("queue.insert", { fileName: file.name, ms: Math.round(performance.now() - tQueue) });
+
+  if (queueError ?? !queueItem) {
+    return { ok: false, error: queueError?.message ?? "Error al encolar el archivo" };
+  }
+
+  return { ok: true, queueId: queueItem.id };
+}
+
 /** Encola archivos ya subidos a Storage para procesamiento asíncrono con IA. */
 export async function enqueueFiles(
   items: ReadonlyArray<{ storagePath: string; fileName: string; sha256: string }>,
@@ -97,24 +182,6 @@ export async function enqueueFiles(
   const results: EnqueueResult = [];
 
   for (const item of items) {
-    // Chequeo rápido de duplicado por sha256 antes de encolar
-    const { data: existing } = await supabase
-      .from("candidates")
-      .select("id, nombre, email")
-      .eq("organization_id", organizationId)
-      .eq("cv_sha256", item.sha256)
-      .maybeSingle<{ id: string; nombre: string; email: string }>();
-
-    if (existing) {
-      results.push({
-        storagePath: item.storagePath,
-        fileName: item.fileName,
-        status: "duplicate",
-        message: `CV ya cargado para ${existing.nombre} (${existing.email}).`,
-      });
-      continue;
-    }
-
     // Insertar en la cola de procesamiento
     const { data: queueItem, error } = await supabase
       .from("cv_processing_queue")

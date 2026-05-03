@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/src/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { CvFileList } from "@/components/cv-file-list";
-import { uploadCvFile, enqueueFiles } from "@/src/lib/upload-actions";
+import { uploadAndEnqueueFile } from "@/src/lib/upload-actions";
 import {
   UPLOAD_CONCURRENCY_LIMIT,
   MAX_FILES,
@@ -34,6 +34,10 @@ export function CvUploadZone() {
     setEntries((prev) =>
       prev.map((e) => (e.key === key ? { ...e, ...patch } : e)),
     );
+  }
+
+  function removeEntry(key: string) {
+    setEntries((prev) => prev.filter((e) => e.key !== key));
   }
 
   const validateAndSetFiles = useCallback(
@@ -113,10 +117,10 @@ export function CvUploadZone() {
     }
 
     const limit = pLimit(UPLOAD_CONCURRENCY_LIMIT);
+    let enqueued = 0;
 
-    // Paso 1: subir todos los archivos a Storage en paralelo (con límite)
-    const uploadedItems: Array<{ key: string; storagePath: string; fileName: string; sha256: string }> = [];
-
+    // Subir y encolar cada archivo de forma independiente y concurrente.
+    // En cuanto un archivo termina upload + enqueue, desaparece de la lista.
     await Promise.allSettled(
       entries.map((entry) =>
         limit(async () => {
@@ -133,7 +137,9 @@ export function CvUploadZone() {
 
           const formData = new FormData();
           formData.append("file", file);
-          const result = await uploadCvFile(formData);
+          const t0 = performance.now();
+          const result = await uploadAndEnqueueFile(formData);
+          console.log(`[upload+enqueue] ${entry.fileName}: ${Math.round(performance.now() - t0)}ms`);
 
           if (!result.ok) {
             updateEntry(entry.key, {
@@ -143,55 +149,12 @@ export function CvUploadZone() {
             return;
           }
 
-          uploadedItems.push({
-            key: entry.key,
-            storagePath: result.storagePath,
-            fileName: entry.fileName,
-            sha256: result.sha256,
-          });
-
-          updateEntry(entry.key, {
-            storagePath: result.storagePath,
-            // Mantener "subiendo" hasta que el enqueue confirme el estado final
-          });
+          removeEntry(entry.key);
+          enqueued++;
+          setEnqueuedCount(enqueued);
         }),
       ),
     );
-
-    // Paso 2: encolar todos los archivos subidos exitosamente de una sola llamada
-    if (uploadedItems.length > 0) {
-      const enqueueResults = await enqueueFiles(
-        uploadedItems.map(({ storagePath, fileName, sha256 }) => ({
-          storagePath,
-          fileName,
-          sha256,
-        })),
-      );
-
-      let enqueued = 0;
-
-      for (const result of enqueueResults) {
-        const uploaded = uploadedItems.find((u) => u.storagePath === result.storagePath);
-        if (!uploaded) continue;
-
-        if (result.status === "enqueued") {
-          updateEntry(uploaded.key, { status: "en_cola", errorMessage: null });
-          enqueued++;
-        } else if (result.status === "duplicate") {
-          updateEntry(uploaded.key, {
-            status: "duplicado",
-            errorMessage: result.message,
-          });
-        } else {
-          updateEntry(uploaded.key, {
-            status: "error",
-            errorMessage: result.error,
-          });
-        }
-      }
-
-      setEnqueuedCount(enqueued);
-    }
 
     setPhase("done");
   }
@@ -257,7 +220,7 @@ export function CvUploadZone() {
         </p>
       )}
 
-      {phase !== "done" && <CvFileList entries={entries} />}
+      <CvFileList entries={entries} />
 
       {entries.length > 0 && phase !== "done" && (
         <div className="flex items-center justify-between gap-3">
@@ -289,59 +252,24 @@ export function CvUploadZone() {
         </div>
       )}
 
-      {phase === "done" && (() => {
-        const failedEntries = entries.filter(
-          (e) => e.status === "error" || e.status === "duplicado",
-        );
-        return (
-          <div className="flex flex-col gap-3">
-            {/* Resumen exitoso */}
-            {enqueuedCount > 0 && (
-              <div className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-800 dark:bg-green-950 dark:text-green-200">
-                <p className="font-medium">
-                  {t("doneEnqueued", { count: enqueuedCount })}
-                </p>
-              </div>
-            )}
-
-            {/* Archivos fallidos */}
-            {failedEntries.length > 0 && (
-              <div className="rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
-                <p className="mb-2 font-medium text-destructive">
-                  {t("failedFilesTitle")}
-                </p>
-                <ul className="space-y-1">
-                  {failedEntries.map((e) => (
-                    <li key={e.key} className="flex flex-col gap-0.5">
-                      <span className="truncate font-medium text-foreground" title={e.fileName}>
-                        {e.fileName}
-                      </span>
-                      <span
-                        className={
-                          e.status === "duplicado"
-                            ? "text-xs text-amber-700 dark:text-amber-300"
-                            : "text-xs text-destructive"
-                        }
-                      >
-                        {e.errorMessage ?? (e.status === "duplicado" ? t("duplicateReason") : "")}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Acciones */}
-            <div className="flex gap-2">
-              <Link href="/">
-                <Button variant="outline" size="sm">
-                  {t("viewCandidates")}
-                </Button>
-              </Link>
+      {phase === "done" && (
+        <div className="flex flex-col gap-3">
+          {enqueuedCount > 0 && (
+            <div className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-800 dark:bg-green-950 dark:text-green-200">
+              <p className="font-medium">
+                {t("doneEnqueued", { count: enqueuedCount })}
+              </p>
             </div>
+          )}
+          <div className="flex gap-2">
+            <Link href="/">
+              <Button variant="outline" size="sm">
+                {t("viewCandidates")}
+              </Button>
+            </Link>
           </div>
-        );
-      })()}
+        </div>
+      )}
     </div>
   );
 }
