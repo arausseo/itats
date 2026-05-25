@@ -28,6 +28,18 @@ export type UploadAndEnqueueResult =
 export interface CvProcessingItem {
   fileName: string;
   storagePath: string;
+  positionId?: string | null;
+  applicationAnswers?: ApplicationAnswer[];
+}
+
+/** Respuesta del candidato a una pregunta de la plaza (vive en `candidates.application_answers`). */
+export interface ApplicationAnswer {
+  question_id: string;
+  position_id: string;
+  question_text: string;
+  question_type: "boolean" | "numeric" | "text";
+  answer: string | number | boolean | null;
+  answered_at: string;
 }
 
 /** Resultado de `runCvPipeline` por archivo (para sincronizar la UI). */
@@ -57,6 +69,9 @@ export interface QueueItem {
   readonly locked_at: string | null;
   readonly created_at: string;
   readonly processed_at: string | null;
+  readonly position_id: string | null;
+  readonly application_answers: ApplicationAnswer[];
+  readonly source: "internal" | "public_application";
 }
 
 export type EnqueueFileResult =

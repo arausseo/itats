@@ -596,6 +596,36 @@ export function CandidateDetailSheet({
                   )}
                 </section>
 
+                {/* Application Answers */}
+                {candidate.application_answers.length > 0 && (
+                  <section className="space-y-2">
+                    <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {tSheet("applicationAnswers")}
+                    </h3>
+                    <ul className="flex flex-col gap-2">
+                      {candidate.application_answers.map((a, idx) => (
+                        <li
+                          key={`${a.question_id}-${idx}`}
+                          className="rounded-md border border-border/60 bg-muted/30 p-2"
+                        >
+                          <p className="text-xs font-medium text-foreground">
+                            {a.question_text}
+                          </p>
+                          <p className="mt-0.5 text-xs/relaxed text-muted-foreground">
+                            {a.question_type === "boolean"
+                              ? a.answer === true
+                                ? tSheet("answerYes")
+                                : tSheet("answerNo")
+                              : a.answer === null || a.answer === ""
+                                ? dash
+                                : String(a.answer)}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
+
                 {/* Tech Stack */}
                 <section className="space-y-3">
                   <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

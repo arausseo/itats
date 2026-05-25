@@ -2,7 +2,11 @@ import { createClient } from "@supabase/supabase-js";
 import { createHash } from "crypto";
 import { GoogleGenAI } from "@google/genai";
 import OpenAI from "openai";
-import type { CvProcessingItem, CvProcessingOutcome } from "@/src/types/upload";
+import type {
+  ApplicationAnswer,
+  CvProcessingItem,
+  CvProcessingOutcome,
+} from "@/src/types/upload";
 
 // ---------------------------------------------------------------------------
 // Tipos
@@ -294,6 +298,7 @@ interface ExistingCandidate {
 interface DuplicateResult {
   found: true;
   message: string;
+  existing: ExistingCandidate;
 }
 
 interface NoDuplicateResult {
@@ -327,6 +332,7 @@ async function findExistingCandidate(
     return {
       found: true,
       message: `CV ya cargado para ${hashMatch.nombre} (${hashMatch.email}).`,
+      existing: hashMatch,
     };
   }
 
@@ -360,6 +366,7 @@ async function findExistingCandidate(
           return {
             found: true,
             message: `CV con email ya registrado: ${emailMatch.email}.`,
+            existing: emailMatch,
           };
         }
       }
@@ -377,6 +384,64 @@ async function findExistingCandidate(
 }
 
 // ---------------------------------------------------------------------------
+// Enlace de candidato existente (duplicado) a una nueva plaza
+// ---------------------------------------------------------------------------
+
+/**
+ * Para postulaciones públicas de un candidato YA existente en la organización:
+ * - Crea fila en position_candidates (Sourced) si no existe — UNIQUE(position_id, candidate_id)
+ *   evita duplicados; ignoramos el error 23505.
+ * - Agrega las nuevas respuestas a `candidates.application_answers` (sin sobrescribir
+ *   las previas; el candidato puede haberse postulado a otras plazas antes).
+ */
+async function linkExistingCandidateToPosition(
+  candidateId: string,
+  positionId: string,
+  newAnswers: ApplicationAnswer[],
+): Promise<void> {
+  const supabase = getServiceClient();
+
+  const { error: linkError } = await supabase
+    .from("position_candidates")
+    .insert({
+      position_id: positionId,
+      candidate_id: candidateId,
+      pipeline_status: "Sourced",
+    });
+  if (linkError && linkError.code !== "23505") {
+    cvLog("Enlace duplicado→plaza: error al insertar position_candidates", {
+      candidateId,
+      positionId,
+      error: linkError.message,
+    });
+  }
+
+  if (newAnswers.length === 0) return;
+
+  const { data: existing } = await supabase
+    .from("candidates")
+    .select("application_answers")
+    .eq("id", candidateId)
+    .maybeSingle<{ application_answers: ApplicationAnswer[] | null }>();
+
+  const previous = Array.isArray(existing?.application_answers)
+    ? existing!.application_answers
+    : [];
+  const merged = [...previous, ...newAnswers];
+
+  const { error: updateError } = await supabase
+    .from("candidates")
+    .update({ application_answers: merged })
+    .eq("id", candidateId);
+  if (updateError) {
+    cvLog("Enlace duplicado→plaza: error actualizando application_answers", {
+      candidateId,
+      error: updateError.message,
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Llamada a la Edge Function process-candidate
 // ---------------------------------------------------------------------------
 
@@ -390,6 +455,8 @@ async function callProcessCandidateEdgeFunction(
   organizationId: string,
   cvMarkdown: string,
   sha256: string,
+  positionId: string | null,
+  applicationAnswers: ApplicationAnswer[],
 ): Promise<{ kind: "inserted" } | { kind: "duplicate"; message: string }> {
   if (!UUID_RE.test(organizationId)) {
     throw new Error(
@@ -420,6 +487,10 @@ async function callProcessCandidateEdgeFunction(
       cv_sha256: sha256,
       embedding,
       organization_id: organizationId,
+      ...(positionId ? { position_id: positionId } : {}),
+      ...(applicationAnswers.length > 0
+        ? { application_answers: applicationAnswers }
+        : {}),
     }),
   });
   const json = (await res.json()) as { ok: boolean; error?: string };
@@ -450,20 +521,38 @@ async function callProcessCandidateEdgeFunction(
 export async function runCvPipeline({
   storagePath,
   organizationId,
+  positionId,
+  applicationAnswers,
 }: CvProcessingItem & { organizationId: string }): Promise<CvProcessingOutcome> {
   const pipelineT0 = performance.now();
+  const normalizedPositionId = positionId ?? null;
+  const normalizedAnswers: ApplicationAnswer[] = applicationAnswers ?? [];
   try {
-    cvLog("Pipeline: inicio", { storagePath, organizationId });
+    cvLog("Pipeline: inicio", {
+      storagePath,
+      organizationId,
+      positionId: normalizedPositionId,
+      answersCount: normalizedAnswers.length,
+    });
 
     const pdfBytes = await downloadPdfBytes(storagePath);
 
     // Pre-check: detectar duplicado antes de gastar tokens de IA
     const duplicateCheck = await findExistingCandidate(pdfBytes, organizationId);
     if (duplicateCheck.found) {
-      cvLog("Pipeline: duplicado detectado pre-IA, abortando", {
+      cvLog("Pipeline: duplicado detectado pre-IA, abortando IA", {
         storagePath,
         message: duplicateCheck.message,
       });
+      // Si la postulación viene de la landing pública, aún así enlazar al
+      // pipeline de la plaza y guardar las respuestas en el candidato existente.
+      if (normalizedPositionId) {
+        await linkExistingCandidateToPosition(
+          duplicateCheck.existing.id,
+          normalizedPositionId,
+          normalizedAnswers,
+        );
+      }
       return { storagePath, status: "duplicado", message: duplicateCheck.message };
     }
 
@@ -497,6 +586,8 @@ export async function runCvPipeline({
       organizationId,
       markdown,
       sha256,
+      normalizedPositionId,
+      normalizedAnswers,
     );
 
     cvLog("Pipeline: completado", {
