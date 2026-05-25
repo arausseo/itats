@@ -386,9 +386,11 @@
     "subtitle": "Estas preguntas se mostrarán en la página pública de la plaza. Las respuestas quedan asociadas al candidato.",
     "addNew": "Agregar pregunta",
     "textPlaceholder": "Ej. ¿Cuántos años de experiencia tienes en C#?",
-    "type.boolean": "Sí / No",
-    "type.numeric": "Numérica",
-    "type.text": "Texto libre",
+    "type": {
+      "boolean": "Sí / No",
+      "numeric": "Numérica",
+      "text": "Texto libre"
+    },
     "required": "Obligatoria",
     "add": "Agregar",
     "delete": "Eliminar",

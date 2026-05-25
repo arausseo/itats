@@ -386,9 +386,11 @@
     "subtitle": "These questions appear on the public position page. Answers are stored on the candidate.",
     "addNew": "Add question",
     "textPlaceholder": "e.g. How many years of experience do you have with C#?",
-    "type.boolean": "Yes / No",
-    "type.numeric": "Numeric",
-    "type.text": "Free text",
+    "type": {
+      "boolean": "Yes / No",
+      "numeric": "Numeric",
+      "text": "Free text"
+    },
     "required": "Required",
     "add": "Add",
     "delete": "Delete",
