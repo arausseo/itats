@@ -8,6 +8,8 @@ import {
 } from "@/src/types/position";
 import { PositionTabs } from "@/components/positions/position-tabs";
 import { reopenPosition, getSeniorityOptions } from "@/src/lib/positions-actions";
+import { getPositionQuestions } from "@/src/lib/position-questions-actions";
+import { getUserProfile } from "@/src/lib/user-profile";
 import { EditPositionDialog } from "@/components/positions/edit-position-dialog";
 import { ClosePositionDialog } from "@/components/positions/close-position-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -78,9 +80,11 @@ export default async function PositionDetailPage({ params }: Props) {
     parsePositionCandidateWithCandidate,
   );
 
-  const [t, seniorityOptions] = await Promise.all([
+  const [t, seniorityOptions, questions, profile] = await Promise.all([
     getTranslations("positions"),
     getSeniorityOptions(),
+    getPositionQuestions(id),
+    getUserProfile(),
   ]);
 
   async function reopenAction() {
@@ -154,6 +158,8 @@ export default async function PositionDetailPage({ params }: Props) {
               position={position}
               positionCandidates={pipelineCandidates}
               seniorityOptions={seniorityOptions}
+              questions={questions}
+              orgSlug={profile?.organizationSlug ?? null}
             />
           </CardContent>
         </Card>

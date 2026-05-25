@@ -92,6 +92,10 @@ export async function claimAndProcessNextQueueItem(
       storagePath: item.storage_path,
       fileName: item.file_name,
       organizationId,
+      positionId: item.position_id ?? null,
+      applicationAnswers: Array.isArray(item.application_answers)
+        ? item.application_answers
+        : [],
     });
 
     if (result.status === "completado") {
