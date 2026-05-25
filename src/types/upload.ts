@@ -69,7 +69,13 @@ export interface QueueStatus {
   readonly pending: number;
   readonly processing: number;
   readonly total: number;
+  /** Si false, la organización pausó el procesamiento global de la cola. */
+  readonly processingEnabled: boolean;
 }
+
+export type SetQueueProcessingResult =
+  | { ok: true; processingEnabled: boolean }
+  | { ok: false; error: string };
 
 export interface QueueHistoryPage {
   readonly items: QueueItem[];

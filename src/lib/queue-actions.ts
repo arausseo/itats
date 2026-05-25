@@ -3,7 +3,12 @@
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createSsrClient } from "@/src/utils/supabase/server";
 import { runCvPipeline } from "@/src/lib/cv-processor";
-import type { QueueItem, QueueHistoryPage, QueueStatus } from "@/src/types/upload";
+import type {
+  QueueItem,
+  QueueHistoryPage,
+  QueueStatus,
+  SetQueueProcessingResult,
+} from "@/src/types/upload";
 
 // ---------------------------------------------------------------------------
 // Cliente de servicio (service_role) — necesario para UPDATE en la cola
@@ -161,27 +166,87 @@ export async function getRecentQueueItems(
 // getQueueStatus
 // ---------------------------------------------------------------------------
 
+async function getProcessingEnabled(
+  organizationId: string,
+): Promise<boolean> {
+  const supabase = getServiceClient();
+  const { data, error } = await supabase
+    .from("cv_queue_settings")
+    .select("processing_enabled")
+    .eq("organization_id", organizationId)
+    .maybeSingle<{ processing_enabled: boolean }>();
+
+  if (error) {
+    console.error(
+      "[queue-actions] Error al leer configuración de cola:",
+      error.message,
+    );
+    return true;
+  }
+
+  return data?.processing_enabled ?? true;
+}
+
 /** Retorna el conteo de items pendientes y en procesamiento para el badge global. */
 export async function getQueueStatus(): Promise<QueueStatus> {
   const organizationId = await getOrganizationId();
-  if (!organizationId) return { pending: 0, processing: 0, total: 0 };
+  if (!organizationId) {
+    return { pending: 0, processing: 0, total: 0, processingEnabled: true };
+  }
 
   const supabase = getServiceClient();
 
-  const [pendingResult, processingResult] = await Promise.all([
-    supabase
-      .from("cv_processing_queue")
-      .select("*", { count: "exact", head: true })
-      .eq("organization_id", organizationId)
-      .eq("status", "pending"),
-    supabase
-      .from("cv_processing_queue")
-      .select("*", { count: "exact", head: true })
-      .eq("organization_id", organizationId)
-      .eq("status", "processing"),
-  ]);
+  const [pendingResult, processingResult, processingEnabled] =
+    await Promise.all([
+      supabase
+        .from("cv_processing_queue")
+        .select("*", { count: "exact", head: true })
+        .eq("organization_id", organizationId)
+        .eq("status", "pending"),
+      supabase
+        .from("cv_processing_queue")
+        .select("*", { count: "exact", head: true })
+        .eq("organization_id", organizationId)
+        .eq("status", "processing"),
+      getProcessingEnabled(organizationId),
+    ]);
 
   const pending = pendingResult.count ?? 0;
   const processing = processingResult.count ?? 0;
-  return { pending, processing, total: pending + processing };
+  return {
+    pending,
+    processing,
+    total: pending + processing,
+    processingEnabled,
+  };
+}
+
+/** Activa o detiene el procesamiento global de la cola para la organización. */
+export async function setQueueProcessingEnabled(
+  enabled: boolean,
+): Promise<SetQueueProcessingResult> {
+  const organizationId = await getOrganizationId();
+  if (!organizationId) {
+    return { ok: false, error: "No autorizado" };
+  }
+
+  const supabase = getServiceClient();
+  const { error } = await supabase.from("cv_queue_settings").upsert(
+    {
+      organization_id: organizationId,
+      processing_enabled: enabled,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "organization_id" },
+  );
+
+  if (error) {
+    console.error(
+      "[queue-actions] Error al actualizar configuración de cola:",
+      error.message,
+    );
+    return { ok: false, error: error.message };
+  }
+
+  return { ok: true, processingEnabled: enabled };
 }

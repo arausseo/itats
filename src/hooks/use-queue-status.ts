@@ -7,7 +7,12 @@ import type { QueueStatus } from "@/src/types/upload";
 const POLL_INTERVAL_MS = 5_000;
 const ERROR_RETRY_MS = 8_000;
 
-const EMPTY_STATUS: QueueStatus = { pending: 0, processing: 0, total: 0 };
+const EMPTY_STATUS: QueueStatus = {
+  pending: 0,
+  processing: 0,
+  total: 0,
+  processingEnabled: true,
+};
 
 /**
  * Hook que consulta periódicamente el estado de la cola de procesamiento.

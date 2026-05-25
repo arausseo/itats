@@ -11,14 +11,14 @@ interface QueueStatusBadgeProps {
 }
 
 /**
- * Badge flotante estilo Google Photos que muestra el progreso de procesamiento
- * de CVs en segundo plano. Visible desde cualquier página mientras haya items
- * pendientes o en procesamiento.
+ * Badge flotante que muestra el progreso o la pausa del procesamiento de CVs.
  */
 export function QueueStatusBadge({ status }: QueueStatusBadgeProps) {
   const t = useTranslations("queueBadge");
 
   if (status.total === 0) return null;
+
+  const isPaused = !status.processingEnabled;
 
   return (
     <Link
@@ -28,10 +28,15 @@ export function QueueStatusBadge({ status }: QueueStatusBadgeProps) {
         "bg-card border border-border shadow-lg ring-1 ring-border/60",
         "text-sm font-medium text-foreground transition-all",
         "hover:shadow-xl hover:ring-primary/40",
+        isPaused && "border-amber-500/50 ring-amber-500/30",
       )}
     >
-      <Spinner className="h-4 w-4 text-primary" />
-      <span>{t("processing", { count: status.total })}</span>
+      {!isPaused && <Spinner className="h-4 w-4 text-primary" />}
+      <span>
+        {isPaused
+          ? t("paused", { count: status.total })
+          : t("processing", { count: status.total })}
+      </span>
     </Link>
   );
 }

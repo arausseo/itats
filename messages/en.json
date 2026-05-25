@@ -333,7 +333,16 @@
     "error": "Error"
   },
   "queueBadge": {
-    "processing": "Processing CVs · {count} remaining"
+    "processing": "Processing CVs · {count} remaining",
+    "paused": "Processing paused · {count} in queue"
+  },
+  "queueControl": {
+    "statusRunning": "Processing active",
+    "statusPaused": "Processing paused",
+    "start": "Start processing",
+    "stop": "Stop processing",
+    "pendingCount": "{count} file(s) pending or in progress",
+    "pausedHint": "Uploaded CVs will stay queued until you restart processing. If one is in progress, it will finish before the queue fully pauses."
   },
   "errors": {
     "unauthorized": "Unauthorized",

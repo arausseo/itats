@@ -333,7 +333,16 @@
     "error": "Error"
   },
   "queueBadge": {
-    "processing": "Procesando CVs · {count} restante(s)"
+    "processing": "Procesando CVs · {count} restante(s)",
+    "paused": "Procesamiento detenido · {count} en cola"
+  },
+  "queueControl": {
+    "statusRunning": "Procesamiento activo",
+    "statusPaused": "Procesamiento detenido",
+    "start": "Iniciar procesamiento",
+    "stop": "Detener procesamiento",
+    "pendingCount": "{count} archivo(s) pendiente(s) o en curso",
+    "pausedHint": "Los CVs subidos quedarán en cola hasta que reinicies el procesamiento. Si hay uno en curso, terminará antes de pausar por completo."
   },
   "errors": {
     "unauthorized": "No autorizado",

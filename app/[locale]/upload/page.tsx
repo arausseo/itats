@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/card";
 import { CvUploadZone } from "@/components/cv-upload-zone";
 import { QueueHistoryList } from "@/components/queue-history-list";
-import { getRecentQueueItems } from "@/src/lib/queue-actions";
+import { QueueControl } from "@/components/queue-control";
+import { getRecentQueueItems, getQueueStatus } from "@/src/lib/queue-actions";
 import { MAX_FILES } from "@/src/lib/upload-config";
 
 const PAGE_SIZE = 20;
@@ -41,7 +42,10 @@ export default async function UploadPage({ params }: UploadPageProps) {
     );
   }
 
-  const history = await getRecentQueueItems(1, PAGE_SIZE);
+  const [history, queueStatus] = await Promise.all([
+    getRecentQueueItems(1, PAGE_SIZE),
+    getQueueStatus(),
+  ]);
 
   return (
     <div className="min-h-full flex-1 bg-muted/30">
@@ -67,7 +71,8 @@ export default async function UploadPage({ params }: UploadPageProps) {
             </CardTitle>
             <CardDescription>{t("historyDescription")}</CardDescription>
           </CardHeader>
-          <CardContent className="pt-4">
+          <CardContent className="space-y-4 pt-4">
+            <QueueControl initialStatus={queueStatus} />
             <QueueHistoryList
               initialItems={history.items}
               initialTotal={history.total}
