@@ -48,6 +48,7 @@ const mapPayloadToRow = (
     cv_markdown,
     cv_sha256,
     embedding,
+    application_answers,
   } = payload;
   const markdown =
     cvMarkdownFromBody ?? cv_markdown ?? "";
@@ -73,6 +74,9 @@ const mapPayloadToRow = (
     cv_markdown: markdown,
     ...(cv_sha256 !== undefined ? { cv_sha256 } : {}),
     ...(embedding !== undefined ? { embedding } : {}),
+    ...(application_answers && application_answers.length > 0
+      ? { application_answers }
+      : {}),
   };
 };
 
@@ -144,6 +148,24 @@ Deno.serve(async (req: Request) => {
         { ok: false, error: error.message ?? "Database error" },
         500,
       );
+    }
+
+    // Si la postulación viene de una plaza pública, enlazar al pipeline.
+    // Errores aquí NO revierten la creación del candidato — se loguean y reporta éxito parcial.
+    if (parsed.data.position_id) {
+      const { error: linkError } = await supabaseResult.client
+        .from("position_candidates")
+        .insert({
+          position_id: parsed.data.position_id,
+          candidate_id: data.id,
+          pipeline_status: "Sourced",
+        });
+      if (linkError && linkError.code !== "23505") {
+        console.error(
+          "[process-candidate] No se pudo enlazar a plaza",
+          { positionId: parsed.data.position_id, candidateId: data.id, error: linkError.message },
+        );
+      }
     }
 
     return jsonResponse({ ok: true, id: data.id }, 200);

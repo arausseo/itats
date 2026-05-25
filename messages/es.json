@@ -56,6 +56,7 @@
     "reopenPosition": "Reabrir plaza",
     "tabPipeline": "Opciones",
     "tabSearch": "Buscar talento",
+    "tabQuestions": "Preguntas",
     "pipelineEmpty": "No hay candidatos en el pipeline todavía.",
     "pipelineEmptyHint": "Usa el buscador de talento para descubrir candidatos y añadirlos.",
     "colCandidate": "Candidato",
@@ -264,6 +265,9 @@
     "executiveSummary": "Resumen ejecutivo",
     "redFlags": "Red flags",
     "redFlagsClear": "Nada relevante",
+    "applicationAnswers": "Respuestas de postulación",
+    "answerYes": "Sí",
+    "answerNo": "No",
     "techStack": "Stack tecnológico",
     "languages": "Lenguajes",
     "frameworks": "Frameworks",
@@ -360,5 +364,43 @@
     "signLinkUnexpected": "Error inesperado al generar el enlace",
     "noteContentRequired": "El contenido de la nota es obligatorio",
     "noteIdRequired": "ID de nota requerido"
+  },
+  "publicApply": {
+    "metaDescription": "Postúlate a esta plaza",
+    "notFoundTitle": "Plaza no disponible",
+    "descriptionTitle": "Descripción",
+    "requirementsTitle": "Requisitos",
+    "formTitle": "Postúlate ahora",
+    "cvLabel": "Tu CV (PDF)",
+    "cvHint": "Máximo {sizeMb} MB. Sólo PDF.",
+    "submit": "Enviar postulación",
+    "submitting": "Enviando…",
+    "successTitle": "¡Postulación recibida!",
+    "successBody": "Gracias por postularte. Revisaremos tu CV y nos pondremos en contacto si tu perfil coincide.",
+    "poweredBy": "Powered by ATS",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "positionQuestions": {
+    "title": "Preguntas para postulantes",
+    "subtitle": "Estas preguntas se mostrarán en la página pública de la plaza. Las respuestas quedan asociadas al candidato.",
+    "addNew": "Agregar pregunta",
+    "textPlaceholder": "Ej. ¿Cuántos años de experiencia tienes en C#?",
+    "type.boolean": "Sí / No",
+    "type.numeric": "Numérica",
+    "type.text": "Texto libre",
+    "required": "Obligatoria",
+    "add": "Agregar",
+    "delete": "Eliminar",
+    "addedSuccess": "Pregunta agregada",
+    "deletedSuccess": "Pregunta eliminada",
+    "emptyTextError": "Escribe el texto de la pregunta"
+  },
+  "publicLink": {
+    "title": "Link público de postulación",
+    "subtitle": "Compártelo en LinkedIn o donde quieras recibir candidatos.",
+    "copyAria": "Copiar URL pública",
+    "missingSlug": "Tu organización no tiene un slug configurado, así que aún no se puede generar el link público.",
+    "closedHint": "El link público sólo está activo cuando la plaza está abierta."
   }
 }

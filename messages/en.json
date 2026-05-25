@@ -56,6 +56,7 @@
     "reopenPosition": "Reopen position",
     "tabPipeline": "Options",
     "tabSearch": "Search talent",
+    "tabQuestions": "Questions",
     "pipelineEmpty": "No candidates in the pipeline yet.",
     "pipelineEmptyHint": "Use the search talent tab to discover candidates and add them.",
     "colCandidate": "Candidate",
@@ -264,6 +265,9 @@
     "executiveSummary": "Executive summary",
     "redFlags": "Red flags",
     "redFlagsClear": "Nothing relevant",
+    "applicationAnswers": "Application answers",
+    "answerYes": "Yes",
+    "answerNo": "No",
     "techStack": "Tech stack",
     "languages": "Languages",
     "frameworks": "Frameworks",
@@ -360,5 +364,43 @@
     "signLinkUnexpected": "Unexpected error generating the link",
     "noteContentRequired": "Note content is required",
     "noteIdRequired": "Note ID is required"
+  },
+  "publicApply": {
+    "metaDescription": "Apply for this position",
+    "notFoundTitle": "Position not available",
+    "descriptionTitle": "Description",
+    "requirementsTitle": "Requirements",
+    "formTitle": "Apply now",
+    "cvLabel": "Your CV (PDF)",
+    "cvHint": "Maximum {sizeMb} MB. PDF only.",
+    "submit": "Send application",
+    "submitting": "Sending…",
+    "successTitle": "Application received!",
+    "successBody": "Thanks for applying. We'll review your CV and reach out if your profile matches.",
+    "poweredBy": "Powered by ATS",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "positionQuestions": {
+    "title": "Applicant questions",
+    "subtitle": "These questions appear on the public position page. Answers are stored on the candidate.",
+    "addNew": "Add question",
+    "textPlaceholder": "e.g. How many years of experience do you have with C#?",
+    "type.boolean": "Yes / No",
+    "type.numeric": "Numeric",
+    "type.text": "Free text",
+    "required": "Required",
+    "add": "Add",
+    "delete": "Delete",
+    "addedSuccess": "Question added",
+    "deletedSuccess": "Question deleted",
+    "emptyTextError": "Enter the question text"
+  },
+  "publicLink": {
+    "title": "Public application link",
+    "subtitle": "Share it on LinkedIn or anywhere you want to source candidates.",
+    "copyAria": "Copy public URL",
+    "missingSlug": "Your organization has no slug configured yet, so the public link can't be generated.",
+    "closedHint": "The public link is only active while the position is open."
   }
 }

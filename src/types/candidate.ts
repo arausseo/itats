@@ -52,6 +52,44 @@ export interface Candidate {
   cv_storage_path: string | null;
   /** Texto markdown extraído del CV por la IA. Vacío en registros anteriores a la migración. */
   cv_markdown: string;
+  /** Respuestas del candidato al postularse vía landing pública de una plaza. */
+  application_answers: ApplicationAnswer[];
+}
+
+export interface ApplicationAnswer {
+  question_id: string;
+  position_id: string;
+  question_text: string;
+  question_type: "boolean" | "numeric" | "text";
+  answer: string | number | boolean | null;
+  answered_at: string;
+}
+
+function parseApplicationAnswers(value: unknown): ApplicationAnswer[] {
+  if (!Array.isArray(value)) return [];
+  const out: ApplicationAnswer[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const r = item as Record<string, unknown>;
+    const type = r.question_type;
+    if (type !== "boolean" && type !== "numeric" && type !== "text") continue;
+    const ans = r.answer;
+    const validAns =
+      typeof ans === "string" ||
+      typeof ans === "number" ||
+      typeof ans === "boolean" ||
+      ans === null;
+    if (!validAns) continue;
+    out.push({
+      question_id: String(r.question_id ?? ""),
+      position_id: String(r.position_id ?? ""),
+      question_text: String(r.question_text ?? ""),
+      question_type: type,
+      answer: ans,
+      answered_at: String(r.answered_at ?? ""),
+    });
+  }
+  return out;
 }
 
 export function normalizeStringArray(value: unknown): string[] {
@@ -117,6 +155,7 @@ export function parseCandidateRow(row: unknown): Candidate {
         ? r.cv_storage_path.trim()
         : null,
     cv_markdown: String(r.cv_markdown ?? ""),
+    application_answers: parseApplicationAnswers(r.application_answers),
   };
 }
 
