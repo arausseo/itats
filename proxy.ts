@@ -48,7 +48,9 @@ export async function proxy(request: NextRequest) {
   const locale = localeFromPathname(pathname);
 
   const isPublic =
-    barePath === "/login" || barePath.startsWith("/login/");
+    barePath === "/login" ||
+    barePath.startsWith("/login/") ||
+    barePath.startsWith("/apply/");
 
   if (!user && !isPublic) {
     const loginUrl = request.nextUrl.clone();
