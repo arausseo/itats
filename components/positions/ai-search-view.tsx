@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { CandidateSearchCard } from "@/components/positions/candidate-search-card";
 import { searchCandidatesForPosition } from "@/src/lib/positions-actions";
+import { isoDateDaysAgo, isoDateToday } from "@/src/lib/candidate-list-params";
 import type { CandidateSearchResult } from "@/src/types/position";
 import type { Position } from "@/src/types/position";
 
@@ -27,14 +28,21 @@ interface AiSearchViewProps {
 
 export function AiSearchView({ positionId, position, seniorityOptions }: AiSearchViewProps) {
   const t = useTranslations("positions");
+  const tFilters = useTranslations("filters");
   const [query, setQuery] = useState("");
   const [seniority, setSeniority] = useState<string>(ALL);
+  const defaultDateFrom = isoDateDaysAgo(30);
+  const defaultDateTo = isoDateToday();
+  const [dateFrom, setDateFrom] = useState(defaultDateFrom);
+  const [dateTo, setDateTo] = useState(defaultDateTo);
   const [results, setResults] = useState<CandidateSearchResult[]>([]);
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  async function runSearch(q: string, sen: string) {
+  const isDefaultDateRange = dateFrom === defaultDateFrom && dateTo === defaultDateTo;
+
+  async function runSearch(q: string, sen: string, from: string, to: string) {
     setError(null);
     setSearched(false);
     startTransition(async () => {
@@ -42,6 +50,8 @@ export function AiSearchView({ positionId, position, seniorityOptions }: AiSearc
         q,
         positionId,
         sen === ALL ? undefined : sen,
+        from,
+        to,
       );
       if (!res.ok) {
         setError(res.error);
@@ -55,14 +65,14 @@ export function AiSearchView({ positionId, position, seniorityOptions }: AiSearc
 
   // Auto-búsqueda al montar usando datos de la plaza
   useEffect(() => {
-    void runSearch("", ALL);
+    void runSearch("", ALL, defaultDateFrom, defaultDateTo);
     // Solo al montar — positionId no cambia en esta página
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [positionId]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    void runSearch(query, seniority);
+    void runSearch(query, seniority, dateFrom, dateTo);
   }
 
   function handleAdded(candidateId: string) {
@@ -73,35 +83,85 @@ export function AiSearchView({ positionId, position, seniorityOptions }: AiSearc
     <div className="flex flex-col gap-6">
       <div>
         <p className="mb-3 text-sm text-muted-foreground">{t("searchHint")}</p>
-        <form onSubmit={handleSearch} className="flex flex-col gap-2 sm:flex-row">
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t("searchPlaceholder")}
-            className="flex-1"
-            disabled={isPending}
-          />
-          {seniorityOptions.length > 0 && (
-            <Select value={seniority} onValueChange={setSeniority} disabled={isPending}>
-              <SelectTrigger className="h-10 w-full sm:w-44">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL} className="text-xs">
-                  {t("filterAll")}
-                </SelectItem>
-                {seniorityOptions.map((s) => (
-                  <SelectItem key={s} value={s} className="text-xs">
-                    {s}
+        <form onSubmit={handleSearch} className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t("searchPlaceholder")}
+              className="flex-1"
+              disabled={isPending}
+            />
+            {seniorityOptions.length > 0 && (
+              <Select value={seniority} onValueChange={setSeniority} disabled={isPending}>
+                <SelectTrigger className="h-10 w-full sm:w-44">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL} className="text-xs">
+                    {t("filterAll")}
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          <Button type="submit" disabled={isPending} className="shrink-0">
-            {isPending ? <Spinner className="mr-2 h-4 w-4" /> : null}
-            {isPending ? t("searching") : t("searchButton")}
-          </Button>
+                  {seniorityOptions.map((s) => (
+                    <SelectItem key={s} value={s} className="text-xs">
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Button type="submit" disabled={isPending} className="shrink-0">
+              {isPending ? <Spinner className="mr-2 h-4 w-4" /> : null}
+              {isPending ? t("searching") : t("searchButton")}
+            </Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <label
+                htmlFor="ai-search-date-from"
+                className="text-xs text-muted-foreground"
+              >
+                {tFilters("dateFrom")}
+              </label>
+              <Input
+                id="ai-search-date-from"
+                type="date"
+                value={dateFrom}
+                max={dateTo}
+                onChange={(e) => setDateFrom(e.target.value)}
+                disabled={isPending}
+                className="h-8 w-36 text-xs"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <label
+                htmlFor="ai-search-date-to"
+                className="text-xs text-muted-foreground"
+              >
+                {tFilters("dateTo")}
+              </label>
+              <Input
+                id="ai-search-date-to"
+                type="date"
+                value={dateTo}
+                min={dateFrom}
+                onChange={(e) => setDateTo(e.target.value)}
+                disabled={isPending}
+                className="h-8 w-36 text-xs"
+              />
+            </div>
+            {!isDefaultDateRange && (
+              <button
+                type="button"
+                onClick={() => {
+                  setDateFrom(defaultDateFrom);
+                  setDateTo(defaultDateTo);
+                }}
+                className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                {tFilters("dateReset")}
+              </button>
+            )}
+          </div>
         </form>
       </div>
 

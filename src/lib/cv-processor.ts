@@ -457,7 +457,11 @@ async function callProcessCandidateEdgeFunction(
   sha256: string,
   positionId: string | null,
   applicationAnswers: ApplicationAnswer[],
-): Promise<{ kind: "inserted" } | { kind: "duplicate"; message: string }> {
+): Promise<
+  | { kind: "inserted" }
+  | { kind: "duplicate"; message: string }
+  | { kind: "not_cv"; message: string }
+> {
   if (!UUID_RE.test(organizationId)) {
     throw new Error(
       `organizationId no es un UUID válido (¿perfil sin organization_id?): ${organizationId}`,
@@ -493,10 +497,16 @@ async function callProcessCandidateEdgeFunction(
         : {}),
     }),
   });
-  const json = (await res.json()) as { ok: boolean; error?: string };
+  const json = (await res.json()) as {
+    ok: boolean;
+    error?: string;
+    not_cv?: boolean;
+    message?: string;
+  };
   cvLog("Edge: respuesta process-candidate", {
     status: res.status,
     ok: json.ok,
+    not_cv: json.not_cv,
     error: json.error,
   });
   if (res.status === 409) {
@@ -510,6 +520,15 @@ async function callProcessCandidateEdgeFunction(
   }
   if (!json.ok) {
     throw new Error(json.error ?? `Edge Function error: ${res.status}`);
+  }
+  if (json.not_cv === true) {
+    const message =
+      json.message?.trim() || "El archivo no fue clasificado como CV por la IA.";
+    cvLog("Edge: archivo no es CV, no se insertó fila", {
+      storagePath,
+      message,
+    });
+    return { kind: "not_cv", message };
   }
   return { kind: "inserted" };
 }
@@ -598,6 +617,9 @@ export async function runCvPipeline({
 
     if (edge.kind === "duplicate") {
       return { storagePath, status: "duplicado", message: edge.message };
+    }
+    if (edge.kind === "not_cv") {
+      return { storagePath, status: "no_cv", message: edge.message };
     }
     return { storagePath, status: "completado" };
   } catch (err) {

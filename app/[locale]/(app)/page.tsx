@@ -149,41 +149,47 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 7);
 
-  // ─── Candidate trend (last 6 months) ──────────────────────────────────────
-  const allCandidateDates: string[] = [];
-  if (seniorityResult.status === "fulfilled") {
-    // Reuse the candidates query for dates — fetch separately
-  }
-
-  // Build trend from recent result (rough approximation using available data)
-  // We need created_at for all candidates — use a dedicated query result
-  const trendRows = recentCandidatesResult.status === "fulfilled"
-    ? (recentCandidatesResult.value.data ?? [])
-    : [];
-
-  // Build month labels for the last 6 months
+  // ─── Candidate trend (last 12 weeks, weekly) ──────────────────────────────
+  const TREND_WEEKS = 12;
   const now = new Date();
-  const monthTrend: { month: string; count: number }[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const label = d.toLocaleString("default", { month: "short", year: "2-digit" });
-    monthTrend.push({ month: label, count: 0 });
+
+  // Compute Monday of each of the last TREND_WEEKS weeks
+  const todayDay = now.getDay(); // 0=Sun..6=Sat
+  const daysToMonday = todayDay === 0 ? 6 : todayDay - 1;
+  const thisMonday = new Date(now);
+  thisMonday.setDate(now.getDate() - daysToMonday);
+  thisMonday.setHours(0, 0, 0, 0);
+
+  const weekStarts: Date[] = [];
+  for (let i = TREND_WEEKS - 1; i >= 0; i--) {
+    const d = new Date(thisMonday);
+    d.setDate(thisMonday.getDate() - i * 7);
+    weekStarts.push(d);
   }
 
-  // ─── Trend query: fetch all candidate created_at for last 6 months ─────────
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
-    .toISOString()
-    .slice(0, 10);
+  const weekTrend: { label: string; count: number; iso: string }[] =
+    weekStarts.map((d) => ({
+      label: d.toLocaleDateString("default", { month: "short", day: "numeric" }),
+      count: 0,
+      iso: d.toISOString().slice(0, 10),
+    }));
+
+  const twelveWeeksAgo = weekStarts[0]!.toISOString().slice(0, 10);
   const { data: trendData } = await supabase
     .from("candidates")
     .select("created_at")
-    .gte("created_at", sixMonthsAgo);
+    .gte("created_at", twelveWeeksAgo);
 
   for (const row of trendData ?? []) {
     const d = new Date((row as { created_at: string }).created_at);
-    const label = d.toLocaleString("default", { month: "short", year: "2-digit" });
-    const entry = monthTrend.find((m) => m.month === label);
-    if (entry) entry.count++;
+    d.setHours(0, 0, 0, 0);
+    // Find which week bucket this date falls into
+    for (let i = weekTrend.length - 1; i >= 0; i--) {
+      if (d >= new Date(weekTrend[i]!.iso)) {
+        weekTrend[i]!.count++;
+        break;
+      }
+    }
   }
 
   // ─── Recent candidates ─────────────────────────────────────────────────────
@@ -285,7 +291,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
             <p className="mb-4 text-xs text-muted-foreground">
               {t("chartTrendSubtitle")}
             </p>
-            <CandidatesTrendChart data={monthTrend} />
+            <CandidatesTrendChart data={weekTrend} />
           </div>
 
           {/* Seniority donut */}

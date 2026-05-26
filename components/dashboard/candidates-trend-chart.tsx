@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 interface CandidatesTrendChartProps {
-  data: { month: string; count: number }[];
+  data: { label: string; count: number }[];
 }
 
 export function CandidatesTrendChart({ data }: CandidatesTrendChartProps) {
@@ -29,10 +29,11 @@ export function CandidatesTrendChart({ data }: CandidatesTrendChartProps) {
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
         <XAxis
-          dataKey="month"
+          dataKey="label"
           tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
           axisLine={false}
           tickLine={false}
+          interval="preserveStartEnd"
         />
         <YAxis
           allowDecimals={false}

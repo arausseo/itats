@@ -5,6 +5,7 @@ export type FileUploadStatus =
   | "procesando"
   | "completado"
   | "duplicado"
+  | "no_cv"
   | "error";
 
 export interface FileUploadEntry {
@@ -46,6 +47,7 @@ export interface ApplicationAnswer {
 export type CvProcessingOutcome =
   | { storagePath: string; status: "completado" }
   | { storagePath: string; status: "duplicado"; message: string }
+  | { storagePath: string; status: "no_cv"; message: string }
   | { storagePath: string; status: "error"; error: string };
 
 export type StartProcessingResult =
@@ -63,7 +65,13 @@ export interface QueueItem {
   readonly storage_path: string;
   readonly file_name: string;
   readonly cv_sha256: string | null;
-  readonly status: "pending" | "processing" | "completed" | "duplicate" | "error";
+  readonly status:
+    | "pending"
+    | "processing"
+    | "completed"
+    | "duplicate"
+    | "not_cv"
+    | "error";
   readonly result_message: string | null;
   readonly locked_by: string | null;
   readonly locked_at: string | null;

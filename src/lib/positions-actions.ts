@@ -195,6 +195,8 @@ export async function searchCandidatesForPosition(
   query: string,
   positionId: string,
   seniority?: string,
+  dateFrom?: string,
+  dateTo?: string,
 ): Promise<{ ok: true; results: CandidateSearchResult[] } | { ok: false; error: string }> {
   const q = query.trim();
   if (!positionId) return { ok: false, error: "ID de plaza requerido." };
@@ -238,15 +240,35 @@ export async function searchCandidatesForPosition(
 
     if (error) return { ok: false, error: error.message };
 
-    const results: CandidateSearchResult[] = (
-      (data ?? []) as Array<{
-        id: string;
-        nombre: string;
-        rol_principal: string;
-        seniority_estimado: string;
-        similarity: number;
-      }>
-    ).map((r) => ({
+    type RpcRow = {
+      id: string;
+      nombre: string;
+      rol_principal: string;
+      seniority_estimado: string;
+      similarity: number;
+    };
+
+    let rows = (data ?? []) as RpcRow[];
+
+    // Post-filter by date range when provided
+    if ((dateFrom || dateTo) && rows.length > 0) {
+      const ids = rows.map((r) => r.id);
+      let dateQuery = supabase
+        .from("candidates")
+        .select("id")
+        .in("id", ids);
+      if (dateFrom) {
+        dateQuery = dateQuery.gte("created_at", `${dateFrom}T00:00:00.000Z`);
+      }
+      if (dateTo) {
+        dateQuery = dateQuery.lte("created_at", `${dateTo}T23:59:59.999Z`);
+      }
+      const { data: dateRows } = await dateQuery;
+      const allowedIds = new Set((dateRows ?? []).map((r) => (r as { id: string }).id));
+      rows = rows.filter((r) => allowedIds.has(r.id));
+    }
+
+    const results: CandidateSearchResult[] = rows.map((r) => ({
       id: r.id,
       nombre: r.nombre,
       rol_principal: r.rol_principal,
