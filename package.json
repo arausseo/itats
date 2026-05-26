@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "worker:dev": "tsx --env-file=.env.worker --tsconfig tsconfig.worker.json worker/src/main.ts",
+    "worker:build": "tsc -p tsconfig.worker.json && tsc-alias -p tsconfig.worker.json && node scripts/finalize-worker-build.mjs",
+    "worker:start": "node dist-worker/worker/src/main.js"
   },
   "dependencies": {
     "@google/genai": "^1.50.1",
@@ -41,6 +44,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
     "tailwindcss": "^4",
+    "tsc-alias": "^1.8.16",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   }
 }

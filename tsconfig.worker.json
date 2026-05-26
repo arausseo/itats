@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist-worker",
+    "noEmit": false,
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "jsx": "preserve",
+    "incremental": false,
+    "isolatedModules": false,
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "rootDir": "./",
+    "skipLibCheck": true
+  },
+  "include": [
+    "worker/src/**/*.ts",
+    "src/lib/cv-processor.ts",
+    "src/types/upload.ts",
+    "src/types/candidate.ts"
+  ],
+  "exclude": ["node_modules", "supabase/functions", ".next", "dist-worker"]
+}
