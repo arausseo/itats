@@ -9,6 +9,7 @@ import {
   getCandidateById,
   generatePositionRanking,
   generateRankingReport,
+  removeFromPipeline,
 } from "@/src/lib/positions-actions";
 import type { PositionCandidateWithCandidate, PipelineStatus } from "@/src/types/position";
 import { PIPELINE_STATUSES } from "@/src/types/position";
@@ -99,6 +100,9 @@ export function PipelineView({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewMarkdown, setPreviewMarkdown] = useState<string | null>(null);
   const [previewFilename, setPreviewFilename] = useState<string>("ranking.md");
+  const [removeTarget, setRemoveTarget] = useState<{ id: string; name: string } | null>(null);
+  const [isRemovePending, startRemoveTransition] = useTransition();
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   const hasRanking = positionCandidates.some((pc) => pc.ranking_score !== null);
   const canGenerateRanking = positionCandidates.length >= MIN_CANDIDATES_FOR_RANKING;
@@ -209,6 +213,20 @@ export function PipelineView({
     a.download = previewFilename;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function handleRemoveConfirm() {
+    if (!removeTarget) return;
+    setRemoveError(null);
+    startRemoveTransition(async () => {
+      const res = await removeFromPipeline(removeTarget.id);
+      if (!res.ok) {
+        setRemoveError(res.error);
+      } else {
+        setRemoveTarget(null);
+        router.refresh();
+      }
+    });
   }
 
   if (positionCandidates.length === 0) {
@@ -426,22 +444,49 @@ export function PipelineView({
                       {new Date(pc.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-xs"
-                        disabled={fetchingId === pc.candidate_id && fetchTransition}
-                        onClick={() => openDetail(pc.candidate_id)}
-                      >
-                        {fetchingId === pc.candidate_id && fetchTransition ? (
-                          <span className="inline-flex items-center gap-1.5">
-                            <Spinner className="h-3 w-3" />
-                            {t("viewProfile")}
-                          </span>
-                        ) : (
-                          t("viewProfile")
-                        )}
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          disabled={fetchingId === pc.candidate_id && fetchTransition}
+                          onClick={() => openDetail(pc.candidate_id)}
+                        >
+                          {fetchingId === pc.candidate_id && fetchTransition ? (
+                            <span className="inline-flex items-center gap-1.5">
+                              <Spinner className="h-3 w-3" />
+                              {t("viewProfile")}
+                            </span>
+                          ) : (
+                            t("viewProfile")
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                          title={t("removeFromPipeline")}
+                          onClick={() =>
+                            setRemoveTarget({
+                              id: pc.id,
+                              name: pc.candidate.nombre,
+                            })
+                          }
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            fill="currentColor"
+                            className="h-3.5 w-3.5"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -484,6 +529,57 @@ export function PipelineView({
         onNavigate={(c) => loadCandidateById(c.id, false)}
         isLoadingCandidate={sheetOpen && fetchTransition}
       />
+
+      {/* Confirm remove from pipeline */}
+      <Dialog
+        open={!!removeTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRemoveTarget(null);
+            setRemoveError(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t("removeConfirmTitle")}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {t("removeConfirmDescription", { name: removeTarget?.name ?? "" })}
+          </p>
+          {removeError && (
+            <p className="text-xs text-destructive">{removeError}</p>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setRemoveTarget(null);
+                setRemoveError(null);
+              }}
+              disabled={isRemovePending}
+            >
+              {t("cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleRemoveConfirm}
+              disabled={isRemovePending}
+            >
+              {isRemovePending ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Spinner className="h-3.5 w-3.5" />
+                  {t("removing")}
+                </span>
+              ) : (
+                t("removeConfirm")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

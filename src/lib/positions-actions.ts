@@ -166,6 +166,25 @@ export async function updatePipelineStatus(
   }
 }
 
+// ─── Eliminar candidato del pipeline ─────────────────────────────────────────
+
+export async function removeFromPipeline(
+  positionCandidateId: string,
+): Promise<ActionResult> {
+  if (!positionCandidateId) return { ok: false, error: "ID requerido." };
+  try {
+    const { supabase } = await requireAuth();
+    const { error } = await supabase
+      .from("position_candidates")
+      .delete()
+      .eq("id", positionCandidateId);
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, data: undefined };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Error inesperado." };
+  }
+}
+
 // ─── Valores únicos de seniority ─────────────────────────────────────────────
 
 export async function getSeniorityOptions(): Promise<string[]> {
