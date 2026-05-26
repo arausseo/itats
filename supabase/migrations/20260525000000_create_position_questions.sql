@@ -2,9 +2,18 @@
 -- Tipos: boolean (sí/no), numeric (entero/decimal positivo), text (libre).
 -- `required = true` obliga al candidato a responder en el formulario público.
 
-CREATE TYPE public.position_question_type AS ENUM ('boolean', 'numeric', 'text');
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_type t
+    JOIN pg_namespace n ON n.oid = t.typnamespace
+    WHERE t.typname = 'position_question_type' AND n.nspname = 'public'
+  ) THEN
+    CREATE TYPE public.position_question_type AS ENUM ('boolean', 'numeric', 'text');
+  END IF;
+END $$;
 
-CREATE TABLE public.position_questions (
+CREATE TABLE IF NOT EXISTS public.position_questions (
   id             uuid                          PRIMARY KEY DEFAULT gen_random_uuid(),
   position_id    uuid                          NOT NULL REFERENCES public.positions (id) ON DELETE CASCADE,
   question_text  text                          NOT NULL,
@@ -19,12 +28,13 @@ COMMENT ON TABLE  public.position_questions IS 'Preguntas configurables por plaz
 COMMENT ON COLUMN public.position_questions.required IS 'Si true, el candidato debe responder para enviar la postulación.';
 COMMENT ON COLUMN public.position_questions.order_index IS 'Orden de aparición en el formulario (asc).';
 
-CREATE INDEX position_questions_position_id_idx
+CREATE INDEX IF NOT EXISTS position_questions_position_id_idx
   ON public.position_questions (position_id, order_index);
 
 ALTER TABLE public.position_questions ENABLE ROW LEVEL SECURITY;
 
 -- Lectura/escritura sólo para miembros de la misma organización
+DROP POLICY IF EXISTS "position_questions_select_same_org" ON public.position_questions;
 CREATE POLICY "position_questions_select_same_org"
   ON public.position_questions FOR SELECT TO authenticated
   USING (
@@ -35,6 +45,7 @@ CREATE POLICY "position_questions_select_same_org"
     )
   );
 
+DROP POLICY IF EXISTS "position_questions_insert_same_org" ON public.position_questions;
 CREATE POLICY "position_questions_insert_same_org"
   ON public.position_questions FOR INSERT TO authenticated
   WITH CHECK (
@@ -45,6 +56,7 @@ CREATE POLICY "position_questions_insert_same_org"
     )
   );
 
+DROP POLICY IF EXISTS "position_questions_update_same_org" ON public.position_questions;
 CREATE POLICY "position_questions_update_same_org"
   ON public.position_questions FOR UPDATE TO authenticated
   USING (
@@ -62,6 +74,7 @@ CREATE POLICY "position_questions_update_same_org"
     )
   );
 
+DROP POLICY IF EXISTS "position_questions_delete_same_org" ON public.position_questions;
 CREATE POLICY "position_questions_delete_same_org"
   ON public.position_questions FOR DELETE TO authenticated
   USING (

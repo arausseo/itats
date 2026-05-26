@@ -16,7 +16,7 @@
 -- ]
 
 ALTER TABLE public.candidates
-  ADD COLUMN application_answers jsonb NOT NULL DEFAULT '[]'::jsonb;
+  ADD COLUMN IF NOT EXISTS application_answers jsonb NOT NULL DEFAULT '[]'::jsonb;
 
 COMMENT ON COLUMN public.candidates.application_answers IS
   'Respuestas del candidato a las preguntas de la plaza por la que se postuló (metadata del candidato).';
