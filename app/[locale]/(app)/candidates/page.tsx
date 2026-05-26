@@ -6,6 +6,8 @@ import {
   getStringListParam,
   parsePaginationFromSearchParams,
   parseSortFromSearchParams,
+  isoDateDaysAgo,
+  isoDateToday,
   type SortDir,
 } from "@/src/lib/candidate-list-params";
 import {
@@ -73,6 +75,11 @@ export default async function CandidatesPage({
   const libre = (firstString(search.libre) ?? "").trim();
   const seniority = (firstString(search.seniority) ?? "").trim();
   const pais = (firstString(search.pais) ?? "").trim();
+
+  const defaultDateFrom = isoDateDaysAgo(30);
+  const defaultDateTo = isoDateToday();
+  const dateFrom = (firstString(search.dateFrom) ?? "").trim() || defaultDateFrom;
+  const dateTo = (firstString(search.dateTo) ?? "").trim() || defaultDateTo;
 
   const roles = getStringListParam(search, "rol");
   const stacks = getStringListParam(search, "stack");
@@ -147,6 +154,8 @@ export default async function CandidatesPage({
       stacks,
       frameworks,
       patrones,
+      dateFrom,
+      dateTo,
     };
 
     const facetOpt: FacetCountOptions = {
@@ -231,6 +240,8 @@ export default async function CandidatesPage({
                 frameworkOptions={frameworkOptions}
                 patronOptions={patronOptions}
                 facetCounts={facetCounts}
+                defaultDateFrom={defaultDateFrom}
+                defaultDateTo={defaultDateTo}
               />
             </Suspense>
           </CardHeader>

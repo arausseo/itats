@@ -150,7 +150,7 @@
     "statHired": "Contratados",
     "statHiredHint": "Total de contratados",
     "chartTrendTitle": "Nuevos Candidatos",
-    "chartTrendSubtitle": "Candidatos añadidos en los últimos 6 meses",
+    "chartTrendSubtitle": "Candidatos añadidos por semana en las últimas 12 semanas",
     "chartSeniorityTitle": "Por Seniority",
     "chartSenioritySubtitle": "Distribución de seniority en todos los candidatos",
     "chartPipelineTitle": "Desglose del Pipeline",
@@ -205,6 +205,7 @@
     "processing": "Procesando",
     "completed": "Completado",
     "duplicate": "Ya existía",
+    "not_cv": "No es CV",
     "error": "Error"
   },
   "filters": {
@@ -221,7 +222,10 @@
     "rol": "Rol principal",
     "stack": "Stack (lenguajes)",
     "frameworks": "Frameworks",
-    "patrones": "Patrones"
+    "patrones": "Patrones",
+    "dateFrom": "Registrado desde",
+    "dateTo": "hasta",
+    "dateReset": "Últimos 30 días"
   },
   "multiSelect": {
     "all": "Todos",
@@ -334,6 +338,7 @@
     "procesando": "Procesando",
     "completado": "Completado",
     "duplicado": "Ya existía",
+    "no_cv": "No es CV",
     "error": "Error"
   },
   "queueBadge": {

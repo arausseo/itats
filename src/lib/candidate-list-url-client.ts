@@ -11,6 +11,8 @@ import {
   PARAM_SENIORITY,
   PARAM_SORT,
   PARAM_STACK,
+  PARAM_DATE_FROM,
+  PARAM_DATE_TO,
   DEFAULT_PAGE_SIZE,
   normalizePageSize,
   setRepeatedParam,
@@ -29,6 +31,8 @@ export type CandidateListUrlPatch = {
   dir?: string;
   page?: string;
   pageSize?: string;
+  dateFrom?: string;
+  dateTo?: string;
 };
 
 /**
@@ -111,6 +115,20 @@ export function mergeCandidateListUrl(
       p.delete(PARAM_PAGE_SIZE);
     } else {
       p.set(PARAM_PAGE_SIZE, String(normalized));
+    }
+  }
+  if (patch.dateFrom !== undefined) {
+    if (patch.dateFrom.trim()) {
+      p.set(PARAM_DATE_FROM, patch.dateFrom.trim());
+    } else {
+      p.delete(PARAM_DATE_FROM);
+    }
+  }
+  if (patch.dateTo !== undefined) {
+    if (patch.dateTo.trim()) {
+      p.set(PARAM_DATE_TO, patch.dateTo.trim());
+    } else {
+      p.delete(PARAM_DATE_TO);
     }
   }
 

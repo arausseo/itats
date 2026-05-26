@@ -17,6 +17,8 @@ import {
   PARAM_FW,
   PARAM_PAT,
   PARAM_STACK,
+  PARAM_DATE_FROM,
+  PARAM_DATE_TO,
 } from "@/src/lib/candidate-list-params";
 import {
   listParamFromSearchParams,
@@ -39,6 +41,8 @@ export type CandidateFiltersProps = {
   frameworkOptions: string[];
   patronOptions: string[];
   facetCounts: FacetCountBundle;
+  defaultDateFrom: string;
+  defaultDateTo: string;
   className?: string;
 };
 
@@ -59,6 +63,8 @@ export function CandidateFilters({
   frameworkOptions,
   patronOptions,
   facetCounts,
+  defaultDateFrom,
+  defaultDateTo,
   className,
 }: CandidateFiltersProps) {
   const t = useTranslations("filters");
@@ -75,6 +81,11 @@ export function CandidateFilters({
   const paisFromUrl =
     getSingleParam(searchParams.get("pais") ?? undefined) ?? "";
 
+  const dateFromUrl =
+    getSingleParam(searchParams.get(PARAM_DATE_FROM) ?? undefined) ?? defaultDateFrom;
+  const dateToUrl =
+    getSingleParam(searchParams.get(PARAM_DATE_TO) ?? undefined) ?? defaultDateTo;
+
   const rolSelected = listParamFromSearchParams(searchParams, PARAM_ROL);
   const stackSelected = listParamFromSearchParams(searchParams, PARAM_STACK);
   const fwSelected = listParamFromSearchParams(searchParams, PARAM_FW);
@@ -82,6 +93,8 @@ export function CandidateFilters({
 
   const [qInput, setQInput] = useState(qFromUrl);
   const [libreInput, setLibreInput] = useState(libreFromUrl);
+  const [dateFromInput, setDateFromInput] = useState(dateFromUrl);
+  const [dateToInput, setDateToInput] = useState(dateToUrl);
 
   useEffect(() => {
     setQInput(qFromUrl);
@@ -90,6 +103,14 @@ export function CandidateFilters({
   useEffect(() => {
     setLibreInput(libreFromUrl);
   }, [libreFromUrl]);
+
+  useEffect(() => {
+    setDateFromInput(dateFromUrl);
+  }, [dateFromUrl]);
+
+  useEffect(() => {
+    setDateToInput(dateToUrl);
+  }, [dateToUrl]);
 
   const replaceUrl = useCallback(
     (patch: CandidateListUrlPatch) => {
@@ -111,24 +132,45 @@ export function CandidateFilters({
       libre?: string;
       seniority?: string;
       pais?: string;
+      dateFrom?: string;
+      dateTo?: string;
     }) => {
       const patch: CandidateListUrlPatch = { page: "1" };
-      if (next.q !== undefined) {
-        patch.q = next.q;
-      }
-      if (next.libre !== undefined) {
-        patch.libre = next.libre;
-      }
-      if (next.seniority !== undefined) {
-        patch.seniority = next.seniority;
-      }
-      if (next.pais !== undefined) {
-        patch.pais = next.pais;
-      }
+      if (next.q !== undefined) patch.q = next.q;
+      if (next.libre !== undefined) patch.libre = next.libre;
+      if (next.seniority !== undefined) patch.seniority = next.seniority;
+      if (next.pais !== undefined) patch.pais = next.pais;
+      if (next.dateFrom !== undefined) patch.dateFrom = next.dateFrom;
+      if (next.dateTo !== undefined) patch.dateTo = next.dateTo;
       replaceUrl(patch);
     },
     [replaceUrl],
   );
+
+  const handleDateFromChange = useCallback(
+    (value: string) => {
+      setDateFromInput(value);
+      pushTextFilters({ dateFrom: value });
+    },
+    [pushTextFilters],
+  );
+
+  const handleDateToChange = useCallback(
+    (value: string) => {
+      setDateToInput(value);
+      pushTextFilters({ dateTo: value });
+    },
+    [pushTextFilters],
+  );
+
+  const isDefaultDateRange =
+    dateFromInput === defaultDateFrom && dateToInput === defaultDateTo;
+
+  const resetDateRange = useCallback(() => {
+    setDateFromInput(defaultDateFrom);
+    setDateToInput(defaultDateTo);
+    replaceUrl({ dateFrom: "", dateTo: "", page: "1" });
+  }, [defaultDateFrom, defaultDateTo, replaceUrl]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -198,7 +240,52 @@ export function CandidateFilters({
         ) : null}
       </div>
 
-      {/* Fila 2: senioridad, país, rol */}
+      {/* Fila 2: rango de fechas */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+        <div className="space-y-1.5">
+          <label
+            htmlFor="candidate-date-from"
+            className="text-xs font-medium text-muted-foreground"
+          >
+            {t("dateFrom")}
+          </label>
+          <Input
+            id="candidate-date-from"
+            type="date"
+            value={dateFromInput}
+            max={dateToInput}
+            onChange={(e) => handleDateFromChange(e.target.value)}
+            className="w-40"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label
+            htmlFor="candidate-date-to"
+            className="text-xs font-medium text-muted-foreground"
+          >
+            {t("dateTo")}
+          </label>
+          <Input
+            id="candidate-date-to"
+            type="date"
+            value={dateToInput}
+            min={dateFromInput}
+            onChange={(e) => handleDateToChange(e.target.value)}
+            className="w-40"
+          />
+        </div>
+        {!isDefaultDateRange && (
+          <button
+            type="button"
+            onClick={resetDateRange}
+            className="pb-0.5 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline sm:pb-2"
+          >
+            {t("dateReset")}
+          </button>
+        )}
+      </div>
+
+      {/* Fila 3: senioridad, país, rol */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="space-y-1.5">
           <span className="block text-xs font-medium text-muted-foreground">
@@ -267,7 +354,7 @@ export function CandidateFilters({
         />
       </div>
 
-      {/* Fila 3: stack, frameworks, patrones */}
+      {/* Fila 4: stack, frameworks, patrones */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <MultiSelectFilter
           label={t("stack")}

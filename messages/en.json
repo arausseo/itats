@@ -150,7 +150,7 @@
     "statHired": "Hired",
     "statHiredHint": "All-time hired",
     "chartTrendTitle": "New Candidates",
-    "chartTrendSubtitle": "Candidates added over the last 6 months",
+    "chartTrendSubtitle": "Candidates added per week over the last 12 weeks",
     "chartSeniorityTitle": "By Seniority",
     "chartSenioritySubtitle": "Seniority distribution across all candidates",
     "chartPipelineTitle": "Pipeline Breakdown",
@@ -205,6 +205,7 @@
     "processing": "Processing",
     "completed": "Completed",
     "duplicate": "Already existed",
+    "not_cv": "Not a CV",
     "error": "Error"
   },
   "filters": {
@@ -221,7 +222,10 @@
     "rol": "Primary role",
     "stack": "Stack (languages)",
     "frameworks": "Frameworks",
-    "patrones": "Patterns"
+    "patrones": "Patterns",
+    "dateFrom": "Registered from",
+    "dateTo": "to",
+    "dateReset": "Reset to last 30 days"
   },
   "multiSelect": {
     "all": "All",
@@ -334,6 +338,7 @@
     "procesando": "Processing",
     "completado": "Completed",
     "duplicado": "Already existed",
+    "no_cv": "Not a CV",
     "error": "Error"
   },
   "queueBadge": {
