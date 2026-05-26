@@ -8,32 +8,52 @@ export const redFlagsField = z
     return v.length ? v.join("\n") : "";
   });
 
-/** Contrato exacto del body POST (validación estricta con Zod). */
+/**
+ * Contrato del body POST.
+ *
+ * Cuando la IA determina que el archivo no es un CV debe devolver
+ * `{ "es_cv": false }` (sin necesidad de poblar el resto del payload).
+ * En ese caso el Edge NO inserta candidato; responde 200 con `not_cv: true`
+ * y el pipeline marca el item de la cola como `not_cv`.
+ *
+ * Cuando `es_cv` es true u omitido, se asume que la IA pudo extraer el perfil
+ * y se valida el shape completo.
+ */
 export const candidatePayloadSchema = z.object({
   organization_id: z.string().uuid(),
-  datos_personales: z.object({
-    nombre: z.string(),
-    pais_residencia: z.string(),
-    email: z.string(),
-    telefono: z.string(),
-  }),
-  perfil_tecnico: z.object({
-    rol_principal: z.string(),
-    lenguajes: z.array(z.string()),
-    frameworks_y_herramientas: z.array(z.string()),
-    patrones_y_arquitectura: z.array(z.string()),
-  }),
-  evaluacion: z.object({
-    anos_experiencia_total: z.number().int(),
-    sectores: z.array(z.string()),
-    seniority_estimado: z.string(),
-    resumen_ejecutivo: z.string(),
-    red_flags: redFlagsField,
-  }),
-  educacion_y_certificaciones: z.object({
-    educacion_formal: z.string(),
-    certificaciones: z.array(z.string()).default([]),
-  }),
+  /** Bandera explícita de la IA. Si false ⇒ no se crea candidato. */
+  es_cv: z.boolean().optional(),
+  datos_personales: z
+    .object({
+      nombre: z.string(),
+      pais_residencia: z.string(),
+      email: z.string(),
+      telefono: z.string(),
+    })
+    .optional(),
+  perfil_tecnico: z
+    .object({
+      rol_principal: z.string(),
+      lenguajes: z.array(z.string()),
+      frameworks_y_herramientas: z.array(z.string()),
+      patrones_y_arquitectura: z.array(z.string()),
+    })
+    .optional(),
+  evaluacion: z
+    .object({
+      anos_experiencia_total: z.number().int(),
+      sectores: z.array(z.string()),
+      seniority_estimado: z.string(),
+      resumen_ejecutivo: z.string(),
+      red_flags: redFlagsField,
+    })
+    .optional(),
+  educacion_y_certificaciones: z
+    .object({
+      educacion_formal: z.string(),
+      certificaciones: z.array(z.string()).default([]),
+    })
+    .optional(),
   cv_storage_path: z.string().optional(),
   cv_markdown: z.string().optional(),
   cv_sha256: z.string().optional(),

@@ -16,6 +16,7 @@ const STATUS_VARIANTS: Record<
   procesando: "secondary",
   completado: "default",
   duplicado: "outline",
+  no_cv: "outline",
   error: "destructive",
 };
 

@@ -34,6 +34,10 @@ function readCvMarkdownFromBody(body: unknown): string | undefined {
   return typeof v === "string" ? v : undefined;
 }
 
+/**
+ * Sólo se llama cuando `es_cv` NO es false. Asume que las secciones del CV
+ * están presentes (el `assertCvPayloadComplete` previo lo garantiza).
+ */
 const mapPayloadToRow = (
   payload: CandidatePayload,
   cvMarkdownFromBody: string | undefined,
@@ -54,21 +58,21 @@ const mapPayloadToRow = (
     cvMarkdownFromBody ?? cv_markdown ?? "";
   return {
     organization_id,
-    nombre: datos_personales.nombre,
-    email: normalizeEmail(datos_personales.email),
-    pais_residencia: datos_personales.pais_residencia,
-    telefono: datos_personales.telefono,
-    rol_principal: perfil_tecnico.rol_principal,
-    lenguajes: perfil_tecnico.lenguajes,
-    frameworks: perfil_tecnico.frameworks_y_herramientas,
-    patrones: perfil_tecnico.patrones_y_arquitectura,
-    educacion_formal: educacion_y_certificaciones.educacion_formal.trim(),
-    certificaciones: educacion_y_certificaciones.certificaciones,
-    anos_experiencia_total: evaluacion.anos_experiencia_total,
-    sectores: evaluacion.sectores,
-    seniority_estimado: evaluacion.seniority_estimado,
-    resumen_ejecutivo: evaluacion.resumen_ejecutivo,
-    red_flags: evaluacion.red_flags,
+    nombre: datos_personales!.nombre,
+    email: normalizeEmail(datos_personales!.email),
+    pais_residencia: datos_personales!.pais_residencia,
+    telefono: datos_personales!.telefono,
+    rol_principal: perfil_tecnico!.rol_principal,
+    lenguajes: perfil_tecnico!.lenguajes,
+    frameworks: perfil_tecnico!.frameworks_y_herramientas,
+    patrones: perfil_tecnico!.patrones_y_arquitectura,
+    educacion_formal: educacion_y_certificaciones!.educacion_formal.trim(),
+    certificaciones: educacion_y_certificaciones!.certificaciones,
+    anos_experiencia_total: evaluacion!.anos_experiencia_total,
+    sectores: evaluacion!.sectores,
+    seniority_estimado: evaluacion!.seniority_estimado,
+    resumen_ejecutivo: evaluacion!.resumen_ejecutivo,
+    red_flags: evaluacion!.red_flags,
     raw_analysis: payload,
     ...(cv_storage_path !== undefined ? { cv_storage_path } : {}),
     cv_markdown: markdown,
@@ -79,6 +83,16 @@ const mapPayloadToRow = (
       : {}),
   };
 };
+
+/** Verifica que todas las secciones del CV vinieron en el payload. */
+function assertCvPayloadComplete(payload: CandidatePayload): string | null {
+  if (!payload.datos_personales) return "Falta 'datos_personales' en el payload del CV.";
+  if (!payload.perfil_tecnico) return "Falta 'perfil_tecnico' en el payload del CV.";
+  if (!payload.evaluacion) return "Falta 'evaluacion' en el payload del CV.";
+  if (!payload.educacion_y_certificaciones)
+    return "Falta 'educacion_y_certificaciones' en el payload del CV.";
+  return null;
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") {
@@ -107,6 +121,24 @@ Deno.serve(async (req: Request) => {
       },
       400,
     );
+  }
+
+  // La IA reportó que el archivo no es un CV → no se crea candidato.
+  // El pipeline traducirá esta respuesta a `status='not_cv'` en la cola.
+  if (parsed.data.es_cv === false) {
+    return jsonResponse(
+      {
+        ok: true,
+        not_cv: true,
+        message: "El archivo no fue clasificado como CV por la IA.",
+      },
+      200,
+    );
+  }
+
+  const missing = assertCvPayloadComplete(parsed.data);
+  if (missing) {
+    return jsonResponse({ ok: false, error: missing }, 400);
   }
 
   const supabaseResult = createSupabaseServiceClient();

@@ -12,6 +12,20 @@ export const PARAM_FW = "fw";
 export const PARAM_PAT = "pat";
 export const PARAM_PAGE = "page";
 export const PARAM_PAGE_SIZE = "pageSize";
+export const PARAM_DATE_FROM = "dateFrom";
+export const PARAM_DATE_TO = "dateTo";
+
+/** Returns ISO date string (YYYY-MM-DD) for N days ago in local time. */
+export function isoDateDaysAgo(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Returns today's ISO date string (YYYY-MM-DD). */
+export function isoDateToday(): string {
+  return new Date().toISOString().slice(0, 10);
+}
 
 export const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
 export type PageSizeOption = (typeof PAGE_SIZE_OPTIONS)[number];

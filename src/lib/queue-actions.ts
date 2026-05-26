@@ -84,7 +84,7 @@ export async function claimAndProcessNextQueueItem(
   if (!item) return { processed: false };
 
   // Ejecutar el pipeline de IA con el pre-check ya implementado
-  let queueStatus: "completed" | "duplicate" | "error";
+  let queueStatus: "completed" | "duplicate" | "not_cv" | "error";
   let resultMessage: string | null = null;
 
   try {
@@ -102,6 +102,9 @@ export async function claimAndProcessNextQueueItem(
       queueStatus = "completed";
     } else if (result.status === "duplicado") {
       queueStatus = "duplicate";
+      resultMessage = result.message;
+    } else if (result.status === "no_cv") {
+      queueStatus = "not_cv";
       resultMessage = result.message;
     } else {
       queueStatus = "error";

@@ -44,6 +44,7 @@ const STATUS_ICON: Record<QueueItemStatus, typeof Tick02Icon | null> = {
   processing: null,
   completed: Tick02Icon,
   duplicate: null,
+  not_cv: Cancel01Icon,
   error: Cancel01Icon,
 };
 
@@ -56,7 +57,7 @@ function StatusBadge({ status, t }: { status: QueueItemStatus; t: ReturnType<typ
       variant={
         status === "error"
           ? "destructive"
-          : status === "pending" || status === "duplicate"
+          : status === "pending" || status === "duplicate" || status === "not_cv"
             ? "outline"
             : "secondary"
       }
@@ -65,6 +66,8 @@ function StatusBadge({ status, t }: { status: QueueItemStatus; t: ReturnType<typ
         status === "completed" && "bg-green-600 text-white hover:bg-green-600",
         status === "duplicate" &&
           "border-amber-500/60 bg-amber-50 text-amber-900 hover:bg-amber-50 dark:bg-amber-950/40 dark:text-amber-100",
+        status === "not_cv" &&
+          "border-slate-400/60 bg-slate-100 text-slate-800 hover:bg-slate-100 dark:bg-slate-800/60 dark:text-slate-100",
       )}
     >
       {isProcessing && <Spinner className="h-3 w-3" />}
@@ -154,7 +157,7 @@ export function QueueHistoryList({
                 icon={
                   item.status === "completed"
                     ? Tick02Icon
-                    : item.status === "error"
+                    : item.status === "error" || item.status === "not_cv"
                       ? Cancel01Icon
                       : item.status === "processing"
                         ? Clock01Icon
@@ -164,6 +167,7 @@ export function QueueHistoryList({
                   "h-4 w-4",
                   item.status === "completed" && "text-green-600",
                   item.status === "error" && "text-destructive",
+                  item.status === "not_cv" && "text-slate-500",
                   item.status === "processing" && "text-primary",
                 )}
                 strokeWidth={2}
@@ -186,6 +190,7 @@ export function QueueHistoryList({
                       ? "text-amber-700 dark:text-amber-300"
                       : "text-muted-foreground",
                     item.status === "error" && "text-destructive",
+                    item.status === "not_cv" && "text-slate-600 dark:text-slate-300",
                   )}
                   title={item.result_message}
                 >

@@ -17,6 +17,10 @@ export type CandidateListFilterState = {
   stacks: string[];
   frameworks: string[];
   patrones: string[];
+  /** ISO date string YYYY-MM-DD inclusive lower bound on created_at */
+  dateFrom?: string;
+  /** ISO date string YYYY-MM-DD inclusive upper bound on created_at */
+  dateTo?: string;
 };
 
 export type FacetExclude =
@@ -70,6 +74,12 @@ export function applyCandidateFilters(
   }
   if (exclude !== "patrones") {
     query = applyJsonbArrayMatchesAny(query, "patrones", filters.patrones);
+  }
+  if (filters.dateFrom) {
+    query = query.gte("created_at", `${filters.dateFrom}T00:00:00.000Z`);
+  }
+  if (filters.dateTo) {
+    query = query.lte("created_at", `${filters.dateTo}T23:59:59.999Z`);
   }
 
   return query;
