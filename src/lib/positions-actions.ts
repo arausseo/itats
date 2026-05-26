@@ -230,12 +230,21 @@ export async function searchCandidatesForPosition(
     });
     const queryEmbedding = embResponse.data[0].embedding;
 
+    const pDateFrom = dateFrom?.trim()
+      ? `${dateFrom.trim()}T00:00:00.000Z`
+      : null;
+    const pDateTo = dateTo?.trim()
+      ? `${dateTo.trim()}T23:59:59.999Z`
+      : null;
+
     const { data, error } = await supabase.rpc("match_candidates_for_position", {
       query_embedding: queryEmbedding,
       p_position_id: positionId,
       p_match_threshold: 0.4,
       p_match_count: 12,
       p_seniority: seniority?.trim() || null,
+      p_date_from: pDateFrom,
+      p_date_to: pDateTo,
     });
 
     if (error) return { ok: false, error: error.message };
@@ -248,25 +257,7 @@ export async function searchCandidatesForPosition(
       similarity: number;
     };
 
-    let rows = (data ?? []) as RpcRow[];
-
-    // Post-filter by date range when provided
-    if ((dateFrom || dateTo) && rows.length > 0) {
-      const ids = rows.map((r) => r.id);
-      let dateQuery = supabase
-        .from("candidates")
-        .select("id")
-        .in("id", ids);
-      if (dateFrom) {
-        dateQuery = dateQuery.gte("created_at", `${dateFrom}T00:00:00.000Z`);
-      }
-      if (dateTo) {
-        dateQuery = dateQuery.lte("created_at", `${dateTo}T23:59:59.999Z`);
-      }
-      const { data: dateRows } = await dateQuery;
-      const allowedIds = new Set((dateRows ?? []).map((r) => (r as { id: string }).id));
-      rows = rows.filter((r) => allowedIds.has(r.id));
-    }
+    const rows = (data ?? []) as RpcRow[];
 
     const results: CandidateSearchResult[] = rows.map((r) => ({
       id: r.id,
