@@ -1,0 +1,13 @@
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ats-cv-worker
+    env_file: .env.worker
+    restart: unless-stopped
+    # Las llamadas a la IA pueden tardar 30s+; damos margen para que el item
+    # en curso termine antes de matar el contenedor.
+    stop_grace_period: 120s
+    ports:
+      - "8080:8080"

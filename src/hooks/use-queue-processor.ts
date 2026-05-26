@@ -8,6 +8,15 @@ const ERROR_RETRY_MS = 6_000;
 const PAUSED_POLL_MS = 5_000;
 
 /**
+ * Feature flag: cuando el worker en Docker se hace cargo de la cola, este hook
+ * debe quedar inactivo para evitar doble procesamiento. Default: deshabilitado.
+ * Activa con `NEXT_PUBLIC_CLIENT_QUEUE_PROCESSOR_ENABLED=true` para usar el
+ * fallback del navegador (e.g. en entornos de desarrollo sin worker).
+ */
+const CLIENT_PROCESSOR_ENABLED =
+  process.env.NEXT_PUBLIC_CLIENT_QUEUE_PROCESSOR_ENABLED === "true";
+
+/**
  * Hook que drena la cola de procesamiento de CVs en segundo plano.
  *
  * - Genera un `tabId` único por instancia (no cambia entre renders).
@@ -28,6 +37,11 @@ export function useQueueProcessor(processingEnabled: boolean): void {
   const runLoopRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    if (!CLIENT_PROCESSOR_ENABLED) {
+      // El worker en contenedor es ahora el procesador autoritativo.
+      // Este hook queda como fallback opt-in para desarrollo local.
+      return;
+    }
     if (!tabIdRef.current) {
       tabIdRef.current = crypto.randomUUID();
     }
@@ -84,6 +98,7 @@ export function useQueueProcessor(processingEnabled: boolean): void {
   }, []);
 
   useEffect(() => {
+    if (!CLIENT_PROCESSOR_ENABLED) return;
     enabledRef.current = processingEnabled;
     if (processingEnabled) {
       runLoopRef.current?.();
