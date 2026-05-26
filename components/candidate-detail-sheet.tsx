@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/src/i18n/navigation";
 import { redFlagsIsClear, type Candidate } from "@/src/types/candidate";
 import { CandidateStatusSelect } from "@/components/candidate-status-select";
@@ -92,6 +92,16 @@ export function CandidateDetailSheet({
   const tSheet = useTranslations("sheet");
   const tCommon = useTranslations("common");
   const dash = tCommon("dash");
+  const locale = useLocale();
+
+  const uploadedAtLabel = useMemo(() => {
+    if (!candidate?.created_at?.trim()) return null;
+    const date = new Date(candidate.created_at);
+    if (Number.isNaN(date.getTime())) return dash;
+    return tSheet("uploadedAt", {
+      date: date.toLocaleDateString(locale, { dateStyle: "medium" }),
+    });
+  }, [candidate?.created_at, dash, locale, tSheet]);
 
   const router = useRouter();
   const [cvDownloadPending, setCvDownloadPending] = useState(false);
@@ -324,6 +334,11 @@ export function CandidateDetailSheet({
                     <p className="mt-1 text-xs text-muted-foreground">
                       {candidate.rol_principal}
                     </p>
+                    {uploadedAtLabel ? (
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {uploadedAtLabel}
+                      </p>
+                    ) : null}
                   </div>
                   <CandidateStatusSelect
                     candidateId={candidate.id}

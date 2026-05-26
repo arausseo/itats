@@ -267,6 +267,7 @@
     "downloadCv": "Descargar CV",
     "generatingLink": "Generando enlace…",
     "cvUnavailable": "CV no disponible para este candidato.",
+    "uploadedAt": "Cargado el {date}",
     "locationContact": "Ubicación y contacto",
     "countryResidence": "País de residencia",
     "email": "Correo electrónico",
