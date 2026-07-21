@@ -1,7 +1,14 @@
 "use client";
 
-import { usePathname } from "@/src/i18n/navigation";
-import { Link } from "@/src/i18n/navigation";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  DashboardSquare01Icon,
+  UserGroupIcon,
+  Briefcase01Icon,
+  CloudUploadIcon,
+} from "@hugeicons/core-free-icons";
+import { Link, usePathname } from "@/src/i18n/navigation";
+import { cn } from "@/lib/utils";
 
 interface AppNavLinksProps {
   labels: {
@@ -10,35 +17,37 @@ interface AppNavLinksProps {
     positions: string;
     upload: string;
   };
+  /** Callback opcional al navegar (p. ej. cerrar el drawer móvil). */
+  onNavigate?: () => void;
 }
 
 const navItems = [
-  { key: "dashboard" as const, href: "/" },
-  { key: "candidates" as const, href: "/candidates" },
-  { key: "positions" as const, href: "/positions" },
-  { key: "upload" as const, href: "/upload" },
-];
+  { key: "dashboard", href: "/", icon: DashboardSquare01Icon },
+  { key: "candidates", href: "/candidates", icon: UserGroupIcon },
+  { key: "positions", href: "/positions", icon: Briefcase01Icon },
+  { key: "upload", href: "/upload", icon: CloudUploadIcon },
+] as const;
 
-export function AppNavLinks({ labels }: AppNavLinksProps) {
+export function AppNavLinks({ labels, onNavigate }: AppNavLinksProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center gap-0.5" aria-label="Main navigation">
-      {navItems.map(({ key, href }) => {
+    <nav className="flex flex-col gap-1" aria-label="Main navigation">
+      {navItems.map(({ key, href, icon }) => {
         const isActive =
-          href === "/"
-            ? pathname === "/"
-            : pathname.startsWith(href);
+          href === "/" ? pathname === "/" : pathname.startsWith(href);
 
         return (
-          <Link key={key} href={href}>
+          <Link key={key} href={href} onClick={onNavigate}>
             <span
-              className={`inline-flex h-7 items-center rounded-md px-3 text-xs font-medium transition-colors ${
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-              }`}
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
             >
+              <HugeiconsIcon icon={icon} className="size-[18px] shrink-0" />
               {labels[key]}
             </span>
           </Link>
