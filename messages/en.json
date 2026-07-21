@@ -6,6 +6,7 @@
     "uploadTitle": "Bulk CV upload — ATS"
   },
   "positions": {
+    "eyebrow": "Recruiting",
     "metaTitle": "Positions — ATS",
     "title": "Positions",
     "description": "Manage open positions and their candidate processes.",
@@ -141,6 +142,7 @@
     "localeEn": "English"
   },
   "dashboard": {
+    "eyebrow": "Overview",
     "metaTitle": "Dashboard — ATS",
     "metaDescription": "Applicant Tracking System overview and metrics.",
     "title": "Dashboard",
@@ -177,6 +179,7 @@
     }
   },
   "home": {
+    "eyebrow": "Talent",
     "title": "Candidates",
     "description": "Overview of the talent pipeline. Filter by country, seniority, role, stack, frameworks and patterns; sort columns from the table.",
     "loadErrorTitle": "Error loading candidates"
@@ -202,6 +205,7 @@
     }
   },
   "upload": {
+    "eyebrow": "Intake",
     "title": "Bulk CV upload",
     "description": "Upload up to {maxFiles} PDF files. Each CV will be processed automatically with AI to extract candidate data and register it in the system.",
     "historyTitle": "Recent results",

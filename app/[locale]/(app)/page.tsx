@@ -3,6 +3,7 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { createClient } from "@/src/utils/supabase/server";
 import { Link } from "@/src/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PipelineBarChart } from "@/components/dashboard/pipeline-bar-chart";
 import { CandidatesTrendChart } from "@/components/dashboard/candidates-trend-chart";
@@ -210,26 +211,23 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <div className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              {t("title")}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("subtitle")}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Link href="/candidates">
-              <Button variant="outline" size="sm">
-                {t("viewCandidates")}
-              </Button>
-            </Link>
-            <Link href="/positions">
-              <Button size="sm">{t("viewPositions")}</Button>
-            </Link>
-          </div>
-        </div>
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          subtitle={t("subtitle")}
+          actions={
+            <>
+              <Link href="/candidates">
+                <Button variant="outline" size="sm">
+                  {t("viewCandidates")}
+                </Button>
+              </Link>
+              <Link href="/positions">
+                <Button size="sm">{t("viewPositions")}</Button>
+              </Link>
+            </>
+          }
+        />
 
         {/* ── KPI Cards ──────────────────────────────────────────────────── */}
         <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">

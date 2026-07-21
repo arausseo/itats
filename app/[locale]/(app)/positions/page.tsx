@@ -5,13 +5,8 @@ import { parsePositionRow } from "@/src/types/position";
 import type { PositionWithCount } from "@/src/types/position";
 import { CreatePositionDialog } from "@/components/positions/create-position-dialog";
 import { PositionsList } from "@/components/positions/positions-list";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/page-header";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -54,17 +49,14 @@ export default async function PositionsPage({ params }: Props) {
   return (
     <div className="min-h-full flex-1 bg-muted/30">
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <Card className="border-border/80 shadow-sm ring-1 ring-border/60">
-          <CardHeader className="border-b border-border/60 pb-6">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <CardTitle className="text-lg sm:text-xl">{t("title")}</CardTitle>
-                <CardDescription className="mt-1">{t("description")}</CardDescription>
-              </div>
-              <CreatePositionDialog />
-            </div>
-          </CardHeader>
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          subtitle={t("description")}
+          actions={<CreatePositionDialog />}
+        />
 
+        <Card className="border-border/80 shadow-sm ring-1 ring-border/60">
           <CardContent className="pt-6">
             {error && (
               <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
