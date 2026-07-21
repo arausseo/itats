@@ -13,8 +13,9 @@ const PAUSED_POLL_MS = 5_000;
  * Activa con `NEXT_PUBLIC_CLIENT_QUEUE_PROCESSOR_ENABLED=true` para usar el
  * fallback del navegador (e.g. en entornos de desarrollo sin worker).
  */
-const CLIENT_PROCESSOR_ENABLED =
-  process.env.NEXT_PUBLIC_CLIENT_QUEUE_PROCESSOR_ENABLED === "true";
+const CLIENT_PROCESSOR_ENABLED = false;
+  // const CLIENT_PROCESSOR_ENABLED =
+  //   process.env.NEXT_PUBLIC_CLIENT_QUEUE_PROCESSOR_ENABLED === "true";
 
 /**
  * Hook que drena la cola de procesamiento de CVs en segundo plano.

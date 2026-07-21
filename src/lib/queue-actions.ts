@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { createClient as createSsrClient } from "@/src/utils/supabase/server";
 import { runCvPipeline } from "@/src/lib/cv-processor";
 import type {
@@ -11,16 +11,22 @@ import type {
 } from "@/src/types/upload";
 
 // ---------------------------------------------------------------------------
-// Cliente de servicio (service_role) — necesario para UPDATE en la cola
+// Cliente de servicio (service_role) — singleton por proceso Node
 // ---------------------------------------------------------------------------
 
-function getServiceClient() {
+let serviceClient: SupabaseClient | null = null;
+
+function getServiceClient(): SupabaseClient {
+  if (serviceClient) return serviceClient;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error("Variables de entorno de Supabase faltantes");
-  return createClient(url, key, {
+
+  serviceClient = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  return serviceClient;
 }
 
 async function getOrganizationId(): Promise<string | null> {
@@ -132,10 +138,6 @@ export async function claimAndProcessNextQueueItem(
 }
 
 // ---------------------------------------------------------------------------
-// getQueueStatus
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
 // getRecentQueueItems
 // ---------------------------------------------------------------------------
 
@@ -173,26 +175,11 @@ export async function getRecentQueueItems(
 // getQueueStatus
 // ---------------------------------------------------------------------------
 
-async function getProcessingEnabled(
-  organizationId: string,
-): Promise<boolean> {
-  const supabase = getServiceClient();
-  const { data, error } = await supabase
-    .from("cv_queue_settings")
-    .select("processing_enabled")
-    .eq("organization_id", organizationId)
-    .maybeSingle<{ processing_enabled: boolean }>();
-
-  if (error) {
-    console.error(
-      "[queue-actions] Error al leer configuración de cola:",
-      error.message,
-    );
-    return true;
-  }
-
-  return data?.processing_enabled ?? true;
-}
+type QueueStatusRpcRow = {
+  pending: number;
+  processing: number;
+  processing_enabled: boolean;
+};
 
 /** Retorna el conteo de items pendientes y en procesamiento para el badge global. */
 export async function getQueueStatus(): Promise<QueueStatus> {
@@ -202,29 +189,27 @@ export async function getQueueStatus(): Promise<QueueStatus> {
   }
 
   const supabase = getServiceClient();
+  const { data, error } = await supabase.rpc("get_cv_queue_status", {
+    p_organization_id: organizationId,
+  });
 
-  const [pendingResult, processingResult, processingEnabled] =
-    await Promise.all([
-      supabase
-        .from("cv_processing_queue")
-        .select("*", { count: "exact", head: true })
-        .eq("organization_id", organizationId)
-        .eq("status", "pending"),
-      supabase
-        .from("cv_processing_queue")
-        .select("*", { count: "exact", head: true })
-        .eq("organization_id", organizationId)
-        .eq("status", "processing"),
-      getProcessingEnabled(organizationId),
-    ]);
+  if (error) {
+    console.error("[queue-actions] Error al obtener estado de cola:", error.message);
+    return { pending: 0, processing: 0, total: 0, processingEnabled: true };
+  }
 
-  const pending = pendingResult.count ?? 0;
-  const processing = processingResult.count ?? 0;
+  const row = ((data ?? []) as QueueStatusRpcRow[])[0];
+  if (!row) {
+    return { pending: 0, processing: 0, total: 0, processingEnabled: true };
+  }
+
+  const pending = Number(row.pending) || 0;
+  const processing = Number(row.processing) || 0;
   return {
     pending,
     processing,
     total: pending + processing,
-    processingEnabled,
+    processingEnabled: row.processing_enabled ?? true,
   };
 }
 
