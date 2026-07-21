@@ -2,6 +2,7 @@
 @plugin "@tailwindcss/typography";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./app-shell.css";
 
 /* ============================================================
    ATS — globals.css
@@ -33,9 +34,9 @@
   --ink:   oklch(0.26 0.018 282);
   --faint: oklch(0.66 0.012 282);
 
-  /* Marca = Iris (la marca ES la inteligencia) */
-  --brand:        oklch(0.47 0.142 282);
-  --brand-strong: oklch(0.41 0.15 282);
+  /* Marca = Iris (la marca ES la inteligencia) — valores designV2 */
+  --brand:        oklch(0.47 0.16 285);
+  --brand-strong: oklch(0.39 0.17 285);
   --brand-tint:   oklch(0.965 0.022 285);
   --brand-tint-2: oklch(0.93 0.04 285);
   --brand-border: oklch(0.86 0.055 285);

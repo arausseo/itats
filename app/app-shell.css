@@ -1,0 +1,103 @@
+/* ============================================================
+   Shell designV2 de ReclutaIT (sidebar iris-plum + topbar).
+   Portado de docs/designV2/ReclutaIT.dc.html.
+   - Estilos del sidebar bajo `.rit-sidebar` (funcionan también en
+     el drawer móvil, que se portalea fuera de `.rit-app`).
+   - Topbar / página bajo `.rit-app`.
+   - `var(--muted)` (texto en el mockup) → `var(--faint)` porque en
+     shadcn `--muted` es una superficie.
+   ============================================================ */
+
+.rit-app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+.rit-sidebar {
+  width: 252px;
+  flex: none;
+  background: linear-gradient(178deg, oklch(0.29 0.075 288), oklch(0.215 0.055 286));
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  color: rgba(255, 255, 255, 0.9);
+}
+.rit-app > .rit-sidebar { position: sticky; top: 0; height: 100vh; }
+
+.rit-sidebar .sb-brand { display: flex; align-items: center; gap: 11px; padding: 22px 18px 16px; }
+.rit-sidebar .logo-mark { width: 34px; height: 34px; border-radius: 11px; background: linear-gradient(150deg, #6a54cf, #4a35a6); display: grid; place-items: center; box-shadow: 0 6px 18px -4px rgba(90, 70, 184, 0.7); flex: none; }
+.rit-sidebar .logo-name { font-size: 19px; font-weight: 800; letter-spacing: -0.04em; color: #fff; }
+.rit-sidebar .logo-name b { color: #c9bcff; }
+.rit-sidebar .ws-switch { margin: 2px 12px 8px; padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.15s; width: calc(100% - 24px); text-align: left; color: inherit; }
+.rit-sidebar .ws-switch:hover { background: rgba(255, 255, 255, 0.1); }
+.rit-sidebar .ws-logo { width: 28px; height: 28px; border-radius: 8px; background: var(--clay); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 12px; flex: none; }
+.rit-sidebar .ws-switch .nm { font-size: 13px; font-weight: 700; line-height: 1.2; color: #fff; }
+.rit-sidebar .ws-switch .sub { font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+.rit-sidebar .sb-nav { padding: 14px 12px; flex: 1; overflow-y: auto; }
+.rit-sidebar .sb-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255, 255, 255, 0.4); padding: 16px 10px 7px; }
+.rit-sidebar .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: rgba(255, 255, 255, 0.68); cursor: pointer; transition: 0.13s; margin-bottom: 3px; position: relative; }
+.rit-sidebar .nav-item svg { width: 18px; height: 18px; flex: none; opacity: 0.85; }
+.rit-sidebar .nav-item:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+.rit-sidebar .nav-item.active { background: linear-gradient(100deg, rgba(140, 116, 255, 0.32), rgba(140, 116, 255, 0.14)); color: #fff; box-shadow: inset 0 0 0 1px rgba(160, 140, 255, 0.25); }
+.rit-sidebar .nav-item.active svg { opacity: 1; color: #c9bcff; }
+.rit-sidebar .nav-item.active::before { content: ""; position: absolute; left: -12px; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; border-radius: 0 3px 3px 0; background: #c9bcff; }
+.rit-sidebar .nav-item .count { margin-left: auto; font-family: var(--mono); font-size: 11px; font-weight: 600; background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.75); padding: 1px 8px; border-radius: 99px; }
+.rit-sidebar .nav-item.active .count { background: rgba(201, 188, 255, 0.28); color: #fff; }
+.rit-sidebar .sb-foot { padding: 12px; border-top: 1px solid rgba(255, 255, 255, 0.09); }
+.rit-sidebar .credits { background: linear-gradient(150deg, rgba(140, 116, 255, 0.28), rgba(140, 116, 255, 0.06)); border: 1px solid rgba(160, 140, 255, 0.25); border-radius: 13px; padding: 13px 14px; margin-bottom: 10px; }
+.rit-sidebar .credits .top { display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 9px; color: #fff; }
+.rit-sidebar .credits .top .v { font-family: var(--mono); color: #c9bcff; font-size: 13px; }
+.rit-sidebar .credits .bar { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, 0.13); overflow: hidden; }
+.rit-sidebar .credits .bar i { display: block; height: 100%; background: linear-gradient(90deg, #8c74ff, #c9bcff); border-radius: 99px; }
+.rit-sidebar .credits .lab { font-size: 11px; color: rgba(255, 255, 255, 0.6); margin-top: 8px; }
+.rit-sidebar .credits .lab a { color: #c9bcff; font-weight: 700; cursor: pointer; }
+.rit-sidebar .sb-user { display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-radius: 10px; cursor: pointer; transition: 0.13s; width: 100%; text-align: left; background: none; border: none; color: inherit; }
+.rit-sidebar .sb-user:hover { background: rgba(255, 255, 255, 0.07); }
+.rit-sidebar .sb-user .nm { font-size: 12.5px; font-weight: 700; line-height: 1.2; color: #fff; }
+.rit-sidebar .sb-user .em { font-size: 11px; color: rgba(255, 255, 255, 0.5); }
+.rit-sidebar .avatar { border-radius: 50%; background: var(--brand-tint-2); color: var(--brand-strong); display: grid; place-items: center; font-weight: 700; flex: none; }
+
+/* ---------- Main + Topbar ---------- */
+.rit-app .main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 100vh; }
+.rit-app .topbar { position: sticky; top: 0; z-index: 15; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 14px 30px; display: flex; align-items: center; gap: 18px; min-height: 68px; }
+.rit-app .search { display: flex; align-items: center; gap: 9px; background: var(--surface); border: 1px solid var(--border-2); border-radius: 11px; padding: 9px 13px; width: 320px; max-width: 40vw; color: var(--faint); }
+.rit-app .search svg { width: 16px; height: 16px; flex: none; }
+.rit-app .search input { border: none; background: none; outline: none; font-size: 13.5px; color: var(--ink); width: 100%; }
+.rit-app .search input::placeholder { color: var(--faint); }
+.rit-app .search .kbd { font-family: var(--mono); font-size: 10px; background: var(--surface-2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 5px; color: var(--faint); }
+.rit-app .topbar .right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.rit-app .icon-btn { width: 38px; height: 38px; border-radius: 11px; border: 1px solid var(--border-2); background: var(--surface); display: grid; place-items: center; color: var(--faint); transition: 0.15s; cursor: pointer; }
+.rit-app .icon-btn:hover { background: var(--surface-2); color: var(--ink); }
+.rit-app .dot-badge { position: relative; }
+.rit-app .dot-badge::after { content: ""; position: absolute; top: 8px; right: 9px; width: 7px; height: 7px; border-radius: 99px; background: var(--clay); border: 2px solid var(--surface); }
+
+/* ---------- Page container ---------- */
+.rit-app .page { padding: 32px 34px; max-width: 1360px; width: 100%; margin: 0 auto; }
+.rit-app .page-head { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 26px; }
+.rit-app .page-head h1 { font-size: 31px; letter-spacing: -0.045em; font-weight: 800; line-height: 1.08; }
+.rit-app .page-head .sub { font-size: 14.5px; color: var(--faint); margin-top: 6px; max-width: 60ch; }
+.rit-app .page-head .right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+.rit-app .eyebrow { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--brand); }
+.rit-app .wave { display: inline-block; transform-origin: 70% 70%; animation: rit-wave 2.4s ease-in-out 1; }
+@keyframes rit-wave { 0%, 60%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(14deg); } 20%, 40% { transform: rotate(-8deg); } }
+
+/* ---------- Mobile ---------- */
+.rit-app .app-mobilebar { display: none; }
+@media (max-width: 1023px) {
+  .rit-app > .rit-sidebar { display: none; }
+  .rit-app .topbar { display: none; }
+  .rit-app .app-mobilebar {
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 15;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+  }
+  .rit-app .page { padding: 22px 18px; }
+}
+
+/* Drawer (Sheet) móvil: contenedor oscuro que aloja el .rit-sidebar */
+.rit-app-drawer { background: transparent !important; color: rgba(255, 255, 255, 0.9); border: none !important; padding: 0 !important; }
+.rit-app-drawer .rit-sidebar { width: 100%; height: 100%; }
