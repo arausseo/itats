@@ -1,26 +1,35 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { routing } from "@/src/i18n/routing";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Tipografías del sistema de diseño ReclutaIT (ver globals.css):
+//   Hanken Grotesk → --font-sans · JetBrains Mono → --font-mono
+const hanken = Hanken_Grotesk({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "ATS",
-  description: "Applicant Tracking System",
+  title: "ReclutaIT — ATS con IA para talento IT de LATAM",
+  description: "Applicant Tracking System con IA para reclutar talento IT en LATAM.",
+  icons: {
+    icon: [
+      { url: "/logo/logo-mark.svg", type: "image/svg+xml" },
+      { url: "/logo/png/favicon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: "/logo/png/apple-touch-icon-180.png",
+  },
 };
 
 export default async function RootLayout({
@@ -37,10 +46,9 @@ export default async function RootLayout({
       className={cn(
         "h-full",
         "antialiased",
-        geistSans.variable,
-        geistMono.variable,
+        hanken.variable,
+        jetbrainsMono.variable,
         "font-sans",
-        inter.variable,
       )}
     >
       <body className="min-h-full flex flex-col">

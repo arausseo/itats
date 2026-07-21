@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="512" height="512" role="img" aria-label="ReclutaIT">
+  <defs>
+    <linearGradient id="iris" x1="6" y1="2" x2="34" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5B46B8"></stop>
+      <stop offset="1" stop-color="#4A35A6"></stop>
+    </linearGradient>
+  </defs>
+  <rect width="40" height="40" rx="11.2" fill="url(#iris)"></rect>
+  <path d="M15 11L9 20L15 29" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M25 11L31 20L25 29" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path d="M20 13.5C20 18 20.4 18.8 24 20 20.4 21.2 20 22 20 26.5 20 22 19.6 21.2 16 20 19.6 18.8 20 18 20 13.5Z" fill="#fff"></path>
+</svg>

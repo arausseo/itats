@@ -3,14 +3,128 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+/* ============================================================
+   ATS — globals.css
+   Sistema de diseño ReclutaIT (OKLCH) sobre tokens shadcn.
+
+   El puente clave: la paleta IRIS de marca se mapea sobre los
+   tokens semánticos de shadcn (--primary, --card, --chart-*),
+   de modo que TODOS los componentes shadcn heredan la marca sin
+   reescribirse. Los tokens crudos (--brand, --ink, --surface…)
+   también se exponen como utilidades Tailwind (bg-brand, text-ink…).
+
+   Fuente de verdad: reclutait/docs/design/design-system.md
+   Tipografía (next/font en layout.tsx):
+     Hanken Grotesk → --font-sans · JetBrains Mono → --font-mono
+   ============================================================ */
+
 @custom-variant dark (&:is(.dark *));
+
+:root {
+  /* ---- Tokens de marca ReclutaIT (crudos) ------------------------- */
+  /* Lienzo / superficies (papel cálido, no gris-azulado frío) */
+  --bg:        oklch(0.985 0.006 80);
+  --surface:   oklch(0.998 0.003 85);
+  --surface-2: oklch(0.972 0.006 78);
+  --surface-3: oklch(0.955 0.007 78);
+  --border-2:  oklch(0.84 0.008 75);
+
+  /* Tinta (negro cálido con un susurro de iris) */
+  --ink:   oklch(0.26 0.018 282);
+  --faint: oklch(0.66 0.012 282);
+
+  /* Marca = Iris (la marca ES la inteligencia) */
+  --brand:        oklch(0.47 0.142 282);
+  --brand-strong: oklch(0.41 0.15 282);
+  --brand-tint:   oklch(0.965 0.022 285);
+  --brand-tint-2: oklch(0.93 0.04 285);
+  --brand-border: oklch(0.86 0.055 285);
+
+  /* Acento cálido (Arcilla) — usar con moderación */
+  --clay:      oklch(0.67 0.115 52);
+  --clay-tint: oklch(0.955 0.03 60);
+
+  /* Semánticos (scores y estados) */
+  --pos:  oklch(0.55 0.115 152);  --pos-tint:  oklch(0.95 0.04 152);
+  --warn: oklch(0.66 0.12 70);    --warn-tint: oklch(0.955 0.05 80);
+  --neg:  oklch(0.56 0.15 27);    --neg-tint:  oklch(0.95 0.04 27);
+  --eng:  oklch(0.55 0.11 245);   --eng-tint:  oklch(0.95 0.035 245);
+  --wa:   #1faa55;                --wa-tint:   oklch(0.95 0.045 155);
+
+  /* ---- Puente: tokens shadcn → paleta de marca ------------------- */
+  --background:          var(--bg);
+  --foreground:          var(--ink);
+  --card:                var(--surface);
+  --card-foreground:     var(--ink);
+  --popover:             var(--surface);
+  --popover-foreground:  var(--ink);
+  --primary:             var(--brand);
+  --primary-foreground:  oklch(1 0 0);
+  --secondary:           var(--surface-2);
+  --secondary-foreground: var(--ink);
+  --muted:               var(--surface-2);
+  --muted-foreground:    var(--faint);
+  --accent:              var(--brand-tint);
+  --accent-foreground:   var(--brand-strong);
+  --destructive:         var(--neg);
+  --border:              oklch(0.922 0 0);
+  --input:               var(--border-2);
+  --ring:                var(--brand);
+
+  /* Charts: paleta de marca (iris + semánticos) en vez de grises */
+  --chart-1: var(--brand);   /* iris    */
+  --chart-2: var(--eng);     /* azul    */
+  --chart-3: var(--pos);     /* verde   */
+  --chart-4: var(--clay);    /* arcilla */
+  --chart-5: var(--warn);    /* ámbar   */
+
+  --radius: 0.75rem;
+
+  /* Sidebar (layout autenticado — Fase 1) */
+  --sidebar:                     var(--surface);
+  --sidebar-foreground:          var(--ink);
+  --sidebar-primary:             var(--brand);
+  --sidebar-primary-foreground:  oklch(1 0 0);
+  --sidebar-accent:              var(--brand-tint);
+  --sidebar-accent-foreground:   var(--brand-strong);
+  --sidebar-border:              var(--border);
+  --sidebar-ring:                var(--brand);
+}
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-mono);
   --font-heading: var(--font-sans);
+
+  /* Utilidades de marca ReclutaIT (bg-brand, text-ink, bg-surface-2…) */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border-2: var(--border-2);
+  --color-ink: var(--ink);
+  --color-faint: var(--faint);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-tint: var(--brand-tint);
+  --color-brand-tint2: var(--brand-tint-2);
+  --color-brand-border: var(--brand-border);
+  --color-clay: var(--clay);
+  --color-clay-tint: var(--clay-tint);
+  --color-pos: var(--pos);
+  --color-pos-tint: var(--pos-tint);
+  --color-warn: var(--warn);
+  --color-warn-tint: var(--warn-tint);
+  --color-neg: var(--neg);
+  --color-neg-tint: var(--neg-tint);
+  --color-eng: var(--eng);
+  --color-eng-tint: var(--eng-tint);
+  --color-wa: var(--wa);
+  --color-wa-tint: var(--wa-tint);
+
+  /* Tokens shadcn */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -40,6 +154,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -47,41 +162,6 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-}
-
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
 }
 
 .dark {
@@ -118,15 +198,45 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ============================================================
+   Helper para superficies de IA (gradiente iris).
+   Uso: <div class="ai-surface"> … </div>
+   ============================================================ */
+@layer components {
+  .ai-surface {
+    background: linear-gradient(180deg, var(--brand-tint), var(--surface) 80%);
+    border: 1px solid var(--brand-border);
+    border-radius: var(--radius-lg);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    letter-spacing: -0.011em; /* cuerpo apretado, propio de Hanken */
+    line-height: 1.5;
   }
   html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
     @apply font-sans;
+  }
+  h1, h2, h3, h4 {
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  ::selection { background: var(--brand-tint-2); }
+
+  /* Anillo de foco de marca, consistente con el diseño */
+  :where(input, select, textarea, button):focus-visible {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px var(--brand-tint-2);
   }
 
   /* UA stylesheet usa cursor default en <button>; enlaces y controles clicables deben indicar clic */
