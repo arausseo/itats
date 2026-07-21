@@ -165,37 +165,44 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* ---- Modo oscuro ReclutaIT (iris sobre lienzo cálido-oscuro) -------
+     Solo se sobrescriben los tokens CRUDOS; los tokens shadcn derivan
+     por var() en :root y se re-resuelven solos (--primary=var(--brand),
+     --card=var(--surface), --accent=var(--brand-tint)…). Las excepciones
+     son los literales de :root (--border, --primary-foreground). */
+
+  /* Lienzo / superficies (oscuro con matiz iris, no gris neutro) */
+  --bg:        oklch(0.17 0.012 285);
+  --surface:   oklch(0.205 0.014 285);
+  --surface-2: oklch(0.255 0.016 285);
+  --surface-3: oklch(0.30 0.016 285);
+  --border-2:  oklch(0.42 0.02 285);
+
+  /* Tinta (blanco cálido con susurro de iris) */
+  --ink:   oklch(0.96 0.006 285);
+  --faint: oklch(0.72 0.018 285);
+
+  /* Marca = Iris (más brillante para leer sobre oscuro) */
+  --brand:        oklch(0.70 0.15 285);
+  --brand-strong: oklch(0.80 0.13 285);
+  --brand-tint:   oklch(0.30 0.055 285);
+  --brand-tint-2: oklch(0.37 0.075 285);
+  --brand-border: oklch(0.46 0.07 285);
+
+  /* Acento cálido (Arcilla) */
+  --clay:      oklch(0.74 0.115 52);
+  --clay-tint: oklch(0.33 0.05 52);
+
+  /* Semánticos (brillo elevado para contraste sobre oscuro) */
+  --pos:  oklch(0.70 0.14 152);  --pos-tint:  oklch(0.30 0.05 152);
+  --warn: oklch(0.78 0.13 75);   --warn-tint: oklch(0.32 0.05 75);
+  --neg:  oklch(0.68 0.17 27);   --neg-tint:  oklch(0.32 0.06 27);
+  --eng:  oklch(0.70 0.13 245);  --eng-tint:  oklch(0.31 0.05 245);
+  --wa:   oklch(0.72 0.15 155);  --wa-tint:   oklch(0.31 0.05 155);
+
+  /* Literales shadcn que no derivan de var() */
+  --border:             oklch(1 0 0 / 9%);
+  --primary-foreground: oklch(0.17 0.012 285);
 }
 
 /* ============================================================

@@ -23,6 +23,7 @@ interface MobileNavProps {
   organization?: string | null;
   email?: string | null;
   signOutLabel: string;
+  themeLabels: { light: string; dark: string };
   menuLabel: string;
 }
 
@@ -35,6 +36,7 @@ export function MobileNav({
   organization,
   email,
   signOutLabel,
+  themeLabels,
   menuLabel,
 }: MobileNavProps) {
   const [open, setOpen] = useState(false);
@@ -61,6 +63,7 @@ export function MobileNav({
             organization={organization}
             email={email}
             signOutLabel={signOutLabel}
+            themeLabels={themeLabels}
             onNavigate={() => setOpen(false)}
           />
         </SheetContent>

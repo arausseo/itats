@@ -32,6 +32,7 @@ export default async function AppGroupLayout({
     : null;
   const signOutLabel = t("signOut");
   const menuLabel = t("menu");
+  const themeLabels = { light: t("themeLight"), dark: t("themeDark") };
 
   return (
     <QueueProvider>
@@ -43,6 +44,7 @@ export default async function AppGroupLayout({
             organization={organization}
             email={user.email}
             signOutLabel={signOutLabel}
+            themeLabels={themeLabels}
           />
         </aside>
 
@@ -53,6 +55,7 @@ export default async function AppGroupLayout({
             organization={organization}
             email={user.email}
             signOutLabel={signOutLabel}
+            themeLabels={themeLabels}
             menuLabel={menuLabel}
           />
           <main className="flex flex-1 flex-col">{children}</main>

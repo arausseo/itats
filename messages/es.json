@@ -134,6 +134,8 @@
     "uploadCvs": "Subir CVs",
     "signOut": "Cerrar sesión",
     "menu": "Menú",
+    "themeDark": "Modo oscuro",
+    "themeLight": "Modo claro",
     "language": "Idioma",
     "localeEs": "Español",
     "localeEn": "English"

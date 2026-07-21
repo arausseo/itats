@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { AppNavLinks } from "@/components/app-nav-links";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface SidebarContentProps {
   labels: {
@@ -19,6 +20,7 @@ interface SidebarContentProps {
   organization?: string | null;
   email?: string | null;
   signOutLabel: string;
+  themeLabels: { light: string; dark: string };
   /** Se ejecuta al hacer clic en un enlace o el logo (cierra el drawer móvil). */
   onNavigate?: () => void;
 }
@@ -32,6 +34,7 @@ export function SidebarContent({
   organization,
   email,
   signOutLabel,
+  themeLabels,
   onNavigate,
 }: SidebarContentProps) {
   return (
@@ -57,6 +60,9 @@ export function SidebarContent({
         )}
         <div className="px-1">
           <LanguageSwitcher />
+        </div>
+        <div className="px-1">
+          <ThemeToggle labels={themeLabels} />
         </div>
         <form action={signOut} className="px-1">
           <Button

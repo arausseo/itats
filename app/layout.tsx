@@ -51,6 +51,15 @@ export default async function RootLayout({
         "font-sans",
       )}
     >
+      <head>
+        {/* Aplica el tema guardado antes del primer render (evita flash). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{if(localStorage.getItem('theme')==='dark')document.documentElement.classList.add('dark');}catch(e){}})();",
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
       </body>
