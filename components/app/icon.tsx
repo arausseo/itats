@@ -20,6 +20,8 @@ const PATHS: Record<string, string> = {
   bell: "M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0",
   check: "M4 12l5 5L20 6",
   menu: "M4 7h16M4 12h16M4 17h16",
+  plus: "M12 5v14M5 12h14",
+  download: "M12 3v12M7 11l5 4 5-4M5 21h14",
 };
 
 interface IconProps {
