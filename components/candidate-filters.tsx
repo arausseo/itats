@@ -223,6 +223,39 @@ export function CandidateFilters({
         />
       </div>
 
+      {/* Registrado (rango de fechas) — primer filtro */}
+      <div className="space-y-1.5">
+        <span className="block text-xs font-semibold text-muted-foreground">{t("dateFrom")}</span>
+        <Input
+          id="candidate-date-from"
+          type="date"
+          value={dateFromInput}
+          max={dateToInput}
+          onChange={(e) => handleDateFromChange(e.target.value)}
+          className="w-full"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <span className="block text-xs font-semibold text-muted-foreground">{t("dateTo")}</span>
+        <Input
+          id="candidate-date-to"
+          type="date"
+          value={dateToInput}
+          min={dateFromInput}
+          onChange={(e) => handleDateToChange(e.target.value)}
+          className="w-full"
+        />
+        {!isDefaultDateRange && (
+          <button
+            type="button"
+            onClick={resetDateRange}
+            className="mt-1 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            {t("dateReset")}
+          </button>
+        )}
+      </div>
+
       {/* Nombre */}
       <div className="space-y-1.5">
         <label htmlFor="candidate-q" className="block text-xs font-semibold text-muted-foreground">
@@ -322,38 +355,6 @@ export function CandidateFilters({
         className="min-w-0"
       />
 
-      {/* Registrado (rango de fechas) */}
-      <div className="space-y-1.5">
-        <span className="block text-xs font-semibold text-muted-foreground">{t("dateFrom")}</span>
-        <Input
-          id="candidate-date-from"
-          type="date"
-          value={dateFromInput}
-          max={dateToInput}
-          onChange={(e) => handleDateFromChange(e.target.value)}
-          className="w-full"
-        />
-      </div>
-      <div className="space-y-1.5">
-        <span className="block text-xs font-semibold text-muted-foreground">{t("dateTo")}</span>
-        <Input
-          id="candidate-date-to"
-          type="date"
-          value={dateToInput}
-          min={dateFromInput}
-          onChange={(e) => handleDateToChange(e.target.value)}
-          className="w-full"
-        />
-        {!isDefaultDateRange && (
-          <button
-            type="button"
-            onClick={resetDateRange}
-            className="mt-1 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
-          >
-            {t("dateReset")}
-          </button>
-        )}
-      </div>
     </div>
   );
 }
