@@ -217,3 +217,136 @@
 .rit-app .tbl tbody tr { transition: 0.12s; cursor: pointer; }
 .rit-app .tbl tbody tr:hover { background: var(--surface-2); }
 .rit-app .tbl tbody tr:last-child td { border-bottom: none; }
+.rit-app .tbl tbody tr.active { background: var(--brand-tint); }
+.rit-app .tbl tbody tr.active td:first-child { box-shadow: inset 3px 0 0 var(--brand); }
+
+/* ============ FASE 0 · Primitivas de diseño ============ */
+/* Badges de color */
+.rit-app .badge.b-open { background: var(--pos-tint); color: var(--pos); }
+.rit-app .badge.b-open .d { background: var(--pos); }
+.rit-app .badge.b-closed { background: var(--surface-2); color: var(--muted); }
+.rit-app .badge.b-closed .d { background: var(--faint); }
+.rit-app .badge.b-ai { background: var(--brand-tint); color: var(--brand); border: 1px solid var(--brand-border); }
+.rit-app .badge.b-lang { background: var(--eng-tint); color: var(--eng); }
+.rit-app .badge.b-wa { background: var(--wa-tint); color: var(--wa); }
+.rit-app .badge.b-neutral { background: var(--surface-2); color: var(--muted); }
+
+/* Chips (skills) */
+.rit-app .chip { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+.rit-app .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.rit-app .tglabel { font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--faint); font-weight: 600; margin-bottom: 8px; }
+
+/* card2 (tarjeta interna) */
+.rit-app .card2 { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; box-shadow: var(--sh-sm, 0 1px 2px rgba(38,24,64,.05)); }
+.rit-app .card2 h4 { font-size: 13.5px; font-weight: 700; }
+.rit-app .c2h { display: flex; align-items: center; margin-bottom: 12px; }
+
+/* StatusSelect (pill tintado por stage) */
+.rit-app .stsel { position: relative; display: inline-flex; align-items: center; gap: 7px; border: 1px solid; border-radius: 9px; padding: 5px 9px; }
+.rit-app .stsel .d { width: 7px; height: 7px; border-radius: 99px; flex: none; }
+.rit-app .stsel select { border: none; background: none; outline: none; font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; -webkit-appearance: none; appearance: none; padding-right: 2px; }
+.rit-app .stsel svg { pointer-events: none; }
+
+/* CEFR meter */
+.rit-app .cefr { display: flex; gap: 3px; }
+.rit-app .cefr i { flex: 1; height: 24px; border-radius: 6px; background: var(--surface-2); display: grid; place-items: center; font-family: var(--mono); font-size: 9px; font-weight: 600; color: var(--faint); font-style: normal; }
+.rit-app .cefr i.on { background: var(--eng-tint); color: var(--eng); }
+.rit-app .cefr i.cur { background: var(--eng); color: #fff; }
+
+/* Botón WhatsApp */
+.rit-app .btn-wa { background: var(--wa); color: #fff; }
+.rit-app .btn-wa:hover { filter: brightness(0.95); }
+
+/* Ranking table helpers (Fase 2) */
+.rit-app .rankbadge { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 99px; font-family: var(--mono); font-size: 12px; font-weight: 700; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); }
+.rit-app .rankbadge.top { background: var(--warn-tint); border-color: transparent; color: oklch(0.5 0.11 65); }
+.rit-app .cname { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
+.rit-app .cemail { font-size: 11.5px; color: var(--faint); margin-top: 1px; }
+.rit-app .cnote { font-size: 12px; color: var(--muted); font-style: italic; margin-top: 3px; }
+.rit-app .scoreN { font-size: 18px; font-weight: 700; letter-spacing: -0.03em; font-family: var(--mono); }
+.rit-app .mini-sel { font-size: 12.5px; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--border-2); border-radius: 9px; padding: 7px 10px; cursor: pointer; font-family: inherit; }
+
+/* ============ FASE 1 · Profile Panel ============ */
+.rit-app .panel { display: flex; flex-direction: column; height: 100%; }
+.rit-app .panel-head { padding: 16px 20px 0; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 5; }
+.rit-app .pnav { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.rit-app .pcount { font-size: 13px; font-weight: 700; }
+.rit-app .pident { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; }
+.rit-app .pname { font-size: 18px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
+.rit-app .prole { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.rit-app .pactions { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
+
+/* At-a-glance AI strip */
+.rit-app .glance { display: flex; align-items: center; gap: 16px; background: linear-gradient(165deg, var(--brand-tint), var(--surface) 80%); border: 1px solid var(--brand-border); border-radius: 13px; padding: 12px 16px; margin-bottom: 14px; }
+.rit-app .g-ring { flex: none; }
+.rit-app .g-cells { flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 14px; }
+.rit-app .g-cell .k { font-size: 10px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--faint); font-weight: 600; }
+.rit-app .g-cell .v { font-size: 14px; font-weight: 700; margin-top: 2px; }
+.rit-app .g-cell .v .sub { font-size: 11px; font-weight: 600; color: var(--muted); }
+
+/* Panel tabs */
+.rit-app .ptabs { display: flex; gap: 2px; }
+.rit-app .ptabs button { border: none; background: none; font: inherit; padding: 10px 13px; font-size: 13px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; transition: 0.13s; }
+.rit-app .ptabs button:hover { color: var(--ink); }
+.rit-app .ptabs button.on { color: var(--brand); border-color: var(--brand); }
+.rit-app .ptabs button .ptn { margin-left: 6px; font-family: var(--mono); font-size: 10px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); padding: 0 6px; border-radius: 99px; }
+.rit-app .ptabs button.on .ptn { background: var(--brand-tint); border-color: var(--brand-border); color: var(--brand); }
+
+.rit-app .panel-body { flex: 1; overflow-y: auto; padding: 18px 20px 28px; }
+.rit-app .stack { display: flex; flex-direction: column; gap: 14px; }
+
+/* AI box */
+.rit-app .ai-box { background: linear-gradient(180deg, var(--brand-tint), var(--surface) 88%); border: 1px solid var(--brand-border); border-radius: 13px; overflow: hidden; }
+.rit-app .ai-h { display: flex; align-items: center; gap: 9px; padding: 11px 15px; border-bottom: 1px solid var(--brand-border); }
+.rit-app .ai-h .i { width: 24px; height: 24px; border-radius: 7px; background: linear-gradient(150deg, var(--brand), var(--brand-strong)); display: grid; place-items: center; color: #fff; }
+.rit-app .ai-h .t { font-size: 13px; font-weight: 700; }
+.rit-app .ai-h .by { margin-left: auto; font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--brand); font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.rit-app .ai-box p { padding: 13px 15px; font-size: 13px; line-height: 1.55; color: oklch(0.36 0.02 285); white-space: pre-wrap; }
+
+/* Flags */
+.rit-app .flag { display: flex; gap: 11px; padding: 12px 14px; border-radius: 12px; background: var(--neg-tint); border: 1px solid oklch(0.88 0.06 27); }
+.rit-app .flag.warn { background: var(--warn-tint); border-color: oklch(0.85 0.08 75); }
+.rit-app .flag .fi { width: 22px; height: 22px; border-radius: 7px; background: var(--neg); color: #fff; display: grid; place-items: center; flex: none; }
+.rit-app .flag.warn .fi { background: var(--warn); }
+.rit-app .flag b { font-size: 12.5px; color: var(--neg); }
+.rit-app .flag.warn b { color: oklch(0.46 0.1 60); }
+.rit-app .flag p { font-size: 12px; color: oklch(0.45 0.06 27); margin-top: 2px; line-height: 1.45; white-space: pre-wrap; }
+.rit-app .flag.warn p { color: oklch(0.42 0.05 70); }
+
+/* Key-value + timeline */
+.rit-app .kv .row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; gap: 12px; }
+.rit-app .kv .row:last-child { border-bottom: none; }
+.rit-app .kv .row .k { color: var(--muted); }
+.rit-app .kv .row b { font-weight: 700; }
+.rit-app .tl { position: relative; padding-left: 24px; }
+.rit-app .tl::before { content: ""; position: absolute; left: 6px; top: 5px; bottom: 5px; width: 1.5px; background: var(--border); }
+.rit-app .tli { position: relative; padding-bottom: 16px; }
+.rit-app .tli:last-child { padding-bottom: 0; }
+.rit-app .tli .dot { position: absolute; left: -22px; top: 2px; width: 13px; height: 13px; border-radius: 99px; background: var(--surface); border: 2px solid var(--border-2); }
+.rit-app .tli .dot.brand { border-color: var(--brand); background: var(--brand-tint); }
+.rit-app .tli .dot.pos { border-color: var(--pos); background: var(--pos-tint); }
+.rit-app .tli .r { font-size: 13.5px; font-weight: 700; }
+.rit-app .tli .co { font-size: 12.5px; color: var(--brand); font-weight: 600; }
+.rit-app .tli .pe { font-size: 11px; color: var(--faint); margin-top: 2px; }
+.rit-app .fileic { width: 38px; height: 38px; border-radius: 10px; background: var(--neg-tint); color: var(--neg); display: grid; place-items: center; flex: none; }
+
+/* Panel modes: split / drawer / full */
+.rit-app .detail-side { position: sticky; top: 16px; align-self: start; width: 480px; max-width: 42vw; height: calc(100vh - 32px); background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--sh, 0 6px 16px rgba(38,24,64,.07)); overflow: hidden; }
+.rit-app .scrim { position: fixed; inset: 0; background: rgba(20, 12, 40, 0.42); backdrop-filter: blur(1px); z-index: 40; animation: rit-fade 0.2s; }
+.rit-app .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 560px; max-width: 94vw; background: var(--surface); box-shadow: var(--sh-xl, 0 40px 90px -24px rgba(20,12,45,.55)); z-index: 41; animation: rit-slidein 0.28s cubic-bezier(.2,.7,.3,1); }
+.rit-app .fullpage { position: fixed; inset: 0; left: 252px; background: var(--bg); z-index: 30; display: flex; flex-direction: column; animation: rit-fade 0.2s; }
+.rit-app .fullpage-bar { display: flex; align-items: center; padding: 14px 30px; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(10px); }
+.rit-app .fullpage-body { flex: 1; overflow-y: auto; }
+.rit-app .fullpage .panel { max-width: 1180px; margin: 0 auto; padding: 0 30px; }
+.rit-app .fullpage .panel-head { padding-left: 0; padding-right: 0; }
+.rit-app .fullpage .glance { max-width: 640px; }
+.rit-app .fullpage .panel-body { padding-left: 0; padding-right: 0; }
+.rit-app .full-grid { display: grid; grid-template-columns: 1fr 320px; gap: 26px; align-items: start; }
+.rit-app .full-grid .pb-side { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 16px; }
+@media (max-width: 900px) {
+  .rit-app .fullpage { left: 0; }
+  .rit-app .detail-side { width: 100%; max-width: 100%; }
+  .rit-app .full-grid { grid-template-columns: 1fr; }
+}
+@keyframes rit-slidein { from { transform: translateX(40px); opacity: 0.4; } to { transform: none; opacity: 1; } }
+@keyframes rit-fade { from { opacity: 0; } to { opacity: 1; } }

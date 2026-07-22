@@ -27,6 +27,21 @@ const PATHS: Record<string, string> = {
   chevRight: "M9 6l6 6-6 6",
   chevLeft: "M15 6l-6 6 6 6",
   doc: "M14 3v5h5M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8zM9 13h6M9 17h4",
+  mail: "M3 5h18v14H3zM3 6l9 7 9-7",
+  phone: "M7 3h10v18H7zM11 18h2",
+  dots: "M5 12h.01M12 12h.01M19 12h.01",
+  x: "M6 6l12 12M18 6L6 18",
+  expand: "M4 14v6h6M20 10V4h-6M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7",
+  arrowLeft: "M19 12H5M11 18l-6-6 6-6",
+  arrowRight: "M5 12h14M13 6l6 6-6 6",
+  copy: "M9 9h11v11H9zM5 15H4V4h11v1",
+  alert: "M12 3l9 16H3zM12 9v4M12 16.5v.5",
+  globe:
+    "M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c2.5 2.5 4 5.7 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.7-4-9s1.5-6.5 4-9z",
+  star: "M12 3l2.6 6.3 6.4.5-4.9 4.2 1.5 6.2L12 17.5 6.9 20.5l1.5-6.2L3.5 9.8l6.4-.5z",
+  clock: "M12 7v5l3 2M12 21a9 9 0 110-18 9 9 0 010 18z",
+  whatsapp: "M12 2a10 10 0 00-8.6 15l-1.4 5 5.1-1.3A10 10 0 1012 2z",
+  send: "M22 2L11 13M22 2l-7 20-4-9-9-4z",
 };
 
 interface IconProps {
