@@ -224,15 +224,15 @@
 /* Badges de color */
 .rit-app .badge.b-open { background: var(--pos-tint); color: var(--pos); }
 .rit-app .badge.b-open .d { background: var(--pos); }
-.rit-app .badge.b-closed { background: var(--surface-2); color: var(--muted); }
+.rit-app .badge.b-closed { background: var(--surface-2); color: var(--faint); }
 .rit-app .badge.b-closed .d { background: var(--faint); }
 .rit-app .badge.b-ai { background: var(--brand-tint); color: var(--brand); border: 1px solid var(--brand-border); }
 .rit-app .badge.b-lang { background: var(--eng-tint); color: var(--eng); }
 .rit-app .badge.b-wa { background: var(--wa-tint); color: var(--wa); }
-.rit-app .badge.b-neutral { background: var(--surface-2); color: var(--muted); }
+.rit-app .badge.b-neutral { background: var(--surface-2); color: var(--faint); }
 
 /* Chips (skills) */
-.rit-app .chip { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+.rit-app .chip { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); color: var(--faint); white-space: nowrap; }
 .rit-app .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .rit-app .tglabel { font-size: 11px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--faint); font-weight: 600; margin-bottom: 8px; }
 
@@ -258,13 +258,13 @@
 .rit-app .btn-wa:hover { filter: brightness(0.95); }
 
 /* Ranking table helpers (Fase 2) */
-.rit-app .rankbadge { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 99px; font-family: var(--mono); font-size: 12px; font-weight: 700; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); }
+.rit-app .rankbadge { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 99px; font-family: var(--mono); font-size: 12px; font-weight: 700; background: var(--surface-2); border: 1px solid var(--border); color: var(--faint); }
 .rit-app .rankbadge.top { background: var(--warn-tint); border-color: transparent; color: oklch(0.5 0.11 65); }
 .rit-app .cname { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
 .rit-app .cemail { font-size: 11.5px; color: var(--faint); margin-top: 1px; }
-.rit-app .cnote { font-size: 12px; color: var(--muted); font-style: italic; margin-top: 3px; }
+.rit-app .cnote { font-size: 12px; color: var(--faint); font-style: italic; margin-top: 3px; }
 .rit-app .scoreN { font-size: 18px; font-weight: 700; letter-spacing: -0.03em; font-family: var(--mono); }
-.rit-app .mini-sel { font-size: 12.5px; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--border-2); border-radius: 9px; padding: 7px 10px; cursor: pointer; font-family: inherit; }
+.rit-app .mini-sel { font-size: 12.5px; font-weight: 600; color: var(--faint); background: var(--surface); border: 1px solid var(--border-2); border-radius: 9px; padding: 7px 10px; cursor: pointer; font-family: inherit; }
 
 /* ============ FASE 1 · Profile Panel ============ */
 .rit-app .panel { display: flex; flex-direction: column; height: 100%; }
@@ -273,7 +273,7 @@
 .rit-app .pcount { font-size: 13px; font-weight: 700; }
 .rit-app .pident { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; }
 .rit-app .pname { font-size: 18px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; }
-.rit-app .prole { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+.rit-app .prole { font-size: 12.5px; color: var(--faint); margin-top: 3px; }
 .rit-app .pactions { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
 
 /* At-a-glance AI strip */
@@ -282,14 +282,14 @@
 .rit-app .g-cells { flex: 1; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 14px; }
 .rit-app .g-cell .k { font-size: 10px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; color: var(--faint); font-weight: 600; }
 .rit-app .g-cell .v { font-size: 14px; font-weight: 700; margin-top: 2px; }
-.rit-app .g-cell .v .sub { font-size: 11px; font-weight: 600; color: var(--muted); }
+.rit-app .g-cell .v .sub { font-size: 11px; font-weight: 600; color: var(--faint); }
 
 /* Panel tabs */
 .rit-app .ptabs { display: flex; gap: 2px; }
-.rit-app .ptabs button { border: none; background: none; font: inherit; padding: 10px 13px; font-size: 13px; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; transition: 0.13s; }
+.rit-app .ptabs button { border: none; background: none; font: inherit; padding: 10px 13px; font-size: 13px; font-weight: 600; color: var(--faint); border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; transition: 0.13s; }
 .rit-app .ptabs button:hover { color: var(--ink); }
 .rit-app .ptabs button.on { color: var(--brand); border-color: var(--brand); }
-.rit-app .ptabs button .ptn { margin-left: 6px; font-family: var(--mono); font-size: 10px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); padding: 0 6px; border-radius: 99px; }
+.rit-app .ptabs button .ptn { margin-left: 6px; font-family: var(--mono); font-size: 10px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--border); color: var(--faint); padding: 0 6px; border-radius: 99px; }
 .rit-app .ptabs button.on .ptn { background: var(--brand-tint); border-color: var(--brand-border); color: var(--brand); }
 
 .rit-app .panel-body { flex: 1; overflow-y: auto; padding: 18px 20px 28px; }
@@ -316,7 +316,7 @@
 /* Key-value + timeline */
 .rit-app .kv .row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; gap: 12px; }
 .rit-app .kv .row:last-child { border-bottom: none; }
-.rit-app .kv .row .k { color: var(--muted); }
+.rit-app .kv .row .k { color: var(--faint); }
 .rit-app .kv .row b { font-weight: 700; }
 .rit-app .tl { position: relative; padding-left: 24px; }
 .rit-app .tl::before { content: ""; position: absolute; left: 6px; top: 5px; bottom: 5px; width: 1.5px; background: var(--border); }
@@ -353,9 +353,9 @@
 
 /* ============ FASE 2 · Plaza detalle ============ */
 /* Meta / KPIs del header */
-.rit-app .desc { font-size: 14px; color: var(--muted); margin-top: 6px; max-width: 74ch; line-height: 1.5; }
+.rit-app .desc { font-size: 14px; color: var(--faint); margin-top: 6px; max-width: 74ch; line-height: 1.5; }
 .rit-app .meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 16px; }
-.rit-app .kpi { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.rit-app .kpi { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--faint); font-weight: 600; }
 .rit-app .kpi b { color: var(--ink); font-family: var(--mono); }
 .rit-app .kpi.faint { color: var(--faint); }
 
@@ -365,7 +365,7 @@
 .rit-app .fbar .seg { transition: 0.2s; cursor: default; }
 .rit-app .fbar .seg.dim { opacity: 0.25; }
 .rit-app .flegend { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-top: 12px; }
-.rit-app .flegend .lg { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 6px 11px; border-radius: 99px; cursor: pointer; transition: 0.13s; }
+.rit-app .flegend .lg { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--faint); background: var(--surface); border: 1px solid var(--border); padding: 6px 11px; border-radius: 99px; cursor: pointer; transition: 0.13s; }
 .rit-app .flegend .lg:hover { border-color: var(--border-2); color: var(--ink); }
 .rit-app .flegend .lg.on { background: var(--brand-tint); border-color: var(--brand-border); color: var(--brand-strong); }
 .rit-app .flegend .lg .d { width: 8px; height: 8px; border-radius: 99px; }

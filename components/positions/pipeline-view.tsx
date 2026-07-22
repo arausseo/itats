@@ -5,6 +5,7 @@ import { useRouter } from "@/src/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { PipelineStatusSelect } from "@/components/positions/pipeline-status-select";
 import { CandidateProfilePanel } from "@/components/features/candidate-profile-panel";
+import { useProfileLayout, ProfileLayoutToggle } from "@/components/features/profile-layout";
 import { Icon } from "@/components/app/icon";
 import {
   getCandidateById,
@@ -44,6 +45,7 @@ export function PipelineView({
 }: PipelineViewProps) {
   const t = useTranslations("positions");
   const router = useRouter();
+  const [layout, setLayout] = useProfileLayout();
 
   const [seniority, setSeniority] = useState<string>(ALL);
   const [stageFilter, setStageFilter] = useState<PipelineStatus | null>(null);
@@ -109,6 +111,7 @@ export function PipelineView({
     : null;
   const panelIdx = selectedPcId ? filtered.findIndex((pc) => pc.id === selectedPcId) : -1;
   const panelOpen = selectedCandidate !== null && selectedPcId !== null;
+  const panelInline = panelOpen && layout === "split";
 
   function openDetail(pc: PositionCandidateWithCandidate) {
     setSelectedPcId(pc.id);
@@ -191,6 +194,12 @@ export function PipelineView({
     <>
       <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
         <div style={{ flex: 1, minWidth: 0 }} className="flex flex-col gap-4">
+          {/* Toggle de modo del panel */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8 }}>
+            <span style={{ fontSize: 12, color: "var(--faint)", fontWeight: 600 }}>{t("viewProfileAs")}</span>
+            <ProfileLayoutToggle value={layout} onChange={setLayout} />
+          </div>
+
           {/* Funnel interactivo */}
           <div className="funnel">
             <div className="fbar">
@@ -292,10 +301,10 @@ export function PipelineView({
                   <tr>
                     {hasRanking && <th style={{ width: 64 }}>{t("colRanking")}</th>}
                     <th>{t("colCandidate")}</th>
-                    {!panelOpen && <th>{t("colRole")}</th>}
-                    {!panelOpen && <th>{t("colSeniority")}</th>}
+                    {!panelInline && <th>{t("colRole")}</th>}
+                    {!panelInline && <th>{t("colSeniority")}</th>}
                     <th>{t("colStatus")}</th>
-                    {!panelOpen && <th>{t("colAdded")}</th>}
+                    {!panelInline && <th>{t("colAdded")}</th>}
                     <th aria-label="acciones" style={{ width: 80 }} />
                   </tr>
                 </thead>
@@ -325,13 +334,13 @@ export function PipelineView({
                         <td>
                           <div className="cname">{pc.candidate.nombre}</div>
                           <div className="cemail">{pc.candidate.email}</div>
-                          {pc.ranking_phrase && !panelOpen && (
+                          {pc.ranking_phrase && !panelInline && (
                             <div className="cnote" title={pc.ranking_phrase} style={{ maxWidth: "24rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {pc.ranking_phrase}
                             </div>
                           )}
                         </td>
-                        {!panelOpen && (
+                        {!panelInline && (
                           <td style={{ color: "var(--faint)" }}>
                             <div>{pc.candidate.rol_principal}</div>
                             {pc.candidate.pais_residencia && (
@@ -339,11 +348,11 @@ export function PipelineView({
                             )}
                           </td>
                         )}
-                        {!panelOpen && <td style={{ color: "var(--faint)" }}>{pc.candidate.seniority_estimado}</td>}
+                        {!panelInline && <td style={{ color: "var(--faint)" }}>{pc.candidate.seniority_estimado}</td>}
                         <td>
                           <PipelineStatusSelect positionCandidateId={pc.id} currentStatus={pc.pipeline_status} />
                         </td>
-                        {!panelOpen && (
+                        {!panelInline && (
                           <td style={{ fontSize: 12.5, color: "var(--faint)" }}>
                             {new Date(pc.created_at).toLocaleDateString()}
                           </td>
@@ -374,7 +383,7 @@ export function PipelineView({
           </div>
         </div>
 
-        {panelOpen && selectedCandidate && (
+        {panelInline && selectedCandidate && (
           <CandidateProfilePanel
             candidate={selectedCandidate}
             mode="split"
@@ -382,6 +391,7 @@ export function PipelineView({
             total={filtered.length}
             onNav={navPanel}
             onClose={closePanel}
+            onExpand={() => setLayout("full")}
             statusSlot={
               selectedPc && (
                 <PipelineStatusSelect positionCandidateId={selectedPc.id} currentStatus={selectedPc.pipeline_status} />
@@ -390,6 +400,24 @@ export function PipelineView({
           />
         )}
       </div>
+
+      {/* Drawer / Full: overlay fuera del flujo */}
+      {panelOpen && layout !== "split" && selectedCandidate && (
+        <CandidateProfilePanel
+          candidate={selectedCandidate}
+          mode={layout}
+          idx={panelIdx}
+          total={filtered.length}
+          onNav={navPanel}
+          onClose={closePanel}
+          onExpand={() => setLayout("full")}
+          statusSlot={
+            selectedPc && (
+              <PipelineStatusSelect positionCandidateId={selectedPc.id} currentStatus={selectedPc.pipeline_status} />
+            )
+          }
+        />
+      )}
 
       {/* Dialog de previsualización del reporte */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>

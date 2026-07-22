@@ -275,7 +275,7 @@ export function CandidateProfilePanel({
           {c.educacion_formal && (
             <div className="card2">
               <h4 style={{ marginBottom: 8 }}>Educación</h4>
-              <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{c.educacion_formal}</p>
+              <p style={{ fontSize: 13, color: "var(--faint)", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{c.educacion_formal}</p>
             </div>
           )}
           {c.certificaciones.length > 0 && (
@@ -364,7 +364,7 @@ export function CandidateProfilePanel({
         <h4 style={{ marginBottom: 12 }}>Nivel de inglés</h4>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
           <span className="mono" style={{ fontSize: 26, fontWeight: 700, color: "var(--faint)" }}>{DASH}</span>
-          <span style={{ fontSize: 12, color: "var(--muted)" }}>· sin evaluar</span>
+          <span style={{ fontSize: 12, color: "var(--faint)" }}>· sin evaluar</span>
         </div>
         <CefrMeter level={null} />
       </div>

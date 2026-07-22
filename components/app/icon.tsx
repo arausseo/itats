@@ -53,7 +53,7 @@ interface IconProps {
 
 export function Icon({ name, size = 18, className, style }: IconProps) {
   const d = PATHS[name] ?? PATHS.spark;
-  const filled = name === "spark";
+  const filled = name === "spark" || name === "whatsapp" || name === "star";
   return (
     <svg
       width={size}
