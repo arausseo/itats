@@ -27,9 +27,10 @@ import {
   ScoreRing,
   getInitials,
 } from "@/components/design/primitives";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { CandidateNotes } from "@/components/candidate-notes";
 import { CandidateStatusSelect } from "@/components/candidate-status-select";
-import { CvMarkdownPreview } from "@/components/cv-markdown-preview";
 import { getCvDownloadSignedUrl } from "@/src/lib/candidate-cv-download";
 import { type Candidate, redFlagsIsClear } from "@/src/types/candidate";
 
@@ -318,7 +319,9 @@ export function CandidateProfilePanel({
         <div className="stack">
           {experienceMd && (
             <div className="card2">
-              <CvMarkdownPreview markdown={experienceMd} />
+              <div className="panel-md">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{experienceMd}</ReactMarkdown>
+              </div>
             </div>
           )}
           {c.educacion_formal && (

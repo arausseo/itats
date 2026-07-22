@@ -386,3 +386,15 @@
   .rit-app .talent-layout { grid-template-columns: 1fr; }
   .rit-app .talent-rail { position: static; max-height: none; }
 }
+
+/* Markdown compacto dentro del panel (tab Experiencia) */
+.rit-app .panel-md { font-size: 13px; line-height: 1.55; color: var(--faint); }
+.rit-app .panel-md > :first-child { margin-top: 0; }
+.rit-app .panel-md h1, .rit-app .panel-md h2, .rit-app .panel-md h3, .rit-app .panel-md h4 { font-size: 13.5px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; margin: 16px 0 8px; }
+.rit-app .panel-md p { margin: 0 0 9px; }
+.rit-app .panel-md ul, .rit-app .panel-md ol { margin: 0 0 9px; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; }
+.rit-app .panel-md li { padding-left: 2px; }
+.rit-app .panel-md li::marker { color: var(--brand); }
+.rit-app .panel-md strong { color: var(--ink); font-weight: 700; }
+.rit-app .panel-md a { color: var(--brand); text-decoration: underline; text-underline-offset: 2px; }
+.rit-app .panel-md hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
