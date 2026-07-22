@@ -254,8 +254,15 @@
 .rit-app .cefr i.cur { background: var(--eng); color: #fff; }
 
 /* Botón WhatsApp */
+.rit-app .btn { font-family: inherit; font-weight: 700; font-size: 13.5px; border-radius: 10px; border: 1px solid transparent; padding: 9px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: 0.15s; white-space: nowrap; letter-spacing: -0.01em; }
+.rit-app .btn-sm { padding: 6px 11px; font-size: 12.5px; border-radius: 9px; }
+.rit-app .btn-primary { background: linear-gradient(160deg, var(--brand), var(--brand-strong)); color: #fff; box-shadow: 0 2px 8px -1px rgba(74, 53, 166, 0.4); }
+.rit-app .btn-primary:hover { filter: brightness(1.08); }
+.rit-app .btn-secondary { background: var(--surface); color: var(--ink); border-color: var(--border-2); }
+.rit-app .btn-secondary:hover { background: var(--surface-2); }
 .rit-app .btn-wa { background: var(--wa); color: #fff; }
 .rit-app .btn-wa:hover { filter: brightness(0.95); }
+.rit-app .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Ranking table helpers (Fase 2) */
 .rit-app .rankbadge { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 99px; font-family: var(--mono); font-size: 12px; font-weight: 700; background: var(--surface-2); border: 1px solid var(--border); color: var(--faint); }

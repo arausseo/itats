@@ -17,6 +17,8 @@
  */
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Icon } from "@/components/app/icon";
 import {
   Avatar,
@@ -51,6 +53,30 @@ const DASH = "—";
 function waHref(phone: string): string | null {
   const digits = phone.replace(/[^\d]/g, "");
   return digits.length >= 8 ? `https://wa.me/${digits}` : null;
+}
+
+/** Icon-button con tooltip del valor; al hacer click copia el valor al portapapeles. */
+function CopyBtn({ icon, value, label }: { icon: string; value: string; label: string }) {
+  if (!value) return null;
+  function copy() {
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(value).then(
+      () => toast.success(`${label} copiado`),
+      () => toast.error("No se pudo copiar"),
+    );
+  }
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button className="icon-btn sm" onClick={copy} aria-label={`Copiar ${label.toLowerCase()}`}>
+          <Icon name={icon} size={15} />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <span className="mono">{value}</span>
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 export function CandidateProfilePanel({
@@ -153,14 +179,8 @@ export function CandidateProfilePanel({
             WhatsApp
           </button>
         )}
-        <a className="icon-btn sm" href={c.email ? `mailto:${c.email}` : undefined} aria-label="Correo">
-          <Icon name="mail" size={15} />
-        </a>
-        {c.telefono && (
-          <a className="icon-btn sm" href={`tel:${c.telefono}`} aria-label="Teléfono">
-            <Icon name="phone" size={15} />
-          </a>
-        )}
+        <CopyBtn icon="mail" value={c.email} label="Correo" />
+        <CopyBtn icon="phone" value={c.telefono} label="Teléfono" />
       </div>
 
       {/* At-a-glance: señal AI arriba de todo */}
