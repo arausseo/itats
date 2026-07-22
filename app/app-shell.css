@@ -378,3 +378,11 @@
 .rit-app .flegend .lg .d { width: 8px; height: 8px; border-radius: 99px; }
 .rit-app .flegend .lg b { font-family: var(--mono); font-weight: 600; }
 .rit-app .flegend .lg.clear { color: var(--neg); }
+
+/* ============ FASE 4 · Talent pool (facet rail) ============ */
+.rit-app .talent-layout { display: grid; grid-template-columns: 258px minmax(0, 1fr); gap: 22px; align-items: start; }
+.rit-app .talent-rail { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; }
+@media (max-width: 900px) {
+  .rit-app .talent-layout { grid-template-columns: 1fr; }
+  .rit-app .talent-rail { position: static; max-height: none; }
+}

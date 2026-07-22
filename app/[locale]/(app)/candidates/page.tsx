@@ -222,43 +222,47 @@ export default async function CandidatesPage({
         </div>
       </div>
 
-      <div className="card card-pad" style={{ marginBottom: 18 }}>
-        <Suspense
-          fallback={<div className="h-16 animate-pulse rounded-md bg-muted/80" />}
-        >
-          <CandidateFilters
-            seniorityOptions={seniorityOptions}
-            paisOptions={paisOptions}
-            rolOptions={rolOptions}
-            stackOptions={stackOptions}
-            frameworkOptions={frameworkOptions}
-            patronOptions={patronOptions}
-            facetCounts={facetCounts}
-            defaultDateFrom={defaultDateFrom}
-            defaultDateTo={defaultDateTo}
-          />
-        </Suspense>
-      </div>
+      <div className="talent-layout">
+        <aside className="card card-pad talent-rail">
+          <Suspense
+            fallback={<div className="h-16 animate-pulse rounded-md bg-muted/80" />}
+          >
+            <CandidateFilters
+              seniorityOptions={seniorityOptions}
+              paisOptions={paisOptions}
+              rolOptions={rolOptions}
+              stackOptions={stackOptions}
+              frameworkOptions={frameworkOptions}
+              patronOptions={patronOptions}
+              facetCounts={facetCounts}
+              defaultDateFrom={defaultDateFrom}
+              defaultDateTo={defaultDateTo}
+            />
+          </Suspense>
+        </aside>
 
-      {queryError ? (
-        <div
-          role="alert"
-          style={{ borderRadius: 11, background: "var(--neg-tint)", color: "var(--neg)", padding: "12px 16px", fontSize: 13 }}
-        >
-          <p style={{ fontWeight: 600 }}>{t("loadErrorTitle")}</p>
-          <p style={{ marginTop: 4 }}>{queryError}</p>
+        <div style={{ minWidth: 0 }}>
+          {queryError ? (
+            <div
+              role="alert"
+              style={{ borderRadius: 11, background: "var(--neg-tint)", color: "var(--neg)", padding: "12px 16px", fontSize: 13 }}
+            >
+              <p style={{ fontWeight: 600 }}>{t("loadErrorTitle")}</p>
+              <p style={{ marginTop: 4 }}>{queryError}</p>
+            </div>
+          ) : (
+            <CandidatesTableSheet
+              candidates={candidates}
+              sortColumn={sortColumn}
+              sortDir={sortDir}
+              totalCount={totalCount}
+              page={pageDisplay}
+              pageSize={pageSize}
+              openPositions={openPositions}
+            />
+          )}
         </div>
-      ) : (
-        <CandidatesTableSheet
-          candidates={candidates}
-          sortColumn={sortColumn}
-          sortDir={sortDir}
-          totalCount={totalCount}
-          page={pageDisplay}
-          pageSize={pageSize}
-          openPositions={openPositions}
-        />
-      )}
+      </div>
     </div>
   );
 }

@@ -26,6 +26,7 @@ import {
   type CandidateListUrlPatch,
 } from "@/src/lib/candidate-list-url-client";
 import { MultiSelectFilter } from "@/components/multi-select-filter";
+import { Icon } from "@/components/app/icon";
 import type { FacetCountBundle } from "@/src/lib/candidate-facet-counts";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
@@ -196,193 +197,162 @@ export function CandidateFilters({
   const paisSelectValue = paisFromUrl.trim() || ALL_PAIS;
 
   return (
-    <div className={cn("space-y-4", className)}>
-      {/* Fila 1: solo nombre y búsqueda libre */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-        <div className="min-w-0 flex-1 space-y-1.5">
-          <label
-            htmlFor="candidate-q"
-            className="text-xs font-medium text-muted-foreground"
-          >
-            {t("searchName")}
-          </label>
-          <Input
-            id="candidate-q"
-            type="search"
-            placeholder={t("namePlaceholder")}
-            value={qInput}
-            onChange={(e) => setQInput(e.target.value)}
-            autoComplete="off"
-          />
-        </div>
-
-        <div className="min-w-0 flex-1 space-y-1.5">
-          <label
-            htmlFor="candidate-libre"
-            className="text-xs font-medium text-muted-foreground"
-          >
-            {t("searchLibre")}
-          </label>
-          <Input
-            id="candidate-libre"
-            type="search"
-            placeholder={t("librePlaceholder")}
-            value={libreInput}
-            onChange={(e) => setLibreInput(e.target.value)}
-            autoComplete="off"
-          />
-        </div>
-
-        {isPending ? (
-          <div className="flex shrink-0 items-center justify-center pb-0.5 sm:pb-1.5">
-            <Spinner className="h-4 w-4 text-primary" />
-          </div>
-        ) : null}
+    <div className={cn("flex flex-col gap-5", className)}>
+      {/* Encabezado del rail */}
+      <div className="flex items-center justify-between">
+        <span className="eyebrow" style={{ fontSize: 10.5 }}>Filtros</span>
+        {isPending && <Spinner className="h-3.5 w-3.5 text-primary" />}
       </div>
 
-      {/* Fila 2: rango de fechas */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-        <div className="space-y-1.5">
-          <label
-            htmlFor="candidate-date-from"
-            className="text-xs font-medium text-muted-foreground"
-          >
-            {t("dateFrom")}
-          </label>
-          <Input
-            id="candidate-date-from"
-            type="date"
-            value={dateFromInput}
-            max={dateToInput}
-            onChange={(e) => handleDateFromChange(e.target.value)}
-            className="w-40"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label
-            htmlFor="candidate-date-to"
-            className="text-xs font-medium text-muted-foreground"
-          >
-            {t("dateTo")}
-          </label>
-          <Input
-            id="candidate-date-to"
-            type="date"
-            value={dateToInput}
-            min={dateFromInput}
-            onChange={(e) => handleDateToChange(e.target.value)}
-            className="w-40"
-          />
-        </div>
+      {/* Búsqueda semántica */}
+      <div
+        className="space-y-1.5 rounded-[13px] p-3"
+        style={{ background: "linear-gradient(165deg, var(--brand-tint), var(--surface) 82%)", border: "1px solid var(--brand-border)" }}
+      >
+        <label htmlFor="candidate-libre" className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: "var(--brand)" }}>
+          <Icon name="spark" size={12} />
+          {t("searchLibre")}
+        </label>
+        <Input
+          id="candidate-libre"
+          type="search"
+          placeholder={t("librePlaceholder")}
+          value={libreInput}
+          onChange={(e) => setLibreInput(e.target.value)}
+          autoComplete="off"
+        />
+      </div>
+
+      {/* Nombre */}
+      <div className="space-y-1.5">
+        <label htmlFor="candidate-q" className="block text-xs font-semibold text-muted-foreground">
+          {t("searchName")}
+        </label>
+        <Input
+          id="candidate-q"
+          type="search"
+          placeholder={t("namePlaceholder")}
+          value={qInput}
+          onChange={(e) => setQInput(e.target.value)}
+          autoComplete="off"
+        />
+      </div>
+
+      {/* Seniority */}
+      <div className="space-y-1.5">
+        <span className="block text-xs font-semibold text-muted-foreground">{t("seniority")}</span>
+        <Select
+          value={selectValue}
+          onValueChange={(value) => pushTextFilters({ seniority: value === ALL_SENIORITY ? "" : value })}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={t("seniorityAll")} />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            <SelectItem value={ALL_SENIORITY}>
+              {t("seniorityAllWithCount", { count: facetCounts.seniorityTotal })}
+            </SelectItem>
+            {seniorityOptions.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s} ({facetCounts.seniority[s] ?? 0})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* País */}
+      <div className="space-y-1.5">
+        <span className="block text-xs font-semibold text-muted-foreground">{t("country")}</span>
+        <Select
+          value={paisSelectValue}
+          onValueChange={(value) => pushTextFilters({ pais: value === ALL_PAIS ? "" : value })}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={t("countryAll")} />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            <SelectItem value={ALL_PAIS}>
+              {t("countryAllWithCount", { count: facetCounts.paisTotal })}
+            </SelectItem>
+            {paisOptions.map((p) => (
+              <SelectItem key={p} value={p}>
+                {p} ({facetCounts.pais[p] ?? 0})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Rol / Stack / Frameworks / Patrones */}
+      <MultiSelectFilter
+        label={t("rol")}
+        options={rolOptions}
+        selected={rolSelected}
+        onChange={(rol) => replaceUrl({ rol, page: "1" })}
+        optionCounts={facetCounts.rol}
+        facetTotal={facetCounts.rolTotal}
+        className="min-w-0"
+      />
+      <MultiSelectFilter
+        label={t("stack")}
+        options={stackOptions}
+        selected={stackSelected}
+        onChange={(stack) => replaceUrl({ stack, page: "1" })}
+        optionCounts={facetCounts.stack}
+        facetTotal={facetCounts.stackTotal}
+        className="min-w-0"
+      />
+      <MultiSelectFilter
+        label={t("frameworks")}
+        options={frameworkOptions}
+        selected={fwSelected}
+        onChange={(fw) => replaceUrl({ fw, page: "1" })}
+        optionCounts={facetCounts.frameworks}
+        facetTotal={facetCounts.frameworksTotal}
+        className="min-w-0"
+      />
+      <MultiSelectFilter
+        label={t("patrones")}
+        options={patronOptions}
+        selected={patSelected}
+        onChange={(pat) => replaceUrl({ pat, page: "1" })}
+        optionCounts={facetCounts.patrones}
+        facetTotal={facetCounts.patronesTotal}
+        className="min-w-0"
+      />
+
+      {/* Registrado (rango de fechas) */}
+      <div className="space-y-1.5">
+        <span className="block text-xs font-semibold text-muted-foreground">{t("dateFrom")}</span>
+        <Input
+          id="candidate-date-from"
+          type="date"
+          value={dateFromInput}
+          max={dateToInput}
+          onChange={(e) => handleDateFromChange(e.target.value)}
+          className="w-full"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <span className="block text-xs font-semibold text-muted-foreground">{t("dateTo")}</span>
+        <Input
+          id="candidate-date-to"
+          type="date"
+          value={dateToInput}
+          min={dateFromInput}
+          onChange={(e) => handleDateToChange(e.target.value)}
+          className="w-full"
+        />
         {!isDefaultDateRange && (
           <button
             type="button"
             onClick={resetDateRange}
-            className="pb-0.5 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline sm:pb-2"
+            className="mt-1 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
             {t("dateReset")}
           </button>
         )}
-      </div>
-
-      {/* Fila 3: senioridad, país, rol */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="space-y-1.5">
-          <span className="block text-xs font-medium text-muted-foreground">
-            {t("seniority")}
-          </span>
-          <Select
-            value={selectValue}
-            onValueChange={(value) => {
-              const seniority = value === ALL_SENIORITY ? "" : value;
-              pushTextFilters({ seniority });
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("seniorityAll")} />
-            </SelectTrigger>
-            <SelectContent position="popper">
-              <SelectItem value={ALL_SENIORITY}>
-                {t("seniorityAllWithCount", {
-                  count: facetCounts.seniorityTotal,
-                })}
-              </SelectItem>
-              {seniorityOptions.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s} ({facetCounts.seniority[s] ?? 0})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <span className="block text-xs font-medium text-muted-foreground">
-            {t("country")}
-          </span>
-          <Select
-            value={paisSelectValue}
-            onValueChange={(value) => {
-              const nextPais = value === ALL_PAIS ? "" : value;
-              pushTextFilters({ pais: nextPais });
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder={t("countryAll")} />
-            </SelectTrigger>
-            <SelectContent position="popper">
-              <SelectItem value={ALL_PAIS}>
-                {t("countryAllWithCount", { count: facetCounts.paisTotal })}
-              </SelectItem>
-              {paisOptions.map((p) => (
-                <SelectItem key={p} value={p}>
-                  {p} ({facetCounts.pais[p] ?? 0})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <MultiSelectFilter
-          label={t("rol")}
-          options={rolOptions}
-          selected={rolSelected}
-          onChange={(rol) => replaceUrl({ rol, page: "1" })}
-          optionCounts={facetCounts.rol}
-          facetTotal={facetCounts.rolTotal}
-          className="min-w-0"
-        />
-      </div>
-
-      {/* Fila 4: stack, frameworks, patrones */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <MultiSelectFilter
-          label={t("stack")}
-          options={stackOptions}
-          selected={stackSelected}
-          onChange={(stack) => replaceUrl({ stack, page: "1" })}
-          optionCounts={facetCounts.stack}
-          facetTotal={facetCounts.stackTotal}
-          className="min-w-0"
-        />
-        <MultiSelectFilter
-          label={t("frameworks")}
-          options={frameworkOptions}
-          selected={fwSelected}
-          onChange={(fw) => replaceUrl({ fw, page: "1" })}
-          optionCounts={facetCounts.frameworks}
-          facetTotal={facetCounts.frameworksTotal}
-          className="min-w-0"
-        />
-        <MultiSelectFilter
-          label={t("patrones")}
-          options={patronOptions}
-          selected={patSelected}
-          onChange={(pat) => replaceUrl({ pat, page: "1" })}
-          optionCounts={facetCounts.patrones}
-          facetTotal={facetCounts.patronesTotal}
-          className="min-w-0"
-        />
       </div>
     </div>
   );
