@@ -1,12 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { normalizeStringArray } from "@/src/types/candidate";
-import {
-  applyCandidateFilters,
-  type CandidateListFilterState,
-  type FacetExclude,
-} from "@/src/lib/candidate-filters-query";
-
-const BATCH = 1000;
+import type { CandidateListFilterState } from "@/src/lib/candidate-filters-query";
 
 export type FacetCountBundle = {
   seniority: Record<string, number>;
@@ -53,104 +46,54 @@ export function emptyFacetBundle(opt: FacetCountOptions): FacetCountBundle {
   };
 }
 
-async function fetchRowsForFacet(
-  supabase: SupabaseClient,
-  filters: CandidateListFilterState,
-  exclude: FacetExclude,
-  select: string,
-): Promise<Record<string, unknown>[]> {
-  const out: Record<string, unknown>[] = [];
-  for (let from = 0; ; from += BATCH) {
-    const q = applyCandidateFilters(supabase, filters, exclude, select)
-      .order("id", { ascending: true })
-      .range(from, from + BATCH - 1);
-    const { data, error } = await q;
-    if (error) {
-      throw error;
-    }
-    if (!data?.length) {
-      break;
-    }
-    out.push(...(data as unknown as Record<string, unknown>[]));
-    if (data.length < BATCH) {
-      break;
-    }
-  }
-  return out;
-}
-
-function tallyScalarColumn(
-  rows: Record<string, unknown>[],
-  column: string,
-  options: string[],
-): Record<string, number> {
-  const counts = zeroRecord(options);
-  for (const row of rows) {
-    const v = String(row[column] ?? "").trim();
-    if (v && counts[v] !== undefined) {
-      counts[v]++;
-    }
-  }
-  return counts;
-}
-
-function tallyJsonbArrayContains(
-  rows: Record<string, unknown>[],
-  column: string,
-  options: string[],
-): Record<string, number> {
-  const counts = zeroRecord(options);
-  const optSet = new Set(options);
-  for (const row of rows) {
-    const arr = normalizeStringArray(row[column]);
-    const seen = new Set<string>();
-    for (const raw of arr) {
-      const s = raw.trim();
-      if (s && optSet.has(s) && !seen.has(s)) {
-        seen.add(s);
-        counts[s]++;
-      }
-    }
-  }
-  return counts;
-}
-
 /**
- * Conteos por opción (faceta): mismos filtros que el listado salvo el campo de cada faceta.
+ * Conteos por opción (faceta): mismos filtros que el listado salvo el campo de
+ * cada faceta. La agregación se hace en Postgres vía el RPC `get_candidate_facets`
+ * (un round-trip, respeta RLS), en lugar de traer todas las filas y contar en app.
  */
 export async function computeFacetCounts(
   supabase: SupabaseClient,
   filters: CandidateListFilterState,
   opt: FacetCountOptions,
 ): Promise<FacetCountBundle> {
-  const [
-    seniorityRows,
-    paisRows,
-    rolRows,
-    stackRows,
-    fwRows,
-    patRows,
-  ] = await Promise.all([
-    fetchRowsForFacet(supabase, filters, "seniority", "seniority_estimado"),
-    fetchRowsForFacet(supabase, filters, "pais", "pais_residencia"),
-    fetchRowsForFacet(supabase, filters, "rol", "rol_principal"),
-    fetchRowsForFacet(supabase, filters, "stack", "lenguajes"),
-    fetchRowsForFacet(supabase, filters, "frameworks", "frameworks"),
-    fetchRowsForFacet(supabase, filters, "patrones", "patrones"),
-  ]);
+  const libreActive = filters.libre.trim() !== "";
+
+  const { data, error } = await supabase.rpc("get_candidate_facets", {
+    p_q: filters.q ?? "",
+    p_libre_active: libreActive,
+    p_libre_ids: filters.libreCandidateIds ?? [],
+    p_seniority: filters.seniority ?? "",
+    p_pais: filters.pais ?? "",
+    p_roles: filters.roles ?? [],
+    p_stacks: filters.stacks ?? [],
+    p_frameworks: filters.frameworks ?? [],
+    p_patrones: filters.patrones ?? [],
+    p_date_from: filters.dateFrom ? `${filters.dateFrom}T00:00:00.000Z` : null,
+    p_date_to: filters.dateTo ? `${filters.dateTo}T23:59:59.999Z` : null,
+  });
+
+  if (error) throw error;
+
+  const r = (data ?? {}) as Record<string, unknown>;
+  // Combina con zeroRecord para que TODAS las opciones aparezcan (0 si no hay).
+  const rec = (key: string, options: string[]): Record<string, number> => ({
+    ...zeroRecord(options),
+    ...((r[key] as Record<string, number> | undefined) ?? {}),
+  });
+  const num = (key: string): number => Number(r[key] ?? 0);
 
   return {
-    seniority: tallyScalarColumn(seniorityRows, "seniority_estimado", opt.seniorityOptions),
-    seniorityTotal: seniorityRows.length,
-    pais: tallyScalarColumn(paisRows, "pais_residencia", opt.paisOptions),
-    paisTotal: paisRows.length,
-    rol: tallyScalarColumn(rolRows, "rol_principal", opt.rolOptions),
-    rolTotal: rolRows.length,
-    stack: tallyJsonbArrayContains(stackRows, "lenguajes", opt.stackOptions),
-    stackTotal: stackRows.length,
-    frameworks: tallyJsonbArrayContains(fwRows, "frameworks", opt.frameworkOptions),
-    frameworksTotal: fwRows.length,
-    patrones: tallyJsonbArrayContains(patRows, "patrones", opt.patronOptions),
-    patronesTotal: patRows.length,
+    seniority: rec("seniority", opt.seniorityOptions),
+    seniorityTotal: num("seniorityTotal"),
+    pais: rec("pais", opt.paisOptions),
+    paisTotal: num("paisTotal"),
+    rol: rec("rol", opt.rolOptions),
+    rolTotal: num("rolTotal"),
+    stack: rec("stack", opt.stackOptions),
+    stackTotal: num("stackTotal"),
+    frameworks: rec("frameworks", opt.frameworkOptions),
+    frameworksTotal: num("frameworksTotal"),
+    patrones: rec("patrones", opt.patronOptions),
+    patronesTotal: num("patronesTotal"),
   };
 }
