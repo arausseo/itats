@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { PositionCard } from "@/components/positions/position-card";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "@/src/i18n/navigation";
+import { Icon } from "@/components/app/icon";
+import { StatusBadge } from "@/components/app/dashboard-ui";
 import type { PositionWithCount } from "@/src/types/position";
-import { cn } from "@/lib/utils";
 
 interface PositionsListProps {
   positions: PositionWithCount[];
@@ -14,107 +13,119 @@ interface PositionsListProps {
 
 export function PositionsList({ positions }: PositionsListProps) {
   const t = useTranslations("positions");
+  const locale = useLocale();
+  const router = useRouter();
   const [search, setSearch] = useState("");
-  const [closedExpanded, setClosedExpanded] = useState(false);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return positions;
+    const base = [...positions].sort((a, b) => {
+      // Abiertas primero, luego por fecha desc
+      if (a.status !== b.status) return a.status === "Open" ? -1 : 1;
+      return 0;
+    });
+    if (!search.trim()) return base;
     const q = search.toLowerCase();
-    return positions.filter(
+    return base.filter(
       (p) =>
         p.title.toLowerCase().includes(q) ||
         p.description?.toLowerCase().includes(q),
     );
   }, [positions, search]);
 
-  const open = filtered.filter((p) => p.status === "Open");
-  const closed = filtered.filter((p) => p.status === "Closed");
+  const fmtDate = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleDateString(locale, { day: "numeric", month: "short" });
+    } catch {
+      return "—";
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Search */}
-      <div className="flex items-center gap-3">
-        <Input
-          type="search"
-          placeholder={t("searchPositions")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
-        />
+    <div>
+      {/* Filtros */}
+      <div className="filters">
+        <div className="search" style={{ width: 260 }}>
+          <Icon name="search" size={16} />
+          <input
+            placeholder={t("searchPositions")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            aria-label={t("searchPositions")}
+          />
+        </div>
         {search && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2 text-xs text-muted-foreground"
-            onClick={() => setSearch("")}
-          >
-            {t("clearSearch")}
-          </Button>
-        )}
-        {search && (
-          <span className="text-xs text-muted-foreground">
+          <span style={{ fontSize: 12.5, color: "var(--faint)", fontWeight: 600 }}>
             {t("searchResults", { count: filtered.length })}
           </span>
         )}
       </div>
 
-      {/* Empty state */}
-      {filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <p className="text-sm text-muted-foreground">
+      {filtered.length === 0 ? (
+        <div className="card card-pad" style={{ textAlign: "center", padding: "56px 24px" }}>
+          <p style={{ fontSize: 14, color: "var(--faint)" }}>
             {search ? t("noSearchResults") : t("empty")}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p style={{ marginTop: 4, fontSize: 12.5, color: "var(--faint)" }}>
             {search ? t("noSearchResultsHint") : t("emptyHint")}
           </p>
         </div>
-      )}
-
-      {/* Open positions */}
-      {open.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            {t("sectionOpen")} ({open.length})
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {open.map((pos) => (
-              <PositionCard key={pos.id} position={pos} />
-            ))}
+      ) : (
+        <div className="card" style={{ padding: "6px 8px" }}>
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th style={{ width: "48%" }}>{t("colPosition")}</th>
+                  <th style={{ textAlign: "center" }}>{t("candidates")}</th>
+                  <th>{t("colAdded")}</th>
+                  <th>{t("colStatus")}</th>
+                  <th style={{ width: 60 }} aria-label="acciones" />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((p, i) => (
+                  <tr key={p.id} onClick={() => router.push(`/positions/${p.id}`)}>
+                    <td>
+                      <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+                        <span className="mono" style={{ fontSize: 12, color: "var(--faint)", fontWeight: 600 }}>
+                          #{i + 1}
+                        </span>
+                        <span style={{ fontSize: 14, fontWeight: 700 }}>{p.title}</span>
+                      </div>
+                    </td>
+                    <td style={{ textAlign: "center" }}>
+                      <span
+                        style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 700 }}
+                      >
+                        <Icon name="users" size={13} style={{ color: "var(--faint)" }} />
+                        {p.candidate_count}
+                      </span>
+                    </td>
+                    <td style={{ fontSize: 12.5, color: "var(--faint)" }}>{fmtDate(p.created_at)}</td>
+                    <td>
+                      <StatusBadge
+                        open={p.status === "Open"}
+                        label={p.status === "Open" ? t("statusOpen") : t("statusClosed")}
+                      />
+                    </td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
+                        <button
+                          type="button"
+                          className="icon-btn sm"
+                          aria-label={t("viewProfile")}
+                          onClick={() => router.push(`/positions/${p.id}`)}
+                        >
+                          <Icon name="eye" size={15} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </section>
-      )}
-
-      {/* Closed positions - Collapsible */}
-      {closed.length > 0 && (
-        <section>
-          <button
-            type="button"
-            onClick={() => setClosedExpanded(!closedExpanded)}
-            className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <svg
-              className={cn(
-                "h-3.5 w-3.5 transition-transform",
-                closedExpanded && "rotate-90",
-              )}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-            {t("sectionClosed")} ({closed.length})
-          </button>
-
-          {closedExpanded && (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {closed.map((pos) => (
-                <PositionCard key={pos.id} position={pos} />
-              ))}
-            </div>
-          )}
-        </section>
+        </div>
       )}
     </div>
   );

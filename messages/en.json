@@ -7,6 +7,7 @@
   },
   "positions": {
     "metaTitle": "Positions — ATS",
+    "eyebrow": "Recruiting",
     "title": "Positions",
     "description": "Manage open positions and their candidate processes.",
     "createButton": "New position",
@@ -64,6 +65,7 @@
     "colSeniority": "Seniority",
     "colStatus": "Status",
     "colAdded": "Added",
+    "colPosition": "Position",
     "searchHint": "Results are automatically generated from the position's title, description and requirements. Type somethin specific to refine the search.",
     "searchPlaceholder": "Refine search…",
     "searchButton": "Search",

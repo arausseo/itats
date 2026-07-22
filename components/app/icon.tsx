@@ -22,6 +22,8 @@ const PATHS: Record<string, string> = {
   menu: "M4 7h16M4 12h16M4 17h16",
   plus: "M12 5v14M5 12h14",
   download: "M12 3v12M7 11l5 4 5-4M5 21h14",
+  filter: "M3 5h18M6 12h12M10 19h4",
+  eye: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7zM12 15a3 3 0 100-6 3 3 0 000 6z",
 };
 
 interface IconProps {

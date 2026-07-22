@@ -178,3 +178,17 @@
   .rit-app .dash-cols.split-a,
   .rit-app .dash-cols.split-b { grid-template-columns: 1fr; }
 }
+
+/* ============================================================
+   Tabla + filtros (Puestos / listados). Portado de designV2.
+   ============================================================ */
+.rit-app .filters { display: flex; align-items: center; gap: 9px; margin-bottom: 18px; flex-wrap: wrap; }
+.rit-app .icon-btn.sm { width: 32px; height: 32px; border-radius: 9px; }
+.rit-app .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 9px; background: var(--surface-2); border: 1px solid var(--border); color: var(--ink); white-space: nowrap; }
+.rit-app .tbl-wrap { overflow-x: auto; }
+.rit-app .tbl { width: 100%; border-collapse: collapse; }
+.rit-app .tbl thead th { font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.rit-app .tbl tbody td { padding: 15px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13.5px; }
+.rit-app .tbl tbody tr { transition: 0.12s; cursor: pointer; }
+.rit-app .tbl tbody tr:hover { background: var(--surface-2); }
+.rit-app .tbl tbody tr:last-child td { border-bottom: none; }
