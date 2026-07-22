@@ -15,14 +15,6 @@ import type { PositionCandidateWithCandidate, PipelineStatus } from "@/src/types
 import { PIPELINE_STATUSES } from "@/src/types/position";
 import type { Candidate } from "@/src/types/candidate";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -242,7 +234,10 @@ export function PipelineView({
     <>
       <div className="flex flex-col gap-4">
         {/* Ranking actions */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 bg-muted/30 px-4 py-3">
+        <div
+          className="card"
+          style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 18px" }}
+        >
           <div className="flex flex-col gap-0.5">
             <p className="text-xs font-medium text-foreground">
               {hasRanking ? t("colRanking") : t("generateRanking")}
@@ -372,127 +367,110 @@ export function PipelineView({
           )}
         </div>
 
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {hasRanking && (
-                  <TableHead className="w-16 text-xs">{t("colRanking")}</TableHead>
-                )}
-                <TableHead className="text-xs">{t("colCandidate")}</TableHead>
-                <TableHead className="text-xs">{t("colRole")}</TableHead>
-                <TableHead className="text-xs">{t("colSeniority")}</TableHead>
-                <TableHead className="text-xs">{t("colStatus")}</TableHead>
-                <TableHead className="text-xs">{t("colAdded")}</TableHead>
-                <TableHead className="text-xs" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={hasRanking ? 7 : 6}
-                    className="h-20 text-center text-xs text-muted-foreground"
-                  >
-                    {t("filterNoResults")}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filtered.map((pc) => (
-                  <TableRow key={pc.id}>
-                    {hasRanking && (
-                      <TableCell>
-                        {pc.ranking_score !== null ? (
-                          <RankBadge score={pc.ranking_score} />
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                    )}
-                    <TableCell className="font-medium">
-                      <div>
-                        <p className="text-sm">{pc.candidate.nombre}</p>
-                        <p className="text-xs text-muted-foreground">{pc.candidate.email}</p>
+        <div className="card" style={{ padding: "6px 8px" }}>
+          <div className="tbl-wrap">
+            <table className="tbl">
+              <thead>
+                <tr>
+                  {hasRanking && <th style={{ width: 74 }}>{t("colRanking")}</th>}
+                  <th>{t("colCandidate")}</th>
+                  <th>{t("colRole")}</th>
+                  <th>{t("colSeniority")}</th>
+                  <th>{t("colStatus")}</th>
+                  <th>{t("colAdded")}</th>
+                  <th aria-label="acciones" />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={hasRanking ? 7 : 6}
+                      style={{ height: 80, textAlign: "center", color: "var(--faint)", cursor: "default" }}
+                    >
+                      {t("filterNoResults")}
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((pc) => (
+                    <tr key={pc.id} style={{ cursor: "default" }}>
+                      {hasRanking && (
+                        <td>
+                          {pc.ranking_score !== null ? (
+                            <RankBadge score={pc.ranking_score} />
+                          ) : (
+                            <span style={{ color: "var(--faint)" }}>—</span>
+                          )}
+                        </td>
+                      )}
+                      <td>
+                        <div style={{ fontSize: 14, fontWeight: 700 }}>{pc.candidate.nombre}</div>
+                        <div style={{ fontSize: 12, color: "var(--faint)" }}>{pc.candidate.email}</div>
                         {pc.ranking_phrase && (
-                          <p
-                            className="mt-0.5 truncate text-xs italic text-muted-foreground"
+                          <div
                             title={pc.ranking_phrase}
+                            style={{ marginTop: 2, maxWidth: "24rem", fontSize: 12, fontStyle: "italic", color: "var(--faint)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
                           >
                             {pc.ranking_phrase}
-                          </p>
+                          </div>
                         )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      <p>{pc.candidate.rol_principal}</p>
-                      {pc.candidate.pais_residencia && (
-                        <p className="text-xs text-muted-foreground/70">
-                          {pc.candidate.pais_residencia}
-                        </p>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {pc.candidate.seniority_estimado}
-                    </TableCell>
-                    <TableCell>
-                      <PipelineStatusSelect
-                        positionCandidateId={pc.id}
-                        currentStatus={pc.pipeline_status}
-                      />
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {new Date(pc.created_at).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 px-2 text-xs"
-                          disabled={fetchingId === pc.candidate_id && fetchTransition}
-                          onClick={() => openDetail(pc.candidate_id)}
-                        >
-                          {fetchingId === pc.candidate_id && fetchTransition ? (
-                            <span className="inline-flex items-center gap-1.5">
-                              <Spinner className="h-3 w-3" />
-                              {t("viewProfile")}
-                            </span>
-                          ) : (
-                            t("viewProfile")
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                          title={t("removeFromPipeline")}
-                          onClick={() =>
-                            setRemoveTarget({
-                              id: pc.id,
-                              name: pc.candidate.nombre,
-                            })
-                          }
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 16 16"
-                            fill="currentColor"
-                            className="h-3.5 w-3.5"
+                      </td>
+                      <td style={{ color: "var(--faint)" }}>
+                        <div>{pc.candidate.rol_principal}</div>
+                        {pc.candidate.pais_residencia && (
+                          <div style={{ fontSize: 12, opacity: 0.8 }}>{pc.candidate.pais_residencia}</div>
+                        )}
+                      </td>
+                      <td style={{ color: "var(--faint)" }}>{pc.candidate.seniority_estimado}</td>
+                      <td>
+                        <PipelineStatusSelect
+                          positionCandidateId={pc.id}
+                          currentStatus={pc.pipeline_status}
+                        />
+                      </td>
+                      <td style={{ fontSize: 12.5, color: "var(--faint)" }}>
+                        {new Date(pc.created_at).toLocaleDateString()}
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, justifyContent: "flex-end" }}>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={fetchingId === pc.candidate_id && fetchTransition}
+                            onClick={() => openDetail(pc.candidate_id)}
                           >
-                            <path
-                              fillRule="evenodd"
-                              d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                            {fetchingId === pc.candidate_id && fetchTransition ? (
+                              <span className="inline-flex items-center gap-1.5">
+                                <Spinner className="h-3 w-3" />
+                                {t("viewProfile")}
+                              </span>
+                            ) : (
+                              t("viewProfile")
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-muted-foreground hover:text-destructive"
+                            title={t("removeFromPipeline")}
+                            onClick={() => setRemoveTarget({ id: pc.id, name: pc.candidate.nombre })}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-3.5 w-3.5">
+                              <path
+                                fillRule="evenodd"
+                                d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 

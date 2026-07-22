@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
 import { PipelineView } from "@/components/positions/pipeline-view";
 import { AiSearchView } from "@/components/positions/ai-search-view";
 import { PipelineStats } from "@/components/positions/pipeline-stats";
@@ -39,41 +38,14 @@ export function PositionTabs({
       <PipelineStats candidates={positionCandidates} />
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-border">
-        <button
-          type="button"
-          onClick={() => setTab("pipeline")}
-          className={cn(
-            "rounded-t-md px-3 py-2 text-sm font-medium transition-colors",
-            tab === "pipeline"
-              ? "border-b-2 border-primary text-foreground"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
+      <div className="rtabs">
+        <button type="button" onClick={() => setTab("pipeline")} className={tab === "pipeline" ? "on" : ""}>
           {t("tabPipeline")} ({positionCandidates.length})
         </button>
-        <button
-          type="button"
-          onClick={() => setTab("search")}
-          className={cn(
-            "rounded-t-md px-3 py-2 text-sm font-medium transition-colors",
-            tab === "search"
-              ? "border-b-2 border-primary text-foreground"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
+        <button type="button" onClick={() => setTab("search")} className={tab === "search" ? "on" : ""}>
           {t("tabSearch")}
         </button>
-        <button
-          type="button"
-          onClick={() => setTab("questions")}
-          className={cn(
-            "rounded-t-md px-3 py-2 text-sm font-medium transition-colors",
-            tab === "questions"
-              ? "border-b-2 border-primary text-foreground"
-              : "text-muted-foreground hover:text-foreground",
-          )}
-        >
+        <button type="button" onClick={() => setTab("questions")} className={tab === "questions" ? "on" : ""}>
           {t("tabQuestions")} ({questions.length})
         </button>
       </div>

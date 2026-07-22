@@ -12,14 +12,9 @@ import { getPositionQuestions } from "@/src/lib/position-questions-actions";
 import { getUserProfile } from "@/src/lib/user-profile";
 import { EditPositionDialog } from "@/components/positions/edit-position-dialog";
 import { ClosePositionDialog } from "@/components/positions/close-position-dialog";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/app/dashboard-ui";
 import { Link } from "@/src/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
 
 type Props = {
   params: Promise<{ locale: string; id: string }>;
@@ -93,77 +88,61 @@ export default async function PositionDetailPage({ params }: Props) {
   }
 
   return (
-    <div className="min-h-full flex-1 bg-muted/30">
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <Card className="border-border/80 shadow-sm ring-1 ring-border/60">
-          <CardHeader className="border-b border-border/60 pb-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Link
-                    href="/positions"
-                    className="text-xs text-muted-foreground hover:text-foreground"
-                  >
-                    ← {t("backToPositions")}
-                  </Link>
-                </div>
-                <h1 className="mt-1 text-lg font-semibold sm:text-xl">
-                  {position.title}
-                </h1>
-                {position.description && (
-                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                    {position.description}
-                  </p>
-                )}
-                <div className="mt-2 flex items-center gap-2">
-                  <Badge
-                    variant={position.status === "Open" ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {position.status === "Open" ? t("statusOpen") : t("statusClosed")}
-                  </Badge>
-                  <span className="text-xs text-muted-foreground">
-                    {pipelineCandidates.length} {t("candidatesInPipeline")}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    · {t("createdAt", { date: new Date(position.created_at).toLocaleDateString() })}
-                  </span>
-                </div>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <EditPositionDialog position={position} />
-                {position.status === "Open" ? (
-                  <ClosePositionDialog
-                    positionId={position.id}
-                    positionTitle={position.title}
-                  />
-                ) : (
-                  <form action={reopenAction}>
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                    >
-                      {t("reopenPosition")}
-                    </Button>
-                  </form>
-                )}
-              </div>
-            </div>
-          </CardHeader>
-
-          <CardContent className="pt-6">
-            <PositionTabs
-              position={position}
-              positionCandidates={pipelineCandidates}
-              seniorityOptions={seniorityOptions}
-              questions={questions}
-              orgSlug={profile?.organizationSlug ?? null}
-            />
-          </CardContent>
-        </Card>
+    <div className="page fade-in">
+      <div className="crumb" style={{ marginBottom: 12 }}>
+        <Link href="/positions">← {t("backToPositions")}</Link>
       </div>
+
+      <div className="page-head">
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <h1 style={{ fontSize: 26 }}>{position.title}</h1>
+          {position.description && (
+            <p
+              className="sub"
+              style={{
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}
+            >
+              {position.description}
+            </p>
+          )}
+          <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <StatusBadge
+              open={position.status === "Open"}
+              label={position.status === "Open" ? t("statusOpen") : t("statusClosed")}
+            />
+            <span style={{ fontSize: 12.5, color: "var(--faint)", fontWeight: 600 }}>
+              {pipelineCandidates.length} {t("candidatesInPipeline")}
+            </span>
+            <span style={{ fontSize: 12.5, color: "var(--faint)" }}>
+              · {t("createdAt", { date: new Date(position.created_at).toLocaleDateString() })}
+            </span>
+          </div>
+        </div>
+        <div className="right">
+          <EditPositionDialog position={position} />
+          {position.status === "Open" ? (
+            <ClosePositionDialog positionId={position.id} positionTitle={position.title} />
+          ) : (
+            <form action={reopenAction}>
+              <Button type="submit" variant="outline" size="sm">
+                {t("reopenPosition")}
+              </Button>
+            </form>
+          )}
+        </div>
+      </div>
+
+      <PositionTabs
+        position={position}
+        positionCandidates={pipelineCandidates}
+        seniorityOptions={seniorityOptions}
+        questions={questions}
+        orgSlug={profile?.organizationSlug ?? null}
+      />
     </div>
   );
 }
