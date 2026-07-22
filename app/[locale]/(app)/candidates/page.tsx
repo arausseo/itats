@@ -27,13 +27,6 @@ import {
   fetchRolOptions,
   fetchSeniorityOptions,
 } from "@/src/lib/candidate-filters-server";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { CandidateFilters } from "@/components/candidate-filters";
 import { CandidatesTableSheet } from "@/components/candidates-table-sheet";
 
@@ -220,54 +213,52 @@ export default async function CandidatesPage({
   const pageDisplay = Math.min(Math.max(1, requestedPage), totalPages);
 
   return (
-    <div className="min-h-full flex-1 bg-muted/30">
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <Card className="border-border/80 shadow-sm ring-1 ring-border/60">
-          <CardHeader className="border-b border-border/60 pb-6">
-            <CardTitle className="text-lg sm:text-xl">{t("title")}</CardTitle>
-            <CardDescription>{t("description")}</CardDescription>
-            <Suspense
-              fallback={
-                <div className="mt-4 h-16 animate-pulse rounded-md bg-muted/80" />
-              }
-            >
-              <CandidateFilters
-                className="mt-4"
-                seniorityOptions={seniorityOptions}
-                paisOptions={paisOptions}
-                rolOptions={rolOptions}
-                stackOptions={stackOptions}
-                frameworkOptions={frameworkOptions}
-                patronOptions={patronOptions}
-                facetCounts={facetCounts}
-                defaultDateFrom={defaultDateFrom}
-                defaultDateTo={defaultDateTo}
-              />
-            </Suspense>
-          </CardHeader>
-          <CardContent className="pt-6">
-            {queryError ? (
-              <div
-                className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-xs text-destructive"
-                role="alert"
-              >
-                <p className="font-medium">{t("loadErrorTitle")}</p>
-                <p className="mt-1 text-destructive/90">{queryError}</p>
-              </div>
-            ) : (
-              <CandidatesTableSheet
-                candidates={candidates}
-                sortColumn={sortColumn}
-                sortDir={sortDir}
-                totalCount={totalCount}
-                page={pageDisplay}
-                pageSize={pageSize}
-                openPositions={openPositions}
-              />
-            )}
-          </CardContent>
-        </Card>
+    <div className="page fade-in">
+      <div className="page-head">
+        <div>
+          <div className="eyebrow" style={{ marginBottom: 6 }}>{t("eyebrow")}</div>
+          <h1>{t("title")}</h1>
+          <div className="sub">{t("description")}</div>
+        </div>
       </div>
+
+      <div className="card card-pad" style={{ marginBottom: 18 }}>
+        <Suspense
+          fallback={<div className="h-16 animate-pulse rounded-md bg-muted/80" />}
+        >
+          <CandidateFilters
+            seniorityOptions={seniorityOptions}
+            paisOptions={paisOptions}
+            rolOptions={rolOptions}
+            stackOptions={stackOptions}
+            frameworkOptions={frameworkOptions}
+            patronOptions={patronOptions}
+            facetCounts={facetCounts}
+            defaultDateFrom={defaultDateFrom}
+            defaultDateTo={defaultDateTo}
+          />
+        </Suspense>
+      </div>
+
+      {queryError ? (
+        <div
+          role="alert"
+          style={{ borderRadius: 11, background: "var(--neg-tint)", color: "var(--neg)", padding: "12px 16px", fontSize: 13 }}
+        >
+          <p style={{ fontWeight: 600 }}>{t("loadErrorTitle")}</p>
+          <p style={{ marginTop: 4 }}>{queryError}</p>
+        </div>
+      ) : (
+        <CandidatesTableSheet
+          candidates={candidates}
+          sortColumn={sortColumn}
+          sortDir={sortDir}
+          totalCount={totalCount}
+          page={pageDisplay}
+          pageSize={pageSize}
+          openPositions={openPositions}
+        />
+      )}
     </div>
   );
 }

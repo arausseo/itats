@@ -204,6 +204,7 @@
     }
   },
   "home": {
+    "eyebrow": "Talento",
     "title": "Candidatos",
     "description": "Vista general del pipeline de talento. Filtra por país, seniority, rol, stack, frameworks y patrones; ordena columnas desde la tabla.",
     "loadErrorTitle": "Error al cargar candidatos"

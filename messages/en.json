@@ -204,6 +204,7 @@
     }
   },
   "home": {
+    "eyebrow": "Talent",
     "title": "Candidates",
     "description": "Overview of the talent pipeline. Filter by country, seniority, role, stack, frameworks and patterns; sort columns from the table.",
     "loadErrorTitle": "Error loading candidates"
