@@ -184,6 +184,13 @@
    ============================================================ */
 .rit-app .filters { display: flex; align-items: center; gap: 9px; margin-bottom: 18px; flex-wrap: wrap; }
 .rit-app .icon-btn.sm { width: 32px; height: 32px; border-radius: 9px; }
+.rit-app .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.rit-app .fchip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-2); background: var(--surface); color: var(--faint); cursor: pointer; transition: 0.13s; }
+.rit-app .fchip:hover { border-color: var(--faint); color: var(--ink); }
+.rit-app .fchip.on { background: var(--brand-tint); border-color: var(--brand-border); color: var(--brand-strong); }
+.rit-app .fchip.sm { padding: 5px 10px; font-size: 12px; }
+.rit-app .pager { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: 12.5px; color: var(--faint); font-weight: 600; }
+.rit-app .pager .grow { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .rit-app .tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 9px; background: var(--surface-2); border: 1px solid var(--border); color: var(--ink); white-space: nowrap; }
 .rit-app .tbl-wrap { overflow-x: auto; }
 .rit-app .tbl { width: 100%; border-collapse: collapse; }

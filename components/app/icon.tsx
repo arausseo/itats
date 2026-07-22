@@ -24,6 +24,8 @@ const PATHS: Record<string, string> = {
   download: "M12 3v12M7 11l5 4 5-4M5 21h14",
   filter: "M3 5h18M6 12h12M10 19h4",
   eye: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7zM12 15a3 3 0 100-6 3 3 0 000 6z",
+  chevRight: "M9 6l6 6-6 6",
+  chevLeft: "M15 6l-6 6 6 6",
 };
 
 interface IconProps {

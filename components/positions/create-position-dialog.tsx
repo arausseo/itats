@@ -17,6 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { RefinableTextarea } from "@/components/positions/refinable-textarea";
+import { Icon } from "@/components/app/icon";
 
 export function CreatePositionDialog() {
   const t = useTranslations("positions");
@@ -61,13 +62,16 @@ export function CreatePositionDialog() {
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); else setOpen(true); }}>
       <DialogTrigger asChild>
-        <Button size="sm" className="shrink-0">
-          + {t("createButton")}
+        <Button size="lg" className="shrink-0 gap-1.5">
+          <Icon name="plus" size={14} />
+          {t("createButton")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-[18px] p-6 shadow-[0_22px_48px_rgba(38,24,64,0.16)]">
         <DialogHeader>
-          <DialogTitle>{t("createTitle")}</DialogTitle>
+          <DialogTitle className="text-xl font-bold tracking-tight">
+            {t("createTitle")}
+          </DialogTitle>
           <DialogDescription>{t("createDescription")}</DialogDescription>
         </DialogHeader>
         <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
