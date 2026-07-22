@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { PipelineView } from "@/components/positions/pipeline-view";
 import { AiSearchView } from "@/components/positions/ai-search-view";
-import { PipelineStats } from "@/components/positions/pipeline-stats";
 import { PositionQuestionsManager } from "@/components/positions/position-questions-manager";
 import { PublicLinkCard } from "@/components/positions/public-link-card";
 import type { Position, PositionCandidateWithCandidate } from "@/src/types/position";
@@ -34,13 +33,10 @@ export function PositionTabs({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Pipeline Stats - always visible */}
-      <PipelineStats candidates={positionCandidates} />
-
       {/* Tabs */}
       <div className="rtabs">
         <button type="button" onClick={() => setTab("pipeline")} className={tab === "pipeline" ? "on" : ""}>
-          {t("tabPipeline")} ({positionCandidates.length})
+          {t("tabCandidates")} ({positionCandidates.length})
         </button>
         <button type="button" onClick={() => setTab("search")} className={tab === "search" ? "on" : ""}>
           {t("tabSearch")}

@@ -4,21 +4,17 @@ import { useOptimistic, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useRouter } from "@/src/i18n/navigation";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Icon } from "@/components/app/icon";
 import { updatePipelineStatus } from "@/src/lib/positions-actions";
 import { PIPELINE_STATUSES, type PipelineStatus } from "@/src/types/position";
+import { STAGE_COLOR } from "@/src/lib/pipeline-stage-colors";
 
 interface PipelineStatusSelectProps {
   positionCandidateId: string;
   currentStatus: PipelineStatus;
 }
 
+/** Pill de status tintada por el color del stage (designV2 `.stsel`). */
 export function PipelineStatusSelect({
   positionCandidateId,
   currentStatus,
@@ -42,29 +38,31 @@ export function PipelineStatusSelect({
     });
   }
 
-  const statusColorMap: Record<PipelineStatus, string> = {
-    Sourced: "text-slate-500",
-    "To Contact": "text-blue-500",
-    Screening: "text-indigo-500",
-    "Tech Assessment": "text-violet-500",
-    Interview: "text-amber-500",
-    Offer: "text-emerald-500",
-    Hired: "text-green-600",
-    Rejected: "text-red-500",
-  };
+  const color = STAGE_COLOR[optimisticStatus];
 
   return (
-    <Select value={optimisticStatus} onValueChange={handleChange}>
-      <SelectTrigger className={`h-7 w-40 text-xs ${statusColorMap[optimisticStatus]}`}>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
+    <div
+      className="stsel"
+      style={{
+        background: `color-mix(in srgb, ${color} 14%, var(--surface))`,
+        borderColor: `color-mix(in srgb, ${color} 35%, transparent)`,
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <span className="d" style={{ background: color }} />
+      <select
+        value={optimisticStatus}
+        onChange={(e) => handleChange(e.target.value)}
+        style={{ color }}
+        aria-label={t("colStatus")}
+      >
         {PIPELINE_STATUSES.map((s) => (
-          <SelectItem key={s} value={s} className={`text-xs ${statusColorMap[s]}`}>
+          <option key={s} value={s}>
             {t(`pipelineStatus.${s.replace(/ /g, "_")}`)}
-          </SelectItem>
+          </option>
         ))}
-      </SelectContent>
-    </Select>
+      </select>
+      <Icon name="chevDown" size={13} style={{ color }} />
+    </div>
   );
 }

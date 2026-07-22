@@ -350,3 +350,24 @@
 }
 @keyframes rit-slidein { from { transform: translateX(40px); opacity: 0.4; } to { transform: none; opacity: 1; } }
 @keyframes rit-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ============ FASE 2 · Plaza detalle ============ */
+/* Meta / KPIs del header */
+.rit-app .desc { font-size: 14px; color: var(--muted); margin-top: 6px; max-width: 74ch; line-height: 1.5; }
+.rit-app .meta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 16px; }
+.rit-app .kpi { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.rit-app .kpi b { color: var(--ink); font-family: var(--mono); }
+.rit-app .kpi.faint { color: var(--faint); }
+
+/* Funnel interactivo */
+.rit-app .funnel { margin-top: 4px; }
+.rit-app .fbar { display: flex; gap: 3px; height: 12px; border-radius: 99px; overflow: hidden; }
+.rit-app .fbar .seg { transition: 0.2s; cursor: default; }
+.rit-app .fbar .seg.dim { opacity: 0.25; }
+.rit-app .flegend { display: flex; flex-wrap: wrap; gap: 6px 8px; margin-top: 12px; }
+.rit-app .flegend .lg { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-size: 12.5px; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--border); padding: 6px 11px; border-radius: 99px; cursor: pointer; transition: 0.13s; }
+.rit-app .flegend .lg:hover { border-color: var(--border-2); color: var(--ink); }
+.rit-app .flegend .lg.on { background: var(--brand-tint); border-color: var(--brand-border); color: var(--brand-strong); }
+.rit-app .flegend .lg .d { width: 8px; height: 8px; border-radius: 99px; }
+.rit-app .flegend .lg b { font-family: var(--mono); font-weight: 600; }
+.rit-app .flegend .lg.clear { color: var(--neg); }
