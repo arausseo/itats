@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Spinner } from "@/components/ui/spinner";
-import { CandidateDetailSheet } from "@/components/candidate-detail-sheet";
+import { CandidateProfilePanel } from "@/components/features/candidate-profile-panel";
+import { Icon } from "@/components/app/icon";
 import { addCandidateToPosition, getCandidateById } from "@/src/lib/positions-actions";
 import type { CandidateSearchResult } from "@/src/types/position";
 import type { Candidate } from "@/src/types/candidate";
@@ -117,16 +118,23 @@ export function CandidateSearchCard({
         </div>
       </div>
 
-      <CandidateDetailSheet
-        candidate={fullCandidate}
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        addToPosition={{
-          mode: "locked",
-          positionId,
-          positionTitle,
-        }}
-      />
+      {sheetOpen && fullCandidate && (
+        <CandidateProfilePanel
+          candidate={fullCandidate}
+          mode="drawer"
+          onClose={() => setSheetOpen(false)}
+          statusSlot={
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={handleAdd}
+              disabled={isPending || added}
+            >
+              <Icon name="plus" size={14} />
+              {added ? t("addedToPipeline") : t("addToPipeline")}
+            </button>
+          }
+        />
+      )}
     </>
   );
 }
