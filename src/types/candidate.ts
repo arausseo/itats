@@ -43,6 +43,10 @@ export interface Candidate {
   patrones: JsonbStringArray;
   sectores: JsonbStringArray;
   red_flags: string;
+  /** Nivel de inglés CEFR (A1..C2) inferido por IA. Null = sin evaluar. */
+  nivel_ingles: string | null;
+  /** Confianza 0-100 de la estimación de nivel_ingles. */
+  nivel_ingles_confianza: number | null;
   raw_analysis: JsonValue;
   created_at: string;
   certificaciones: JsonbStringArray;
@@ -143,6 +147,14 @@ export function parseCandidateRow(row: unknown): Candidate {
     patrones: normalizeStringArray(r.patrones),
     sectores: normalizeStringArray(r.sectores),
     red_flags: String(r.red_flags ?? ""),
+    nivel_ingles:
+      typeof r.nivel_ingles === "string" && r.nivel_ingles.trim().length > 0
+        ? r.nivel_ingles.trim()
+        : null,
+    nivel_ingles_confianza:
+      typeof r.nivel_ingles_confianza === "number"
+        ? r.nivel_ingles_confianza
+        : null,
     raw_analysis: isJsonValue(raw) ? raw : {},
     created_at: String(r.created_at ?? ""),
     certificaciones: normalizeStringArray(r.certificaciones),

@@ -46,6 +46,12 @@ export const candidatePayloadSchema = z.object({
       seniority_estimado: z.string(),
       resumen_ejecutivo: z.string(),
       red_flags: redFlagsField,
+      /** Nivel de inglés CEFR inferido del CV. Null/omitido = sin evaluar. */
+      nivel_ingles: z
+        .enum(["A1", "A2", "B1", "B2", "C1", "C2"])
+        .nullish(),
+      /** Confianza 0-100 de la estimación de nivel_ingles. */
+      nivel_ingles_confianza: z.number().int().min(0).max(100).nullish(),
     })
     .optional(),
   educacion_y_certificaciones: z

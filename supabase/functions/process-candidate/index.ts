@@ -73,6 +73,10 @@ const mapPayloadToRow = (
     seniority_estimado: evaluacion!.seniority_estimado,
     resumen_ejecutivo: evaluacion!.resumen_ejecutivo,
     red_flags: evaluacion!.red_flags,
+    ...(evaluacion!.nivel_ingles != null ? { nivel_ingles: evaluacion!.nivel_ingles } : {}),
+    ...(evaluacion!.nivel_ingles_confianza != null
+      ? { nivel_ingles_confianza: evaluacion!.nivel_ingles_confianza }
+      : {}),
     raw_analysis: payload,
     ...(cv_storage_path !== undefined ? { cv_storage_path } : {}),
     cv_markdown: markdown,

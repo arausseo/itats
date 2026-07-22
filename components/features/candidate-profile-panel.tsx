@@ -191,7 +191,16 @@ export function CandidateProfilePanel({
         <div className="g-cells">
           <div className="g-cell">
             <div className="k">Inglés (CEFR)</div>
-            <div className="v" style={{ color: "var(--faint)" }}>Sin datos</div>
+            {c.nivel_ingles ? (
+              <div className="v" style={{ color: "var(--eng)" }}>
+                {c.nivel_ingles}
+                {c.nivel_ingles_confianza != null && (
+                  <span className="sub"> · {c.nivel_ingles_confianza}% conf.</span>
+                )}
+              </div>
+            ) : (
+              <div className="v" style={{ color: "var(--faint)" }}>Sin datos</div>
+            )}
           </div>
           <div className="g-cell">
             <div className="k">Seniority</div>
@@ -383,10 +392,18 @@ export function CandidateProfilePanel({
       <div className="card2">
         <h4 style={{ marginBottom: 12 }}>Nivel de inglés</h4>
         <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 10 }}>
-          <span className="mono" style={{ fontSize: 26, fontWeight: 700, color: "var(--faint)" }}>{DASH}</span>
-          <span style={{ fontSize: 12, color: "var(--faint)" }}>· sin evaluar</span>
+          <span className="mono" style={{ fontSize: 26, fontWeight: 700, color: c.nivel_ingles ? "var(--eng)" : "var(--faint)" }}>
+            {c.nivel_ingles ?? DASH}
+          </span>
+          <span style={{ fontSize: 12, color: "var(--faint)" }}>
+            {c.nivel_ingles
+              ? c.nivel_ingles_confianza != null
+                ? `· ${c.nivel_ingles_confianza}% conf.`
+                : ""
+              : "· sin evaluar"}
+          </span>
         </div>
-        <CefrMeter level={null} />
+        <CefrMeter level={c.nivel_ingles} />
       </div>
     </div>
   ) : null;
