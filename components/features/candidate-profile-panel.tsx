@@ -29,6 +29,7 @@ import {
 } from "@/components/design/primitives";
 import { CandidateNotes } from "@/components/candidate-notes";
 import { CandidateStatusSelect } from "@/components/candidate-status-select";
+import { CvMarkdownPreview } from "@/components/cv-markdown-preview";
 import { getCvDownloadSignedUrl } from "@/src/lib/candidate-cv-download";
 import { type Candidate, redFlagsIsClear } from "@/src/types/candidate";
 
@@ -53,6 +54,33 @@ const DASH = "—";
 function waHref(phone: string): string | null {
   const digits = phone.replace(/[^\d]/g, "");
   return digits.length >= 8 ? `https://wa.me/${digits}` : null;
+}
+
+/**
+ * Extrae la sección "Experiencia (Crítica y Logros)" del análisis markdown
+ * (`cv_markdown`): desde el heading que empieza con "Experiencia" hasta el
+ * siguiente heading. Devuelve null si no se encuentra.
+ */
+function extractExperienceSection(md: string): string | null {
+  if (!md) return null;
+  const lines = md.split("\n");
+  let start = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^#{1,4}\s*Experiencia/i.test(lines[i].trim())) {
+      start = i;
+      break;
+    }
+  }
+  if (start < 0) return null;
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++) {
+    if (/^#{1,4}\s+\S/.test(lines[i].trim())) {
+      end = i;
+      break;
+    }
+  }
+  const section = lines.slice(start, end).join("\n").trim();
+  return section.length > 0 ? section : null;
 }
 
 /** Icon-button con tooltip del valor; al hacer click copia el valor al portapapeles. */
@@ -101,6 +129,7 @@ export function CandidateProfilePanel({
   const stack = [...c.lenguajes];
   const tools = [...c.frameworks, ...c.patrones];
   const added = c.created_at ? new Date(c.created_at).toLocaleDateString() : DASH;
+  const experienceMd = extractExperienceSection(c.cv_markdown);
 
   function downloadCv() {
     if (!c.cv_storage_path) return;
@@ -117,7 +146,7 @@ export function CandidateProfilePanel({
   const TABS: [TabKey, string, number | null][] = [
     ["analisis", "Análisis IA", null],
     ["notas", "Notas", null],
-    ["cv", "CV & experiencia", null],
+    ["cv", "Experiencia", null],
     ["contacto", "Contacto", null],
     ["actividad", "Actividad", null],
   ];
@@ -287,20 +316,11 @@ export function CandidateProfilePanel({
 
       {tab === "cv" && (
         <div className="stack">
-          <div className="card2" style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div className="fileic"><Icon name="doc" size={18} /></div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 700 }}>
-                {c.cv_storage_path ? "CV del candidato" : "Sin CV cargado"}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--faint)" }}>
-                {c.cv_storage_path ? `Cargado el ${added}` : "No hay archivo asociado"}
-              </div>
+          {experienceMd && (
+            <div className="card2">
+              <CvMarkdownPreview markdown={experienceMd} />
             </div>
-            <button className="btn btn-secondary btn-sm" onClick={downloadCv} disabled={!c.cv_storage_path || cvPending}>
-              <Icon name="download" size={14} />Descargar
-            </button>
-          </div>
+          )}
           {c.educacion_formal && (
             <div className="card2">
               <h4 style={{ marginBottom: 8 }}>Educación</h4>
@@ -312,6 +332,9 @@ export function CandidateProfilePanel({
               <h4 style={{ marginBottom: 12 }}>Certificaciones</h4>
               <div className="chips">{c.certificaciones.map((s) => <Chip key={s}>{s}</Chip>)}</div>
             </div>
+          )}
+          {!experienceMd && !c.educacion_formal && c.certificaciones.length === 0 && (
+            <p style={{ fontSize: 13, color: "var(--faint)" }}>Sin datos de experiencia.</p>
           )}
         </div>
       )}
