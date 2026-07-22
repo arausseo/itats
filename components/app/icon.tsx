@@ -26,6 +26,7 @@ const PATHS: Record<string, string> = {
   eye: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7zM12 15a3 3 0 100-6 3 3 0 000 6z",
   chevRight: "M9 6l6 6-6 6",
   chevLeft: "M15 6l-6 6 6 6",
+  doc: "M14 3v5h5M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8zM9 13h6M9 17h4",
 };
 
 interface IconProps {

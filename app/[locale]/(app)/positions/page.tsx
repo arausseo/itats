@@ -30,10 +30,23 @@ export default async function PositionsPage({ params }: Props) {
 
   const t = await getTranslations("positions");
 
-  const { data: rows, error } = await supabase
-    .from("positions")
-    .select("*, position_candidates(count)")
-    .order("created_at", { ascending: false });
+  const [{ data: rows, error }, { data: appRows }] = await Promise.all([
+    supabase
+      .from("positions")
+      .select("*, position_candidates(count)")
+      .order("created_at", { ascending: false }),
+    // Solicitudes recibidas por la página pública (reusa la cola existente).
+    supabase
+      .from("cv_processing_queue")
+      .select("position_id")
+      .eq("source", "public_application"),
+  ]);
+
+  const appCounts: Record<string, number> = {};
+  for (const r of appRows ?? []) {
+    const pid = (r as { position_id: string | null }).position_id;
+    if (pid) appCounts[pid] = (appCounts[pid] ?? 0) + 1;
+  }
 
   const positions: PositionWithCount[] = (rows ?? []).map((row) => {
     const base = parsePositionRow(row);
@@ -41,7 +54,11 @@ export default async function PositionsPage({ params }: Props) {
     const count = Array.isArray(countArr)
       ? (countArr[0] as { count: number } | undefined)?.count ?? 0
       : 0;
-    return { ...base, candidate_count: count };
+    return {
+      ...base,
+      candidate_count: count,
+      application_count: appCounts[base.id] ?? 0,
+    };
   });
 
   return (

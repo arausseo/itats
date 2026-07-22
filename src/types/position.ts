@@ -20,6 +20,7 @@ export interface Position {
   description: string;
   requirements: string;
   status: PositionStatus;
+  views: number;
   created_at: string;
   updated_at: string;
 }
@@ -63,6 +64,8 @@ export interface CandidateSearchResult {
 
 export interface PositionWithCount extends Position {
   candidate_count: number;
+  /** Solicitudes recibidas por la página pública (cv_processing_queue). */
+  application_count: number;
 }
 
 // ─── Parsers ────────────────────────────────────────────────────────────────
@@ -77,6 +80,7 @@ export function parsePositionRow(row: unknown): Position {
     description: String(r.description ?? ""),
     requirements: String(r.requirements ?? ""),
     status: r.status === "Closed" ? "Closed" : "Open",
+    views: Number(r.views ?? 0),
     created_at: String(r.created_at ?? ""),
     updated_at: String(r.updated_at ?? ""),
   };

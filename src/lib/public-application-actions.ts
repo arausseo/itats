@@ -20,6 +20,19 @@ export type SubmitApplicationResult =
   | { ok: false; error: string; fieldErrors?: Record<string, string> };
 
 /**
+ * Registra una vista de la página pública de postulación (best-effort).
+ * Usa el RPC SECURITY DEFINER; nunca rompe la página si falla.
+ */
+export async function recordPositionView(positionId: string): Promise<void> {
+  try {
+    const supabase = getServiceClient();
+    await supabase.rpc("increment_position_views", { p_position_id: positionId });
+  } catch {
+    // El contador de vistas no debe afectar la carga de la página.
+  }
+}
+
+/**
  * Recibe la postulación pública: valida, sube el PDF a Storage y encola el item
  * con `position_id` + `application_answers` para que el pipeline lo procese
  * normalmente y enlace al candidato a la plaza.

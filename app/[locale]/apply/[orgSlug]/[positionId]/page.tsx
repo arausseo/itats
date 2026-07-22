@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getPublicApplicationContext } from "@/src/lib/public-application";
+import { recordPositionView } from "@/src/lib/public-application-actions";
 import { PublicApplicationForm } from "@/components/public-application-form";
 
 type Props = {
@@ -24,6 +25,9 @@ export default async function PublicApplyPage({ params }: Props) {
 
   const ctx = await getPublicApplicationContext(orgSlug, positionId);
   if (!ctx) notFound();
+
+  // Registra la vista (best-effort, no bloquea si falla).
+  await recordPositionView(ctx.position.id);
 
   const t = await getTranslations("publicApply");
 

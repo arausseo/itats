@@ -131,8 +131,9 @@ export function PositionsList({ positions }: PositionsListProps) {
               <table className="tbl">
                 <thead>
                   <tr>
-                    <th style={{ width: "48%" }}>{t("colPosition")}</th>
+                    <th style={{ width: "42%" }}>{t("colPosition")}</th>
                     <th style={{ textAlign: "center" }}>{t("candidates")}</th>
+                    <th style={{ textAlign: "center" }}>{t("colViewsApps")}</th>
                     <th>{t("colAdded")}</th>
                     <th>{t("colStatus")}</th>
                     <th style={{ width: 60 }} aria-label="acciones" />
@@ -153,6 +154,21 @@ export function PositionsList({ positions }: PositionsListProps) {
                         <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 700 }}>
                           <Icon name="users" size={13} style={{ color: "var(--faint)" }} />
                           {p.candidate_count}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: "center" }}>
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: 14, fontSize: 13, color: "var(--faint)" }}>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }} title={t("colViews")}>
+                            <Icon name="eye" size={13} />
+                            {p.views}
+                          </span>
+                          <span
+                            style={{ display: "inline-flex", alignItems: "center", gap: 5, fontWeight: 700, color: p.application_count > 0 ? "var(--brand-strong)" : "var(--faint)" }}
+                            title={t("colApplications")}
+                          >
+                            <Icon name="doc" size={13} />
+                            {p.application_count}
+                          </span>
                         </span>
                       </td>
                       <td style={{ fontSize: 12.5, color: "var(--faint)" }}>{fmtDate(p.created_at)}</td>

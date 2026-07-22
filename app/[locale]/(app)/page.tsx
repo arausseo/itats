@@ -80,7 +80,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     const base = parsePositionRow(row);
     const arr = (row as Record<string, unknown>).position_candidates;
     const count = Array.isArray(arr) ? (arr[0] as { count: number } | undefined)?.count ?? 0 : 0;
-    return { ...base, candidate_count: count };
+    return { ...base, candidate_count: count, application_count: 0 };
   });
   const openPositions = positions.filter((p) => p.status === "Open");
   const totalInPipeline = positions.reduce((a, p) => a + p.candidate_count, 0);
