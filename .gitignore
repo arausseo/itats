@@ -48,3 +48,6 @@ next-env.d.ts
 
 supabase/.temp/
 supabase/.branches/
+
+# pnpm build-approval stub (no es workspace real)
+pnpm-workspace.yaml
