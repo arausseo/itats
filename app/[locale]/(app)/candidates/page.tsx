@@ -15,17 +15,9 @@ import {
   type CandidateListFilterState,
 } from "@/src/lib/candidate-filters-query";
 import {
-  computeFacetCounts,
-  emptyFacetBundle,
-  type FacetCountBundle,
-  type FacetCountOptions,
-} from "@/src/lib/candidate-facet-counts";
-import {
-  fetchJsonbArrayOptions,
+  fetchFacetOptionsFromCache,
   fetchLibreCandidateIds,
-  fetchPaisOptions,
-  fetchRolOptions,
-  fetchSeniorityOptions,
+  type FacetOption,
 } from "@/src/lib/candidate-filters-server";
 import { CandidateFilters } from "@/components/candidate-filters";
 import { CandidatesTableSheet } from "@/components/candidates-table-sheet";
@@ -85,41 +77,17 @@ export default async function CandidatesPage({
 
   let candidates: Candidate[] = [];
   let totalCount = 0;
-  let seniorityOptions: string[] = [];
-  let paisOptions: string[] = [];
-  let rolOptions: string[] = [];
-  let stackOptions: string[] = [];
-  let frameworkOptions: string[] = [];
-  let patronOptions: string[] = [];
+  let seniorityOptions: FacetOption[] = [];
+  let paisOptions: FacetOption[] = [];
   let queryError: string | null = null;
-  let facetCounts: FacetCountBundle = emptyFacetBundle({
-    seniorityOptions: [],
-    paisOptions: [],
-    rolOptions: [],
-    stackOptions: [],
-    frameworkOptions: [],
-    patronOptions: [],
-  });
-  let facetPromise: Promise<FacetCountBundle> | undefined;
   let openPositions: { id: string; title: string }[] = [];
 
   try {
     const supabase = await createClient();
 
-    [
-      seniorityOptions,
-      paisOptions,
-      rolOptions,
-      stackOptions,
-      frameworkOptions,
-      patronOptions,
-    ] = await Promise.all([
-      fetchSeniorityOptions(supabase),
-      fetchPaisOptions(supabase),
-      fetchRolOptions(supabase),
-      fetchJsonbArrayOptions(supabase, "lenguajes"),
-      fetchJsonbArrayOptions(supabase, "frameworks"),
-      fetchJsonbArrayOptions(supabase, "patrones"),
+    [seniorityOptions, paisOptions] = await Promise.all([
+      fetchFacetOptionsFromCache(supabase, "seniority"),
+      fetchFacetOptionsFromCache(supabase, "pais"),
     ]);
 
     const { data: openPosRows } = await supabase
@@ -150,19 +118,6 @@ export default async function CandidatesPage({
       dateFrom,
       dateTo,
     };
-
-    const facetOpt: FacetCountOptions = {
-      seniorityOptions,
-      paisOptions,
-      rolOptions,
-      stackOptions,
-      frameworkOptions,
-      patronOptions,
-    };
-
-    facetPromise = computeFacetCounts(supabase, filterState, facetOpt).catch(
-      () => emptyFacetBundle(facetOpt),
-    );
 
     const buildFiltered = () =>
       applyCandidateFilters(supabase, filterState, null, "*", {
@@ -201,10 +156,6 @@ export default async function CandidatesPage({
   } catch (e) {
     queryError =
       e instanceof Error ? e.message : tCommon("connectionError");
-  } finally {
-    if (facetPromise) {
-      facetCounts = await facetPromise;
-    }
   }
 
   const sortDir: SortDir = ascending ? "asc" : "desc";
@@ -230,11 +181,6 @@ export default async function CandidatesPage({
             <CandidateFilters
               seniorityOptions={seniorityOptions}
               paisOptions={paisOptions}
-              rolOptions={rolOptions}
-              stackOptions={stackOptions}
-              frameworkOptions={frameworkOptions}
-              patronOptions={patronOptions}
-              facetCounts={facetCounts}
               defaultDateFrom={defaultDateFrom}
               defaultDateTo={defaultDateTo}
             />

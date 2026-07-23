@@ -25,9 +25,9 @@ import {
   mergeCandidateListUrl,
   type CandidateListUrlPatch,
 } from "@/src/lib/candidate-list-url-client";
-import { MultiSelectFilter } from "@/components/multi-select-filter";
+import { TokenAutocomplete } from "@/components/features/token-autocomplete";
 import { Icon } from "@/components/app/icon";
-import type { FacetCountBundle } from "@/src/lib/candidate-facet-counts";
+import type { FacetOption } from "@/src/lib/candidate-filters-server";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 
@@ -35,13 +35,9 @@ const ALL_SENIORITY = "__all__";
 const ALL_PAIS = "__all_pais__";
 
 export type CandidateFiltersProps = {
-  seniorityOptions: string[];
-  paisOptions: string[];
-  rolOptions: string[];
-  stackOptions: string[];
-  frameworkOptions: string[];
-  patronOptions: string[];
-  facetCounts: FacetCountBundle;
+  /** Opciones escalares precargadas desde la cache (con base count). */
+  seniorityOptions: FacetOption[];
+  paisOptions: FacetOption[];
   defaultDateFrom: string;
   defaultDateTo: string;
   className?: string;
@@ -59,11 +55,6 @@ function getSingleParam(
 export function CandidateFilters({
   seniorityOptions,
   paisOptions,
-  rolOptions,
-  stackOptions,
-  frameworkOptions,
-  patronOptions,
-  facetCounts,
   defaultDateFrom,
   defaultDateTo,
   className,
@@ -282,12 +273,10 @@ export function CandidateFilters({
             <SelectValue placeholder={t("seniorityAll")} />
           </SelectTrigger>
           <SelectContent position="popper">
-            <SelectItem value={ALL_SENIORITY}>
-              {t("seniorityAllWithCount", { count: facetCounts.seniorityTotal })}
-            </SelectItem>
-            {seniorityOptions.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s} ({facetCounts.seniority[s] ?? 0})
+            <SelectItem value={ALL_SENIORITY}>{t("seniorityAll")}</SelectItem>
+            {seniorityOptions.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.value} ({o.count})
               </SelectItem>
             ))}
           </SelectContent>
@@ -305,56 +294,41 @@ export function CandidateFilters({
             <SelectValue placeholder={t("countryAll")} />
           </SelectTrigger>
           <SelectContent position="popper">
-            <SelectItem value={ALL_PAIS}>
-              {t("countryAllWithCount", { count: facetCounts.paisTotal })}
-            </SelectItem>
-            {paisOptions.map((p) => (
-              <SelectItem key={p} value={p}>
-                {p} ({facetCounts.pais[p] ?? 0})
+            <SelectItem value={ALL_PAIS}>{t("countryAll")}</SelectItem>
+            {paisOptions.map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.value} ({o.count})
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      {/* Rol / Stack / Frameworks / Patrones */}
-      <MultiSelectFilter
+      {/* Rol / Stack / Frameworks / Patrones — typeahead multi-valor */}
+      <TokenAutocomplete
         label={t("rol")}
-        options={rolOptions}
+        kind="rol"
         selected={rolSelected}
         onChange={(rol) => replaceUrl({ rol, page: "1" })}
-        optionCounts={facetCounts.rol}
-        facetTotal={facetCounts.rolTotal}
-        className="min-w-0"
       />
-      <MultiSelectFilter
+      <TokenAutocomplete
         label={t("stack")}
-        options={stackOptions}
+        kind="lenguajes"
         selected={stackSelected}
         onChange={(stack) => replaceUrl({ stack, page: "1" })}
-        optionCounts={facetCounts.stack}
-        facetTotal={facetCounts.stackTotal}
-        className="min-w-0"
       />
-      <MultiSelectFilter
+      <TokenAutocomplete
         label={t("frameworks")}
-        options={frameworkOptions}
+        kind="frameworks"
         selected={fwSelected}
         onChange={(fw) => replaceUrl({ fw, page: "1" })}
-        optionCounts={facetCounts.frameworks}
-        facetTotal={facetCounts.frameworksTotal}
-        className="min-w-0"
       />
-      <MultiSelectFilter
+      <TokenAutocomplete
         label={t("patrones")}
-        options={patronOptions}
+        kind="patrones"
         selected={patSelected}
         onChange={(pat) => replaceUrl({ pat, page: "1" })}
-        optionCounts={facetCounts.patrones}
-        facetTotal={facetCounts.patronesTotal}
-        className="min-w-0"
       />
-
     </div>
   );
 }
