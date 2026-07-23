@@ -16,17 +16,15 @@ import { CandidateSearchCard } from "@/components/positions/candidate-search-car
 import { searchCandidatesForPosition } from "@/src/lib/positions-actions";
 import { isoDateDaysAgo, isoDateToday } from "@/src/lib/candidate-list-params";
 import type { CandidateSearchResult } from "@/src/types/position";
-import type { Position } from "@/src/types/position";
 
 const ALL = "__all__";
 
 interface AiSearchViewProps {
   positionId: string;
-  position: Position;
   seniorityOptions: string[];
 }
 
-export function AiSearchView({ positionId, position, seniorityOptions }: AiSearchViewProps) {
+export function AiSearchView({ positionId, seniorityOptions }: AiSearchViewProps) {
   const t = useTranslations("positions");
   const tFilters = useTranslations("filters");
   const [query, setQuery] = useState("");
@@ -65,6 +63,7 @@ export function AiSearchView({ positionId, position, seniorityOptions }: AiSearc
 
   // Auto-búsqueda al montar usando datos de la plaza
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void runSearch("", ALL, defaultDateFrom, defaultDateTo);
     // Solo al montar — positionId no cambia en esta página
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -196,7 +195,6 @@ export function AiSearchView({ positionId, position, seniorityOptions }: AiSearc
                 key={r.id}
                 result={r}
                 positionId={positionId}
-                positionTitle={position.title}
                 onAdded={handleAdded}
               />
             ))}

@@ -15,14 +15,12 @@ import type { Candidate } from "@/src/types/candidate";
 interface CandidateSearchCardProps {
   result: CandidateSearchResult;
   positionId: string;
-  positionTitle: string;
   onAdded: (candidateId: string) => void;
 }
 
 export function CandidateSearchCard({
   result,
   positionId,
-  positionTitle,
   onAdded,
 }: CandidateSearchCardProps) {
   const t = useTranslations("positions");

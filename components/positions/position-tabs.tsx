@@ -52,12 +52,10 @@ export function PositionTabs({
           <PipelineView
             positionCandidates={positionCandidates}
             positionId={position.id}
-            positionTitle={position.title}
           />
         ) : tab === "search" ? (
           <AiSearchView
             positionId={position.id}
-            position={position}
             seniorityOptions={seniorityOptions}
           />
         ) : (

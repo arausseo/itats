@@ -27,6 +27,8 @@ export function AppMobileBar({
   const pathname = usePathname();
 
   useEffect(() => {
+    // Cierra el menú al navegar.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(false);
   }, [pathname]);
 

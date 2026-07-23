@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/src/i18n/navigation";
 import { Icon } from "@/components/app/icon";
@@ -53,11 +53,6 @@ export function PositionsList({ positions }: PositionsListProps) {
   const safePage = Math.min(page, totalPages);
   const pageItems = visible.slice((safePage - 1) * pageSize, safePage * pageSize);
 
-  // Reset de página cuando cambian filtros / tamaño.
-  useEffect(() => {
-    setPage(1);
-  }, [search, showClosed, pageSize]);
-
   const fmtDate = (iso: string) => {
     try {
       return new Date(iso).toLocaleDateString(locale, { day: "numeric", month: "short" });
@@ -75,7 +70,7 @@ export function PositionsList({ positions }: PositionsListProps) {
           <input
             placeholder={t("searchPositions")}
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             aria-label={t("searchPositions")}
           />
         </div>
@@ -83,7 +78,7 @@ export function PositionsList({ positions }: PositionsListProps) {
         <button
           type="button"
           className={"fchip" + (showClosed ? " on" : "")}
-          onClick={() => setShowClosed((v) => !v)}
+          onClick={() => { setShowClosed((v) => !v); setPage(1); }}
           aria-pressed={showClosed}
         >
           <Icon name={showClosed ? "eye" : "filter"} size={13} />
@@ -107,7 +102,7 @@ export function PositionsList({ positions }: PositionsListProps) {
               key={s}
               type="button"
               className={"fchip sm" + (pageSize === s ? " on" : "")}
-              onClick={() => setPageSize(s)}
+              onClick={() => { setPageSize(s); setPage(1); }}
             >
               {s}
             </button>

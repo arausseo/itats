@@ -35,13 +35,11 @@ const MIN_CANDIDATES_FOR_RANKING = 3;
 interface PipelineViewProps {
   positionCandidates: PositionCandidateWithCandidate[];
   positionId: string;
-  positionTitle: string;
 }
 
 export function PipelineView({
   positionCandidates,
   positionId,
-  positionTitle,
 }: PipelineViewProps) {
   const t = useTranslations("positions");
   const router = useRouter();

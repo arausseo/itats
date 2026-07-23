@@ -88,19 +88,24 @@ export function CandidateFilters({
   const [dateFromInput, setDateFromInput] = useState(dateFromUrl);
   const [dateToInput, setDateToInput] = useState(dateToUrl);
 
+  // Sincroniza el input local cuando cambia la URL (back/forward, filtro aplicado).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQInput(qFromUrl);
   }, [qFromUrl]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLibreInput(libreFromUrl);
   }, [libreFromUrl]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDateFromInput(dateFromUrl);
   }, [dateFromUrl]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDateToInput(dateToUrl);
   }, [dateToUrl]);
 

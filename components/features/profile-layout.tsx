@@ -20,6 +20,8 @@ export function useProfileLayout(): [ProfileMode, (m: ProfileMode) => void] {
   const [mode, setMode] = useState<ProfileMode>("split");
   useEffect(() => {
     const stored = localStorage.getItem(KEY);
+    // Hidratación desde localStorage al montar (no disponible en SSR).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isMode(stored)) setMode(stored);
   }, []);
   function update(m: ProfileMode) {
