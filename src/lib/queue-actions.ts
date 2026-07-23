@@ -134,6 +134,20 @@ export async function claimAndProcessNextQueueItem(
     })
     .eq("id", item.id);
 
+  // Al vaciarse la cola, refrescar la cache de facetas (una vez por tanda,
+  // no por item). refresh_candidate_facets requiere service_role.
+  const { count: pendingLeft } = await supabase
+    .from("cv_processing_queue")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .eq("status", "pending");
+  if ((pendingLeft ?? 0) === 0) {
+    const { error: refreshErr } = await supabase.rpc("refresh_candidate_facets");
+    if (refreshErr) {
+      console.error("[queue-actions] refresh_candidate_facets:", refreshErr.message);
+    }
+  }
+
   return { processed: true, queueId: item.id, status: queueStatus };
 }
 
